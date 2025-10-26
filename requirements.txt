@@ -1,0 +1,27 @@
+# =============================================================================
+# ChatUVisBox - Requirements
+# =============================================================================
+# Install with: pip install -r requirements.txt
+#
+# Note: UVisBox must be installed separately in the conda 'agent' environment:
+#   conda activate agent
+#   pip install uvisbox
+#
+# Note: GEMINI_API_KEY must be set in your system environment
+# =============================================================================
+
+# --- LLM and Orchestration ---
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-google-genai>=0.0.5
+google-generativeai>=0.3.0
+
+# --- Data Processing ---
+numpy>=1.24.0
+pandas>=2.0.0
+
+# --- Visualization ---
+matplotlib>=3.7.0
+
+# --- Tracing & Debugging (Optional but Recommended) ---
+langsmith>=0.1.0
