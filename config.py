@@ -8,7 +8,7 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment. Please set it in your system environment.")
 
 # Model Configuration
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-2.0-flash-lite"  # Lite version: 30 RPM (vs standard: 15 RPM)
 
 # Paths
 PROJECT_ROOT = Path(__file__).parent

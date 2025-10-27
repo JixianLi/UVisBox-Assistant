@@ -1,6 +1,11 @@
 # Temporary files
 temp/
 
+# AI coding agent temporary verification files (delete before commit)
+PHASE_*_COMPLETION_REPORT.md
+UPDATE_*.md
+*_SUMMARY.md
+
 # Python
 __pycache__/
 *.pyc

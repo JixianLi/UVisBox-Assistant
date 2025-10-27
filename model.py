@@ -22,7 +22,7 @@ Your capabilities:
 2. **Visualization Tools**: Create uncertainty visualizations using UVisBox functions
 
 Available visualization types:
-- functional_boxplot: For visualizing multiple 1D curves with band depth (supports multiple percentile bands)
+- functional_boxplot: For visualizing multiple 1D curves with band depth (supports multiple percentile bands, optional plot_all_curves flag to show raw curves)
 - curve_boxplot: For ensemble curve data with depth-based coloring (supports multiple percentile bands)
 - probabilistic_marching_squares: For 2D scalar field ensembles with isocontours
 - uncertainty_lobes: For visualizing directional uncertainty in vector fields
@@ -39,6 +39,7 @@ Important:
 - If a tool returns an error, ask the user for clarification
 - Be conversational and helpful
 - Both functional_boxplot and curve_boxplot now support percentiles (list of floats) for multi-band visualization
+- functional_boxplot has plot_all_curves parameter (default False) to optionally show all raw curves alongside the boxplot
 """
 
     if file_list:

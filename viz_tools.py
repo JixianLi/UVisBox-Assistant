@@ -16,7 +16,8 @@ except ImportError as e:
 def plot_functional_boxplot(
     data_path: str,
     percentiles: Optional[List[float]] = None,
-    colors: Optional[List[str]] = None
+    colors: Optional[List[str]] = None,
+    plot_all_curves: bool = False
 ) -> Dict[str, str]:
     """
     Create a functional boxplot from curve data with multiple percentile bands.
@@ -25,6 +26,7 @@ def plot_functional_boxplot(
         data_path: Path to .npy file with shape (n_curves, n_points)
         percentiles: List of percentiles for bands to be plotted (default: [25, 50, 90, 100])
         colors: List of colors for each percentile band (default: None, uses default color scheme)
+        plot_all_curves: Whether to plot all individual curves in addition to the boxplot (default: False)
 
     Returns:
         Dict with status and message
@@ -60,7 +62,8 @@ def plot_functional_boxplot(
             percentiles=percentiles,
             ax=ax,
             colors=colors,
-            alpha=0.7  # Use UVisBox default
+            alpha=0.7,  # Use UVisBox default
+            plot_all_curves=plot_all_curves
         )
 
         ax.set_title("Functional Boxplot")
@@ -78,7 +81,8 @@ def plot_functional_boxplot(
                 "_tool_name": "plot_functional_boxplot",
                 "data_path": data_path,
                 "percentiles": percentiles,
-                "colors": colors
+                "colors": colors,
+                "plot_all_curves": plot_all_curves
             }
         }
 
@@ -326,6 +330,11 @@ VIZ_TOOL_SCHEMAS = [
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of colors for each percentile band (optional, uses default if not provided)"
+                },
+                "plot_all_curves": {
+                    "type": "boolean",
+                    "description": "Whether to plot all individual curves in addition to the boxplot bands (default: False)",
+                    "default": False
                 }
             },
             "required": ["data_path"]

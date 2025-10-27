@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 2 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 3 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/viz tools with UVisBox wrappers (2025-10-26)
 - ✅ **Phase 2**: LangGraph state management, model setup, core nodes (2025-10-26)
+- ✅ **Phase 3**: Graph wiring, routing logic, end-to-end workflow (2025-10-26)
 
 ## Architecture
 
@@ -31,10 +32,10 @@ The system uses a **two-tier execution model**:
 ### Key Components
 
 ```
-graph.py          - LangGraph StateGraph definition with conditional routing (TODO: Phase 3)
+graph.py          - ✅ DONE: LangGraph StateGraph definition with conditional routing
 state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_viz_params, session_files
 nodes.py          - ✅ DONE: Three core nodes: call_model, call_data_tool, call_viz_tool
-routing.py        - Conditional logic: route_after_model, route_after_tool (TODO: Phase 3)
+routing.py        - ✅ DONE: Conditional logic: route_after_model, route_after_tool
 model.py          - ✅ DONE: ChatGoogleGenerativeAI setup with tool binding
 utils.py          - ✅ DONE: Tool type detection and file management utilities
 data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_curves, load_npy, generate_scalar_field_ensemble
@@ -115,22 +116,48 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 - Phase 9: Comprehensive testing (pytest + manual)
 - Phase 10: Documentation and packaging
 
+### Temporary Verification Files
+
+**IMPORTANT**: Completion reports and update summaries are temporary verification files:
+- `PHASE_*_COMPLETION_REPORT.md` - Phase verification summaries
+- `UPDATE_*.md` - API update documentation
+- `*_SUMMARY.md` - Various update summaries
+
+**Workflow**:
+1. AI coding agent creates these during development for verification
+2. Human developer reviews to verify correctness
+3. **DELETE before committing** - these are NOT part of the codebase or documentation
+4. Only keep actual code, tests, and permanent documentation (CLAUDE.md, TESTING.md, etc.)
+
+**Purpose**: Provide detailed verification context for human review, then discard.
+
 ### Testing Commands
 
-```bash
-# Individual phase tests (create as you implement)
-python test_data_tools.py
-python test_nodes.py
-python test_graph.py
-python test_happy_path.py
-python test_error_handling.py
-python test_multiturn.py
-python test_hybrid_control.py
-python test_session_management.py
+**⚠️ IMPORTANT: Gemini Free Tier Rate Limits**
+- 30 requests per minute (using gemini-2.0-flash-lite)
+- See `TESTING.md` and `RATE_LIMIT_FRIENDLY_TESTING.md` for details
 
-# Comprehensive test suite (Phase 9)
-python test_comprehensive.py
-python run_all_tests.py
+**Recommended for development (respects rate limits):**
+```bash
+# Quick test - 9 API calls, ~5 seconds (RECOMMENDED)
+python test_graph_quick.py
+
+# No API calls - instant validation
+python test_routing.py
+python test_phase1.py
+
+# Full suite with automatic delays - ~5-7 minutes
+python run_tests_with_delays.py
+```
+
+**Individual phase tests:**
+```bash
+python test_phase1.py           # Phase 1: 0 API calls
+python test_phase2.py           # Phase 2: 10-15 API calls (wait 60s between runs)
+python test_routing.py          # Phase 3: 0 API calls
+python test_graph.py            # Phase 3: 5-8 API calls (wait 60s between runs)
+python test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
+python test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
 ```
 
 ### Running the Application
@@ -185,7 +212,7 @@ if not GEMINI_API_KEY:
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 model = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.0-flash-lite",  # Lite version for 30 RPM
     google_api_key=config.GEMINI_API_KEY,
     temperature=0.0
 )
@@ -219,7 +246,7 @@ return {
 
 See `interface.md` for complete function signatures. Key matplotlib-based functions for MVP:
 
-- `functional_boxplot(data, method='fdb', percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7)` ⚠️ **Updated 2025-10-26**
+- `functional_boxplot(data, method='fdb', percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7, plot_all_curves=False)` ⚠️ **Updated 2025-10-26**
 - `curve_boxplot(curves, percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7)` ⚠️ **Updated 2025-10-26**
 - `probabilistic_marching_squares(F, isovalue, cmap='viridis', ax=None)`
 - `uncertainty_lobes(positions, ensemble_vectors, percentil1, percentil2=None, scale=0.2, ax=None)`
@@ -228,7 +255,12 @@ All expect numpy arrays and return matplotlib axes.
 
 ### API Changes
 
-**2025-10-26**: Both `functional_boxplot` and `curve_boxplot` updated to support multiple percentile bands:
+**2025-10-26 (Latest)**: `functional_boxplot` added `plot_all_curves` parameter:
+- Added `plot_all_curves` parameter (boolean, default False)
+- When True, plots all individual curves in addition to the boxplot bands
+- Useful for showing raw data alongside statistical summary
+
+**2025-10-26 (Earlier)**: Both `functional_boxplot` and `curve_boxplot` updated to support multiple percentile bands:
 
 **functional_boxplot**:
 - Parameter `curves` → `data`
@@ -263,12 +295,8 @@ All expect numpy arrays and return matplotlib axes.
 ### UVisBox Import Path Issue
 The correct import path for UVisBox functions is:
 ```python
-# ❌ WRONG - Does not work
 from uvisbox.Modules import functional_boxplot
-
-# ✅ CORRECT - Use full module path
-from uvisbox.Modules.FunctionalBoxplot.functional_boxplot import functional_boxplot
-from uvisbox.Modules import curve_boxplot  # These work at top level
+from uvisbox.Modules import curve_boxplot  
 from uvisbox.Modules import probabilistic_marching_squares
 from uvisbox.Modules import uncertainty_lobes
 ```
@@ -293,13 +321,13 @@ return {
 ```
 chatuvisbox/
 ├── main.py                  # TODO Phase 8: REPL entry point
-├── graph.py                 # TODO Phase 3: LangGraph workflow
+├── graph.py                 # ✅ DONE Phase 3: LangGraph workflow (127 lines)
 ├── state.py                 # ✅ DONE Phase 2: GraphState definition (85 lines)
 ├── nodes.py                 # ✅ DONE Phase 2: call_model, call_data_tool, call_viz_tool (182 lines)
-├── routing.py               # TODO Phase 3: Conditional routing logic
+├── routing.py               # ✅ DONE Phase 3: Conditional routing logic (90 lines)
 ├── model.py                 # ✅ DONE Phase 2: ChatGoogleGenerativeAI setup (95 lines)
 ├── utils.py                 # ✅ DONE Phase 2: Utility functions (60 lines)
-├── data_tools.py            # ✅ DONE Phase 1: Data loading/generation tools (278 lines)
+├── data_tools.py            # ✅ DONE Phase 1: Data loading/generation tools (updated with float-to-int fix)
 ├── viz_tools.py             # ✅ DONE Phase 1: UVisBox wrappers (401 lines)
 ├── config.py                # ✅ DONE Phase 1: Configuration (34 lines)
 ├── hybrid_control.py        # TODO Phase 7: Fast path for simple commands
@@ -314,14 +342,22 @@ chatuvisbox/
 ├── temp/                    # ✅ DONE Phase 1: Generated .npy files (gitignored)
 ├── plans/                   # ✅ DONE: Implementation phase guides
 │   ├── phase_01_*.md        # ✅ Phase 1 complete
-│   └── phase_02_*.md        # ✅ Phase 2 complete
+│   ├── phase_02_*.md        # ✅ Phase 2 complete
+│   └── phase_03_*.md        # ✅ Phase 3 complete
 ├── requirements.txt         # ✅ DONE: Python dependencies
 ├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
 ├── .gitignore               # ✅ DONE Phase 1
-├── test_phase1.py           # ✅ DONE Phase 1: Validation test suite
-├── test_phase2.py           # ✅ DONE Phase 2: Comprehensive test suite
-├── PHASE_1_COMPLETION_REPORT.md  # ✅ Phase 1 summary
-├── PHASE_2_COMPLETION_REPORT.md  # ✅ Phase 2 summary
+├── test_phase1.py           # ✅ DONE Phase 1: Validation test suite (0 API calls)
+├── test_phase2.py           # ✅ DONE Phase 2: Comprehensive test suite (10-15 API calls)
+├── test_routing.py          # ✅ DONE Phase 3: Routing logic tests (0 API calls)
+├── test_graph.py            # ✅ DONE Phase 3: Graph compilation tests (5-8 API calls)
+├── test_graph_quick.py      # ✅ DONE Phase 3: Quick integration test (6-10 API calls) ⭐ RECOMMENDED
+├── test_graph_integration.py # ✅ DONE Phase 3: Full integration tests (15-20 API calls)
+├── run_tests_with_delays.py # ✅ DONE: Automated test runner (respects rate limits)
+├── TESTING.md               # ✅ DONE: Comprehensive testing guide
+├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy
+├── UPDATE_*.md              # Temporary: API update summaries (verified then deleted before commit)
+├── PHASE_*_COMPLETION_REPORT.md  # Temporary: Phase verification (deleted before commit)
 └── create_test_data.py      # ✅ DONE Phase 1: Test data generator
 ```
 

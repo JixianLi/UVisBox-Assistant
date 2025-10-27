@@ -73,6 +73,11 @@ def generate_ensemble_curves(
         Dict with status, output_path, message, shape
     """
     try:
+        # Convert to int in case LLM passes floats
+        n_curves = int(n_curves)
+        n_points = int(n_points)
+        n_ensemble = int(n_ensemble)
+
         # Generate synthetic curves
         x = np.linspace(0, 2*np.pi, n_points)
         curves = []
@@ -128,6 +133,11 @@ def generate_scalar_field_ensemble(
         Dict with status, output_path, message
     """
     try:
+        # Convert to int in case LLM passes floats
+        nx = int(nx)
+        ny = int(ny)
+        n_ensemble = int(n_ensemble)
+
         x = np.linspace(-3, 3, nx)
         y = np.linspace(-3, 3, ny)
         X, Y = np.meshgrid(x, y)
