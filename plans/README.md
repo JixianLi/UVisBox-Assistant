@@ -8,7 +8,7 @@ These plans provide step-by-step guidance for building a natural language interf
 
 ## Quick Navigation
 
-### Milestone 1: Core Pipeline (Phases 1-4) - ~3-5 days ✅ COMPLETE
+### Milestone 1: Core Pipeline & Structure (Phases 1-4.5) - ~4-7 days
 
 | Phase | Document | Focus | Duration | Status |
 |-------|----------|-------|----------|--------|
@@ -16,8 +16,9 @@ These plans provide step-by-step guidance for building a natural language interf
 | **Phase 2** ✅ | [LangGraph State & Nodes](phase_02_langgraph_state_and_nodes.md) | State definition and core nodes | 1 day | Complete (2025-10-26) |
 | **Phase 3** ✅ | [Graph Wiring & Routing](phase_03_graph_wiring_and_routing.md) | Complete graph assembly | 0.5-1 day | Complete (2025-10-26) |
 | **Phase 4** ✅ | [End-to-End Test](phase_04_end_to_end_test.md) | Happy path validation | 0.5 day | Complete (2025-10-27) |
+| **Phase 4.5** | [Codebase Restructure](phase_04.5_codebase_restructure.md) | Professional package structure | 1-2 days | In Progress |
 
-**Milestone 1 Output**: ✅ Working data → viz pipeline with all core functionality
+**Milestone 1 Output**: Working data → viz pipeline with professional Python package structure
 
 ---
 
