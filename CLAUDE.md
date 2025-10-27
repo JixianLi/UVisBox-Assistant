@@ -6,10 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 1 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 2 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/viz tools with UVisBox wrappers (2025-10-26)
+- ✅ **Phase 2**: LangGraph state management, model setup, core nodes (2025-10-26)
 
 ## Architecture
 
@@ -31,10 +32,11 @@ The system uses a **two-tier execution model**:
 
 ```
 graph.py          - LangGraph StateGraph definition with conditional routing (TODO: Phase 3)
-state.py          - GraphState TypedDict: messages, current_data_path, last_viz_params, session_files (TODO: Phase 2)
-nodes.py          - Three core nodes: call_model, call_data_tool, call_viz_tool (TODO: Phase 2)
+state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_viz_params, session_files
+nodes.py          - ✅ DONE: Three core nodes: call_model, call_data_tool, call_viz_tool
 routing.py        - Conditional logic: route_after_model, route_after_tool (TODO: Phase 3)
-model.py          - ChatGoogleGenerativeAI setup with tool binding (TODO: Phase 2)
+model.py          - ✅ DONE: ChatGoogleGenerativeAI setup with tool binding
+utils.py          - ✅ DONE: Tool type detection and file management utilities
 data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_curves, load_npy, generate_scalar_field_ensemble
 viz_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, uncertainty_lobes
 config.py         - ✅ DONE: Configuration (API key, paths, defaults)
@@ -292,17 +294,17 @@ return {
 chatuvisbox/
 ├── main.py                  # TODO Phase 8: REPL entry point
 ├── graph.py                 # TODO Phase 3: LangGraph workflow
-├── state.py                 # TODO Phase 2: GraphState definition
-├── nodes.py                 # TODO Phase 2: call_model, call_data_tool, call_viz_tool
+├── state.py                 # ✅ DONE Phase 2: GraphState definition (85 lines)
+├── nodes.py                 # ✅ DONE Phase 2: call_model, call_data_tool, call_viz_tool (182 lines)
 ├── routing.py               # TODO Phase 3: Conditional routing logic
-├── model.py                 # TODO Phase 2: ChatGoogleGenerativeAI setup
+├── model.py                 # ✅ DONE Phase 2: ChatGoogleGenerativeAI setup (95 lines)
+├── utils.py                 # ✅ DONE Phase 2: Utility functions (60 lines)
 ├── data_tools.py            # ✅ DONE Phase 1: Data loading/generation tools (278 lines)
 ├── viz_tools.py             # ✅ DONE Phase 1: UVisBox wrappers (401 lines)
 ├── config.py                # ✅ DONE Phase 1: Configuration (34 lines)
 ├── hybrid_control.py        # TODO Phase 7: Fast path for simple commands
 ├── command_parser.py        # TODO Phase 7: Pattern matching for hybrid control
 ├── conversation.py          # TODO Phase 6: ConversationSession class
-├── utils.py                 # TODO Phase 2: Utility functions
 ├── logger.py                # TODO Phase 5: Logging setup (optional)
 ├── viz_manager.py           # TODO Phase 8: Matplotlib window tracking (optional)
 ├── test_data/               # ✅ DONE Phase 1: Sample CSV/NPY files
@@ -311,10 +313,15 @@ chatuvisbox/
 │   └── README.md
 ├── temp/                    # ✅ DONE Phase 1: Generated .npy files (gitignored)
 ├── plans/                   # ✅ DONE: Implementation phase guides
+│   ├── phase_01_*.md        # ✅ Phase 1 complete
+│   └── phase_02_*.md        # ✅ Phase 2 complete
 ├── requirements.txt         # ✅ DONE: Python dependencies
 ├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
 ├── .gitignore               # ✅ DONE Phase 1
 ├── test_phase1.py           # ✅ DONE Phase 1: Validation test suite
+├── test_phase2.py           # ✅ DONE Phase 2: Comprehensive test suite
+├── PHASE_1_COMPLETION_REPORT.md  # ✅ Phase 1 summary
+├── PHASE_2_COMPLETION_REPORT.md  # ✅ Phase 2 summary
 └── create_test_data.py      # ✅ DONE Phase 1: Test data generator
 ```
 
