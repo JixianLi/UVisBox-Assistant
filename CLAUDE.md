@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Pre-implementation. Complete phase-by-phase implementation plans exist in `plans/` directory.
+**Current State**: Phase 1 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
+
+**Completed Phases**:
+- ✅ **Phase 1**: Tool definitions, schemas, data/viz tools with UVisBox wrappers (2025-10-26)
 
 ## Architecture
 
@@ -24,19 +27,20 @@ The system uses a **two-tier execution model**:
    - Bypasses LangGraph for ~10x speed improvement
    - Updates `last_viz_params` and re-executes visualization directly
 
-### Key Components (To Be Implemented)
+### Key Components
 
 ```
-graph.py          - LangGraph StateGraph definition with conditional routing
-state.py          - GraphState TypedDict: messages, current_data_path, last_viz_params, session_files
-nodes.py          - Three core nodes: call_model, call_data_tool, call_viz_tool
-routing.py        - Conditional logic: route_after_model, route_after_tool
-model.py          - ChatGoogleGenerativeAI setup with tool binding
-data_tools.py     - Functions: load_csv_to_numpy, generate_ensemble_curves, clear_session
-viz_tools.py      - UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, etc.
-hybrid_control.py - Pattern matching for fast parameter updates
-conversation.py   - ConversationSession class for multi-turn state management
-main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit)
+graph.py          - LangGraph StateGraph definition with conditional routing (TODO: Phase 3)
+state.py          - GraphState TypedDict: messages, current_data_path, last_viz_params, session_files (TODO: Phase 2)
+nodes.py          - Three core nodes: call_model, call_data_tool, call_viz_tool (TODO: Phase 2)
+routing.py        - Conditional logic: route_after_model, route_after_tool (TODO: Phase 3)
+model.py          - ChatGoogleGenerativeAI setup with tool binding (TODO: Phase 2)
+data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_curves, load_npy, generate_scalar_field_ensemble
+viz_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, uncertainty_lobes
+config.py         - ✅ DONE: Configuration (API key, paths, defaults)
+hybrid_control.py - Pattern matching for fast parameter updates (TODO: Phase 7)
+conversation.py   - ConversationSession class for multi-turn state management (TODO: Phase 6)
+main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit) (TODO: Phase 8)
 ```
 
 ### LangGraph Flow
@@ -213,12 +217,33 @@ return {
 
 See `interface.md` for complete function signatures. Key matplotlib-based functions for MVP:
 
-- `functional_boxplot(curves, percentil=100, ax=None, show_median=True, band_alpha=0.5)`
-- `curve_boxplot(curves, percentile=50, ax=None, color_map='viridis', alpha=1.0)`
+- `functional_boxplot(data, method='fdb', percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7)` ⚠️ **Updated 2025-10-26**
+- `curve_boxplot(curves, percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7)` ⚠️ **Updated 2025-10-26**
 - `probabilistic_marching_squares(F, isovalue, cmap='viridis', ax=None)`
 - `uncertainty_lobes(positions, ensemble_vectors, percentil1, percentil2=None, scale=0.2, ax=None)`
 
 All expect numpy arrays and return matplotlib axes.
+
+### API Changes
+
+**2025-10-26**: Both `functional_boxplot` and `curve_boxplot` updated to support multiple percentile bands:
+
+**functional_boxplot**:
+- Parameter `curves` → `data`
+- Parameter `percentil` (float) → `percentiles` (list of floats)
+- Parameter `band_alpha` (float) → `alpha` (float)
+- Added `method` parameter ('fdb' or 'mfdb', default 'fdb')
+- Added `colors` parameter (list of strings, optional)
+- Removed `show_median` parameter (always shows median)
+- Removed `curves_depths` parameter (auto-computed)
+- Default `alpha` changed from 0.5 → 0.7
+- Now supports multiple percentile bands instead of single band
+
+**curve_boxplot**:
+- Parameter `percentile` (float) → `percentiles` (list of floats)
+- Parameter `color_map` (str) → `colors` (list of strings, optional)
+- Default `alpha` changed from 1.0 → 0.7
+- Now supports multiple percentile bands instead of single band
 
 ## Common Pitfalls to Avoid
 
@@ -231,30 +256,66 @@ All expect numpy arrays and return matplotlib axes.
 7. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors
 8. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
 
-## File Structure (Post-Implementation)
+## Implementation-Specific Notes (From Phase 1)
+
+### UVisBox Import Path Issue
+The correct import path for UVisBox functions is:
+```python
+# ❌ WRONG - Does not work
+from uvisbox.Modules import functional_boxplot
+
+# ✅ CORRECT - Use full module path
+from uvisbox.Modules.FunctionalBoxplot.functional_boxplot import functional_boxplot
+from uvisbox.Modules import curve_boxplot  # These work at top level
+from uvisbox.Modules import probabilistic_marching_squares
+from uvisbox.Modules import uncertainty_lobes
+```
+
+### Visualization Return Format
+All viz tools MUST include `_viz_params` for hybrid control (Phase 7):
+```python
+return {
+    "status": "success",
+    "message": "Displayed functional boxplot for 30 curves",
+    "_viz_params": {
+        "_tool_name": "plot_functional_boxplot",
+        "data_path": data_path,
+        "percentile": percentile,
+        "show_median": show_median
+    }
+}
+```
+
+## File Structure (Current Implementation Status)
 
 ```
 chatuvisbox/
-├── main.py                  # REPL entry point
-├── graph.py                 # LangGraph workflow
-├── state.py                 # GraphState definition
-├── nodes.py                 # call_model, call_data_tool, call_viz_tool
-├── routing.py               # Conditional routing logic
-├── model.py                 # ChatGoogleGenerativeAI setup
-├── data_tools.py            # Data loading/generation tools
-├── viz_tools.py             # UVisBox wrappers
-├── hybrid_control.py        # Fast path for simple commands
-├── command_parser.py        # Pattern matching for hybrid control
-├── conversation.py          # ConversationSession class
-├── config.py                # Configuration (API key, paths, defaults)
-├── utils.py                 # Utility functions
-├── logger.py                # Logging setup (optional)
-├── viz_manager.py           # Matplotlib window tracking (optional)
-├── test_data/               # Sample CSV/NPY files
-├── temp/                    # Generated .npy files (gitignored)
-├── plans/                   # Implementation phase guides
-├── requirements.txt         # Python dependencies
-└── ENVIRONMENT_SETUP.md     # API key configuration guide
+├── main.py                  # TODO Phase 8: REPL entry point
+├── graph.py                 # TODO Phase 3: LangGraph workflow
+├── state.py                 # TODO Phase 2: GraphState definition
+├── nodes.py                 # TODO Phase 2: call_model, call_data_tool, call_viz_tool
+├── routing.py               # TODO Phase 3: Conditional routing logic
+├── model.py                 # TODO Phase 2: ChatGoogleGenerativeAI setup
+├── data_tools.py            # ✅ DONE Phase 1: Data loading/generation tools (278 lines)
+├── viz_tools.py             # ✅ DONE Phase 1: UVisBox wrappers (401 lines)
+├── config.py                # ✅ DONE Phase 1: Configuration (34 lines)
+├── hybrid_control.py        # TODO Phase 7: Fast path for simple commands
+├── command_parser.py        # TODO Phase 7: Pattern matching for hybrid control
+├── conversation.py          # TODO Phase 6: ConversationSession class
+├── utils.py                 # TODO Phase 2: Utility functions
+├── logger.py                # TODO Phase 5: Logging setup (optional)
+├── viz_manager.py           # TODO Phase 8: Matplotlib window tracking (optional)
+├── test_data/               # ✅ DONE Phase 1: Sample CSV/NPY files
+│   ├── sample_curves.csv
+│   ├── sample_scalar_field.npy
+│   └── README.md
+├── temp/                    # ✅ DONE Phase 1: Generated .npy files (gitignored)
+├── plans/                   # ✅ DONE: Implementation phase guides
+├── requirements.txt         # ✅ DONE: Python dependencies
+├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
+├── .gitignore               # ✅ DONE Phase 1
+├── test_phase1.py           # ✅ DONE Phase 1: Validation test suite
+└── create_test_data.py      # ✅ DONE Phase 1: Test data generator
 ```
 
 ## Reference Documentation
