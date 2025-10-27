@@ -1,9 +1,6 @@
 """Test graph compilation and basic execution"""
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from graph import create_graph, run_graph, graph_app
+from chatuvisbox.graph import create_graph, run_graph, graph_app
 
 
 def test_graph_compilation():

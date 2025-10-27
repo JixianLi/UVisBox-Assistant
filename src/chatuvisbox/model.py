@@ -1,7 +1,7 @@
 """Language model setup for ChatUVisBox"""
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage
-import config
+from chatuvisbox import config
 import os
 
 

@@ -4,11 +4,8 @@ Gemini Free Tier Limits (gemini-2.0-flash-lite):
 - 30 requests per minute
 - This test makes ~6-8 API calls total, staying well under the limit
 """
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from graph import run_graph
+from chatuvisbox.graph import run_graph
 import matplotlib.pyplot as plt
 import time
 

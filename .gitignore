@@ -1,10 +1,8 @@
 # Temporary files
 temp/
 
-# AI coding agent temporary verification files (delete before commit)
-PHASE_*_COMPLETION_REPORT.md
-UPDATE_*.md
-*_SUMMARY.md
+# AI coding agent temporary verification files (organized but not tracked)
+reports/
 
 # Python
 __pycache__/
@@ -36,3 +34,15 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+.eggs/
+
+# Poetry
+poetry.lock
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+
+# Ruff cache
+.ruff_cache/

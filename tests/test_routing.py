@@ -1,10 +1,7 @@
 """Test routing logic"""
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from routing import route_after_model, route_after_tool
-from state import create_initial_state
+from chatuvisbox.routing import route_after_model, route_after_tool
+from chatuvisbox.state import create_initial_state
 from langchain_core.messages import AIMessage
 
 

@@ -1,17 +1,14 @@
 """Comprehensive test for Phase 2: LangGraph State & Nodes"""
 import os
-import sys
-from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
 
-import config
-from state import GraphState, create_initial_state, update_state_with_data, update_state_with_viz, increment_error_count
-from model import create_model_with_tools, prepare_messages_for_model, get_system_prompt
-from nodes import call_model, call_data_tool, call_viz_tool
-from utils import is_data_tool, is_viz_tool, get_tool_type, get_available_files, format_file_list
-from data_tools import DATA_TOOL_SCHEMAS
+from chatuvisbox import config
+from chatuvisbox.state import GraphState, create_initial_state, update_state_with_data, update_state_with_viz, increment_error_count
+from chatuvisbox.model import create_model_with_tools, prepare_messages_for_model, get_system_prompt
+from chatuvisbox.nodes import call_model, call_data_tool, call_viz_tool
+from chatuvisbox.utils import is_data_tool, is_viz_tool, get_tool_type, get_available_files, format_file_list
+from chatuvisbox.data_tools import DATA_TOOL_SCHEMAS
 from viz_tools import VIZ_TOOL_SCHEMAS
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 

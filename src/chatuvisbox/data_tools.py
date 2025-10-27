@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Dict, Optional
-import config
+from chatuvisbox import config
 
 def load_csv_to_numpy(
     filepath: str,

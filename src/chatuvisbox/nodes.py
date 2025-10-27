@@ -3,11 +3,11 @@ from typing import Dict
 from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 import os
 
-from state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
-from model import create_model_with_tools, prepare_messages_for_model
-from data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
-from viz_tools import VIZ_TOOLS, VIZ_TOOL_SCHEMAS
-import config
+from chatuvisbox.state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
+from chatuvisbox.model import create_model_with_tools, prepare_messages_for_model
+from chatuvisbox.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
+from chatuvisbox.viz_tools import VIZ_TOOLS, VIZ_TOOL_SCHEMAS
+from chatuvisbox import config
 
 
 # Create model with all tools

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Dict, Optional, List
-import config
+from chatuvisbox import config
 
 # Import UVisBox modules
 try:

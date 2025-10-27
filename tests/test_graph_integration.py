@@ -1,9 +1,6 @@
 """Integration test for the complete graph"""
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from graph import run_graph
+from chatuvisbox.graph import run_graph
 import matplotlib.pyplot as plt
 
 

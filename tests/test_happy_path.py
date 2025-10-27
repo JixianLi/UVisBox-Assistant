@@ -10,11 +10,8 @@ Each test follows the pattern:
 Note: This suite makes ~25-35 API calls total. With gemini-2.0-flash-lite (30 RPM),
 tests are spaced out to respect rate limits.
 """
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from graph import run_graph, graph_app
+from chatuvisbox.graph import run_graph, graph_app
 import matplotlib.pyplot as plt
 from langchain_core.messages import HumanMessage
 import time

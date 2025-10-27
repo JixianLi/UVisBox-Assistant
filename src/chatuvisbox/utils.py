@@ -1,18 +1,18 @@
 """Utility functions for the ChatUVisBox pipeline"""
 from typing import Dict, Optional
 from pathlib import Path
-import config
+from chatuvisbox import config
 
 
 def is_data_tool(tool_name: str) -> bool:
     """Check if a tool name corresponds to a data tool."""
-    from data_tools import DATA_TOOLS
+    from chatuvisbox.data_tools import DATA_TOOLS
     return tool_name in DATA_TOOLS
 
 
 def is_viz_tool(tool_name: str) -> bool:
     """Check if a tool name corresponds to a viz tool."""
-    from viz_tools import VIZ_TOOLS
+    from chatuvisbox.viz_tools import VIZ_TOOLS
     return tool_name in VIZ_TOOLS
 
 

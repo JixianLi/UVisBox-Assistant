@@ -1,6 +1,4 @@
 """Phase 1 Validation Tests"""
-import sys
-from pathlib import Path
 
 print("=" * 60)
 print("Phase 1 Validation Tests")

@@ -1,8 +1,8 @@
 """LangGraph workflow definition for ChatUVisBox"""
 from langgraph.graph import StateGraph, END
-from state import GraphState
-from nodes import call_model, call_data_tool, call_viz_tool
-from routing import route_after_model, route_after_tool
+from chatuvisbox.state import GraphState
+from chatuvisbox.nodes import call_model, call_data_tool, call_viz_tool
+from chatuvisbox.routing import route_after_model, route_after_tool
 
 
 def create_graph():
@@ -80,7 +80,7 @@ def run_graph(user_input: str, initial_state: dict = None) -> GraphState:
     Returns:
         Final state after graph execution
     """
-    from state import create_initial_state
+    from chatuvisbox.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)
@@ -107,7 +107,7 @@ def stream_graph(user_input: str, initial_state: dict = None):
     Yields:
         State updates as they occur
     """
-    from state import create_initial_state
+    from chatuvisbox.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)

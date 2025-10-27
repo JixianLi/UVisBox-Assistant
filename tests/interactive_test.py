@@ -4,11 +4,8 @@ Interactive test script for manual testing.
 This allows you to test the graph interactively and verify the flow.
 Uses gemini-2.0-flash-lite (30 requests/minute rate limit).
 """
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
 
-from graph import run_graph, stream_graph
+from chatuvisbox.graph import run_graph, stream_graph
 import matplotlib.pyplot as plt
 
 
