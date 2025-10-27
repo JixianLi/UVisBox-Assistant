@@ -6,12 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 3 Complete (2025-10-26). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 4 Complete (2025-10-27). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/viz tools with UVisBox wrappers (2025-10-26)
 - ✅ **Phase 2**: LangGraph state management, model setup, core nodes (2025-10-26)
 - ✅ **Phase 3**: Graph wiring, routing logic, end-to-end workflow (2025-10-26)
+- ✅ **Phase 4**: End-to-end happy path tests, matplotlib verification, interactive testing (2025-10-27)
 
 ## Architecture
 
@@ -353,6 +354,9 @@ chatuvisbox/
 ├── test_graph.py            # ✅ DONE Phase 3: Graph compilation tests (5-8 API calls)
 ├── test_graph_quick.py      # ✅ DONE Phase 3: Quick integration test (6-10 API calls) ⭐ RECOMMENDED
 ├── test_graph_integration.py # ✅ DONE Phase 3: Full integration tests (15-20 API calls)
+├── test_happy_path.py       # ✅ DONE Phase 4: End-to-end tests all viz types (25-35 API calls)
+├── test_matplotlib_behavior.py # ✅ DONE Phase 4: Matplotlib non-blocking tests (0 API calls)
+├── interactive_test.py      # ✅ DONE Phase 4: Manual interactive testing (variable API calls)
 ├── run_tests_with_delays.py # ✅ DONE: Automated test runner (respects rate limits)
 ├── TESTING.md               # ✅ DONE: Comprehensive testing guide
 ├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy

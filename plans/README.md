@@ -8,16 +8,16 @@ These plans provide step-by-step guidance for building a natural language interf
 
 ## Quick Navigation
 
-### Milestone 1: Core Pipeline (Phases 1-4) - ~3-5 days
+### Milestone 1: Core Pipeline (Phases 1-4) - ~3-5 days ✅ COMPLETE
 
-| Phase | Document | Focus | Duration |
-|-------|----------|-------|----------|
-| **Phase 1** | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/viz tools and function schemas | 1-2 days |
-| **Phase 2** | [LangGraph State & Nodes](phase_02_langgraph_state_and_nodes.md) | State definition and core nodes | 1 day |
-| **Phase 3** | [Graph Wiring & Routing](phase_03_graph_wiring_and_routing.md) | Complete graph assembly | 0.5-1 day |
-| **Phase 4** | [End-to-End Test](phase_04_end_to_end_test.md) | Happy path validation | 0.5 day |
+| Phase | Document | Focus | Duration | Status |
+|-------|----------|-------|----------|--------|
+| **Phase 1** ✅ | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/viz tools and function schemas | 1-2 days | Complete (2025-10-26) |
+| **Phase 2** ✅ | [LangGraph State & Nodes](phase_02_langgraph_state_and_nodes.md) | State definition and core nodes | 1 day | Complete (2025-10-26) |
+| **Phase 3** ✅ | [Graph Wiring & Routing](phase_03_graph_wiring_and_routing.md) | Complete graph assembly | 0.5-1 day | Complete (2025-10-26) |
+| **Phase 4** ✅ | [End-to-End Test](phase_04_end_to_end_test.md) | Happy path validation | 0.5 day | Complete (2025-10-27) |
 
-**Milestone 1 Output**: Working data → viz pipeline with all core functionality
+**Milestone 1 Output**: ✅ Working data → viz pipeline with all core functionality
 
 ---
 
