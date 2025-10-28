@@ -182,6 +182,7 @@ def print_help():
     print("  • functional_boxplot    - Band depth for 1D curves")
     print("  • curve_boxplot         - Depth-colored ensemble curves")
     print("  • probabilistic_marching_squares - 2D scalar field uncertainty")
+    print("  • contour_boxplot       - Contour band depth from scalar fields")
     print("  • uncertainty_lobes     - Directional vector uncertainty")
 
     print("\n📊 Data Operations:")

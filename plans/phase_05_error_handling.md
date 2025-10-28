@@ -30,6 +30,7 @@ Available visualization types:
 - functional_boxplot: For visualizing multiple 1D curves with band depth
 - curve_boxplot: For ensemble curve data with depth-based coloring
 - probabilistic_marching_squares: For 2D scalar field ensembles with isocontours
+- contour_boxplot: For contour band depth from scalar field ensembles
 - uncertainty_lobes: For visualizing directional uncertainty in vector fields
 
 Workflow:

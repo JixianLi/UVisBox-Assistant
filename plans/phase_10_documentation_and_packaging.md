@@ -30,7 +30,7 @@ ChatUVisBox allows you to create uncertainty visualizations using natural langua
 - 🗣️ **Natural Language Interface**: Describe what you want in plain English
 - 🔄 **Conversational**: Multi-turn conversations with context preservation
 - ⚡ **Fast Parameter Updates**: Quick visualization adjustments without reprocessing
-- 📊 **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, and more
+- 📊 **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, and uncertainty lobes
 - 🎨 **Flexible**: Load CSV files or generate synthetic test data
 - 💾 **Session Management**: Clean file management and session control
 
@@ -739,18 +739,66 @@ Generate synthetic ensemble curves.
 
 ## Visualization Tools
 
-### plot_functional_boxplot(data_path, percentile=100.0, show_median=True)
+### plot_functional_boxplot(data_path, percentiles=None, colors=None, plot_all_curves=False)
 
-Create functional boxplot visualization.
+Create functional boxplot visualization with multiple percentile bands.
 
 **Parameters**:
-- `data_path` (str): Path to 2D curve data
-- `percentile` (float): Percentile for band
-- `show_median` (bool): Show median curve
+- `data_path` (str): Path to 2D curve data (n_curves, n_points)
+- `percentiles` (list): List of percentiles for bands (default: [25, 50, 90, 100])
+- `colors` (list): Colors for each band (optional)
+- `plot_all_curves` (bool): Plot all individual curves (default: False)
 
-**Returns**: Dict with status, message
+**Returns**: Dict with status, message, _viz_params
 
-[Continue for all viz tools...]
+### plot_curve_boxplot(data_path, percentiles=None, colors=None)
+
+Create curve boxplot for ensemble curves.
+
+**Parameters**:
+- `data_path` (str): Path to 3D curve data (n_curves, n_steps, n_dims)
+- `percentiles` (list): List of percentiles for bands (default: [25, 50, 90, 100])
+- `colors` (list): Colors for each band (optional)
+
+**Returns**: Dict with status, message, _viz_params
+
+### plot_probabilistic_marching_squares(data_path, isovalue=0.5, colormap="viridis")
+
+Visualize probabilistic isocontours from scalar field ensemble.
+
+**Parameters**:
+- `data_path` (str): Path to 3D scalar field (ny, nx, n_ensemble)
+- `isovalue` (float): Isovalue for contour extraction
+- `colormap` (str): Matplotlib colormap name
+
+**Returns**: Dict with status, message, _viz_params
+
+### plot_contour_boxplot(data_path, isovalue, percentiles=None, colormap="viridis", show_median=True, show_outliers=True)
+
+Create contour boxplot from scalar field ensemble.
+
+**Parameters**:
+- `data_path` (str): Path to 3D scalar field (ny, nx, n_ensemble)
+- `isovalue` (float): Threshold for binary contour extraction
+- `percentiles` (list): List of percentiles for band envelopes (default: [25, 50, 75, 90])
+- `colormap` (str): Matplotlib colormap name
+- `show_median` (bool): Show median contour in red
+- `show_outliers` (bool): Show outlier contours in gray
+
+**Returns**: Dict with status, message, _viz_params
+
+### plot_uncertainty_lobes(vectors_path, positions_path, percentile1=90, percentile2=50, scale=0.2)
+
+Create uncertainty lobe glyphs for vector ensembles.
+
+**Parameters**:
+- `vectors_path` (str): Path to ensemble vectors (n, m, 2)
+- `positions_path` (str): Path to glyph positions (n, 2)
+- `percentile1` (float): First percentile (0-100), should be > percentile2
+- `percentile2` (float): Second percentile (0-100), should be < percentile1
+- `scale` (float): Scale factor for glyph size
+
+**Returns**: Dict with status, message, _viz_params
 
 ## State Management
 

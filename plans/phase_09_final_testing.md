@@ -109,6 +109,15 @@ class TestVizTools:
         ctx = session.get_context_summary()
         assert ctx["last_viz"] is not None
 
+    def test_contour_boxplot(self):
+        """Test contour boxplot."""
+        session = ConversationSession()
+        session.send("Generate scalar field and create contour boxplot with isovalue 0.5")
+
+        ctx = session.get_context_summary()
+        assert ctx["last_viz"] is not None
+        assert "plot_contour_boxplot" in str(ctx["last_viz"])
+
     def test_viz_with_parameters(self):
         """Test visualization with specific parameters."""
         session = ConversationSession()

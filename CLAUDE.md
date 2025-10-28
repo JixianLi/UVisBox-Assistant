@@ -259,7 +259,14 @@ All expect numpy arrays and return matplotlib axes.
 
 ### API Changes
 
-**2025-10-28 (Latest)**: Major updates to data generation and uncertainty_lobes:
+**2025-10-28 (Latest)**: Major updates to data generation, visualization tools, and dependencies:
+
+**contour_boxplot** (NEW):
+- Added wrapper for UVisBox's `contour_boxplot` function
+- Creates band depth visualization of binary contours from scalar field ensembles
+- Accepts data with shape (ny, nx, n_ensemble), transposes to (n_ensemble, ny, nx)
+- Parameters: `isovalue`, `percentiles`, `colormap`, `show_median`, `show_outliers`
+- Automatically extracts binary contours and computes band depths
 
 **generate_vector_field_ensemble** (NEW):
 - Added new function for generating 2D vector field ensembles
@@ -290,15 +297,22 @@ All expect numpy arrays and return matplotlib axes.
 - More directive: "IMMEDIATELY use visualization tools" without asking for confirmation
 - Emphasizes automatic progression from data generation to visualization
 
+**Python Version** (UPDATED):
+- Minimum: Python 3.10
+- Maximum: Python 3.13 (excludes 3.14+)
+- Default: Python 3.13 in conda environment
+- Linting tools (black, ruff) target Python 3.13
+
 **Dependencies** (UPDATED):
 - langchain: 0.1.0 → 0.3.27
 - langchain-google-genai: 2.0.4 → 2.1.12
 - langgraph: 0.2.53 → 0.2.76
-- google-generativeai: 0.3.0 → 0.8.5
+- **google-generativeai: REMOVED** (was causing dependency conflict, not directly used)
 - numpy: 1.26.0 → 1.26.4
 - pandas: 2.2.0 → 2.3.3
 - matplotlib: 3.8.0 → 3.10.7
 - langsmith: 0.1.0 → 0.4.38
+- Poetry lock file now generated successfully with caret (^) version notation
 
 **2025-10-26**: `functional_boxplot` added `plot_all_curves` parameter:
 - Added `plot_all_curves` parameter (boolean, default False)

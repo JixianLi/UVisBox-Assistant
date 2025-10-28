@@ -33,13 +33,13 @@ This document outlines recommended modifications to the original 10-phase plan b
 | `squid_glyph_2D` | ✅ Yes | 2D, matplotlib, vector uncertainty |
 | `uncertainty_lobes` | ✅ Yes | 2D, matplotlib, vector uncertainty |
 | `uncertainty_tubes_2D` | ✅ Yes | 2D, matplotlib, trajectory uncertainty |
-| `contour_boxplot` | ⚠️ Maybe | Requires binary images - add if time permits |
+| `contour_boxplot` | ✅ Yes | 2D, matplotlib, contour band depth (added 2025-10-28) |
 | `squid_glyph_3D` | ❌ No | PyVista, not matplotlib |
 | `probabilistic_marching_cubes` | ❌ No | PyVista, 3D, too complex for MVP |
 | `probabilistic_marching_tetrahedra` | ❌ No | PyVista, 3D, too complex for MVP |
 | `probabilistic_marching_triangles` | ❌ No | 2D but complex triangulation |
 
-**Start with 3-4 functions**: `functional_boxplot`, `curve_boxplot`, `probabilistic_marching_squares`, `uncertainty_lobes`
+**Implemented (5 functions)**: `functional_boxplot`, `curve_boxplot`, `probabilistic_marching_squares`, `uncertainty_lobes`, `contour_boxplot`
 
 ### 3. Data Tools Specification
 
