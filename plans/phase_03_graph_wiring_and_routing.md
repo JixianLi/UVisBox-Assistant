@@ -149,7 +149,7 @@ print(f"Route after tool (too many errors): {route4}")  # Should be "end"
 """LangGraph workflow definition for ChatUVisBox"""
 from langgraph.graph import StateGraph, END
 from state import GraphState
-from nodes import call_model, call_data_tool, call_viz_tool
+from nodes import call_model, call_data_tool, call_vis_tool
 from routing import route_after_model, route_after_tool
 
 
@@ -172,7 +172,7 @@ def create_graph():
     # Add nodes
     workflow.add_node("model", call_model)
     workflow.add_node("data_tool", call_data_tool)
-    workflow.add_node("viz_tool", call_viz_tool)
+    workflow.add_node("viz_tool", call_vis_tool)
 
     # Set entry point
     workflow.set_entry_point("model")

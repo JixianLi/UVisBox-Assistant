@@ -20,7 +20,7 @@
 chatuvisbox/
 ├── main.py                 # Placeholder for now
 ├── data_tools.py           # This phase
-├── viz_tools.py            # This phase
+├── vis_tools.py            # This phase
 ├── config.py               # This phase
 ├── test_data/              # This phase
 │   └── README.md
@@ -97,7 +97,7 @@ TEMP_FILE_PREFIX = "_temp_"
 TEMP_FILE_EXTENSION = ".npy"
 
 # Visualization defaults (Tier-2 parameters)
-DEFAULT_VIZ_PARAMS = {
+DEFAULT_VIS_PARAMS = {
     "figsize": (10, 8),
     "dpi": 100,
     "cmap": "viridis",
@@ -425,7 +425,7 @@ print(result)
 
 ### Task 1.4: Visualization Tools Implementation
 
-**File**: `viz_tools.py`
+**File**: `vis_tools.py`
 
 Implement wrappers around UVisBox functions:
 
@@ -478,8 +478,8 @@ def plot_functional_boxplot(
 
         # Create figure with Tier-2 defaults
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         # Call UVisBox function
@@ -488,7 +488,7 @@ def plot_functional_boxplot(
             percentil=percentile,
             ax=ax,
             show_median=show_median,
-            band_alpha=config.DEFAULT_VIZ_PARAMS["alpha"]
+            band_alpha=config.DEFAULT_VIS_PARAMS["alpha"]
         )
 
         ax.set_title("Functional Boxplot")
@@ -551,8 +551,8 @@ def plot_curve_boxplot(
             }
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         curve_boxplot(
@@ -560,7 +560,7 @@ def plot_curve_boxplot(
             percentile=percentile,
             ax=ax,
             color_map=colormap,
-            alpha=config.DEFAULT_VIZ_PARAMS["alpha"]
+            alpha=config.DEFAULT_VIS_PARAMS["alpha"]
         )
 
         ax.set_title("Curve Boxplot")
@@ -607,8 +607,8 @@ def plot_probabilistic_marching_squares(
             }
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         probabilistic_marching_squares(
@@ -661,8 +661,8 @@ def plot_uncertainty_lobes(
         vectors = np.load(vectors_path)
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         uncertainty_lobes(
@@ -671,7 +671,7 @@ def plot_uncertainty_lobes(
             percentil1=percentile,
             scale=scale,
             ax=ax,
-            show_median=config.DEFAULT_VIZ_PARAMS["show_median"]
+            show_median=config.DEFAULT_VIS_PARAMS["show_median"]
         )
 
         ax.set_title("Uncertainty Lobes")
@@ -691,7 +691,7 @@ def plot_uncertainty_lobes(
 
 
 # Tool registry
-VIZ_TOOLS = {
+VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
@@ -700,7 +700,7 @@ VIZ_TOOLS = {
 
 
 # Tier-1 schemas for Gemini
-VIZ_TOOL_SCHEMAS = [
+VIS_TOOL_SCHEMAS = [
     {
         "name": "plot_functional_boxplot",
         "description": "Create a functional boxplot visualization showing the median and band depth of multiple curves",
@@ -806,9 +806,9 @@ VIZ_TOOL_SCHEMAS = [
 
 **Test:**
 ```python
-# test_viz_tools.py
+# test_vis_tools.py
 from data_tools import generate_ensemble_curves
-from viz_tools import plot_functional_boxplot
+from vis_tools import plot_functional_boxplot
 
 # Generate test data
 result = generate_ensemble_curves(n_curves=30, n_points=100)
@@ -901,7 +901,7 @@ python create_test_data.py
 - [x] All data tools return proper JSON-formatted responses
 - [x] All data tools have corresponding schemas in `DATA_TOOL_SCHEMAS`
 - [x] All viz tools accept .npy file paths and show matplotlib windows
-- [x] All viz tools have corresponding schemas in `VIZ_TOOL_SCHEMAS`
+- [x] All viz tools have corresponding schemas in `VIS_TOOL_SCHEMAS`
 - [x] Test data created in `test_data/`
 - [x] Manual test: generate curves → plot functional boxplot (window appears)
 
@@ -911,7 +911,7 @@ python create_test_data.py
 - UVisBox import requires full module path: `from uvisbox.Modules.FunctionalBoxplot.functional_boxplot import functional_boxplot`
 - All visualization tools include `_viz_params` in return dict for Phase 7 hybrid control
 - Test suite created: `test_phase1.py` validates all components
-- Total implementation: 713 lines across config.py (34), data_tools.py (278), viz_tools.py (401)
+- Total implementation: 713 lines across config.py (34), data_tools.py (278), vis_tools.py (401)
 
 ## Output
 

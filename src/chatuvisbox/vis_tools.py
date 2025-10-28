@@ -51,8 +51,8 @@ def plot_functional_boxplot(
 
         # Create figure with Tier-2 defaults
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         # Call UVisBox function (using 'fdb' method by default)
@@ -138,8 +138,8 @@ def plot_curve_boxplot(
             percentiles = [25, 50, 90, 100]
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         curve_boxplot(
@@ -201,8 +201,8 @@ def plot_probabilistic_marching_squares(
             }
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
         probabilistic_marching_squares(
@@ -235,45 +235,62 @@ def plot_probabilistic_marching_squares(
 
 
 def plot_uncertainty_lobes(
-    positions_path: str,
     vectors_path: str,
-    percentile: float = 0.75,
+    positions_path: str,
+    percentile1: float = 90,
+    percentile2: float = 50,
     scale: float = 0.2
 ) -> Dict[str, str]:
     """
     Create uncertainty lobe glyphs.
 
     Args:
-        positions_path: Path to .npy with shape (n, 2) - glyph positions
         vectors_path: Path to .npy with shape (n, m, 2) - ensemble vectors
-        percentile: Percentile for depth filtering
+        positions_path: Path to .npy with shape (n, 2) - glyph positions
+        percentile1: First percentile for depth filtering, 0-100 (default: 90)
+        percentile2: Second percentile for depth filtering, 0-100 (default: 50)
         scale: Scale factor for glyphs
 
     Returns:
         Dict with status and message
     """
     try:
-        if not Path(positions_path).exists():
-            return {"status": "error", "message": f"Positions file not found: {positions_path}"}
         if not Path(vectors_path).exists():
             return {"status": "error", "message": f"Vectors file not found: {vectors_path}"}
 
-        positions = np.load(positions_path)
+        if not Path(positions_path).exists():
+            return {"status": "error", "message": f"Positions file not found: {positions_path}"}
+
         vectors = np.load(vectors_path)
+        positions = np.load(positions_path)
 
         fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIZ_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIZ_PARAMS["dpi"]
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
+        # Call uncertainty_lobes with positions
         uncertainty_lobes(
             positions=positions,
             ensemble_vectors=vectors,
-            percentil1=percentile,
+            percentile1=percentile1,
+            percentile2=percentile2,
             scale=scale,
-            ax=ax,
-            show_median=config.DEFAULT_VIZ_PARAMS["show_median"]
+            ax=ax
         )
+
+        n_positions = positions.shape[0]
+
+        # Set proper axis limits based on positions
+        x_min, x_max = positions[:, 0].min(), positions[:, 0].max()
+        y_min, y_max = positions[:, 1].min(), positions[:, 1].max()
+
+        # Add some margin
+        x_margin = (x_max - x_min) * 0.1 if x_max > x_min else 0.5
+        y_margin = (y_max - y_min) * 0.1 if y_max > y_min else 0.5
+
+        ax.set_xlim(x_min - x_margin, x_max + x_margin)
+        ax.set_ylim(y_min - y_margin, y_max + y_margin)
 
         ax.set_title("Uncertainty Lobes")
         ax.set_aspect('equal')
@@ -282,12 +299,13 @@ def plot_uncertainty_lobes(
 
         return {
             "status": "success",
-            "message": f"Displayed uncertainty lobes for {positions.shape[0]} positions",
+            "message": f"Displayed uncertainty lobes for {n_positions} positions",
             "_viz_params": {
                 "_tool_name": "plot_uncertainty_lobes",
                 "positions_path": positions_path,
                 "vectors_path": vectors_path,
-                "percentile": percentile,
+                "percentile1": percentile1,
+                "percentile2": percentile2,
                 "scale": scale
             }
         }
@@ -300,7 +318,7 @@ def plot_uncertainty_lobes(
 
 
 # Tool registry
-VIZ_TOOLS = {
+VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
@@ -309,7 +327,7 @@ VIZ_TOOLS = {
 
 
 # Tier-1 schemas for Gemini
-VIZ_TOOL_SCHEMAS = [
+VIS_TOOL_SCHEMAS = [
     {
         "name": "plot_functional_boxplot",
         "description": "Create a functional boxplot visualization with multiple percentile bands showing band depth of curves",
@@ -395,18 +413,23 @@ VIZ_TOOL_SCHEMAS = [
         "parameters": {
             "type": "object",
             "properties": {
-                "positions_path": {
-                    "type": "string",
-                    "description": "Path to .npy file with glyph positions (n, 2)"
-                },
                 "vectors_path": {
                     "type": "string",
                     "description": "Path to .npy file with ensemble vectors (n, m, 2)"
                 },
-                "percentile": {
+                "positions_path": {
+                    "type": "string",
+                    "description": "Path to .npy file with glyph positions (n, 2)"
+                },
+                "percentile1": {
                     "type": "number",
-                    "description": "Percentile for depth filtering",
-                    "default": 0.75
+                    "description": "First percentile for depth filtering (0 to 100), should be larger than percentile2",
+                    "default": 90
+                },
+                "percentile2": {
+                    "type": "number",
+                    "description": "Second percentile for depth filtering (0 to 100), should be smaller than percentile1",
+                    "default": 50
                 },
                 "scale": {
                     "type": "number",
@@ -414,7 +437,7 @@ VIZ_TOOL_SCHEMAS = [
                     "default": 0.2
                 }
             },
-            "required": ["positions_path", "vectors_path"]
+            "required": ["vectors_path", "positions_path"]
         }
     }
 ]

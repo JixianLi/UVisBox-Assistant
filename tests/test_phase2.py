@@ -9,7 +9,7 @@ from chatuvisbox.model import create_model_with_tools, prepare_messages_for_mode
 from chatuvisbox.nodes import call_model, call_data_tool, call_viz_tool
 from chatuvisbox.utils import is_data_tool, is_viz_tool, get_tool_type, get_available_files, format_file_list
 from chatuvisbox.data_tools import DATA_TOOL_SCHEMAS
-from viz_tools import VIZ_TOOL_SCHEMAS
+from vis_tools import VIS_TOOL_SCHEMAS
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
 
@@ -85,7 +85,7 @@ def test_2_model_setup():
     print("✅ System prompt includes file list")
 
     # Test model creation
-    all_tools = DATA_TOOL_SCHEMAS + VIZ_TOOL_SCHEMAS
+    all_tools = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS
     model = create_model_with_tools(all_tools)
 
     assert model is not None

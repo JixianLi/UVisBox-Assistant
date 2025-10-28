@@ -6,12 +6,12 @@ import os
 from chatuvisbox.state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
 from chatuvisbox.model import create_model_with_tools, prepare_messages_for_model
 from chatuvisbox.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
-from chatuvisbox.viz_tools import VIZ_TOOLS, VIZ_TOOL_SCHEMAS
+from chatuvisbox.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
 from chatuvisbox import config
 
 
 # Create model with all tools
-ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIZ_TOOL_SCHEMAS
+ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS
 MODEL = create_model_with_tools(ALL_TOOL_SCHEMAS)
 
 
@@ -131,20 +131,20 @@ def call_viz_tool(state: GraphState) -> Dict:
     tool_args = tool_call["args"]
     tool_call_id = tool_call["id"]
 
-    print(f"[VIZ TOOL] Calling {tool_name} with args: {tool_args}")
+    print(f"[VIS TOOL] Calling {tool_name} with args: {tool_args}")
 
     # Execute tool
     try:
-        if tool_name not in VIZ_TOOLS:
+        if tool_name not in VIS_TOOLS:
             result = {
                 "status": "error",
                 "message": f"Unknown viz tool: {tool_name}"
             }
         else:
-            tool_func = VIZ_TOOLS[tool_name]
+            tool_func = VIS_TOOLS[tool_name]
             result = tool_func(**tool_args)
 
-        print(f"[VIZ TOOL] Result: {result}")
+        print(f"[VIS TOOL] Result: {result}")
 
         # Create tool message
         tool_message = ToolMessage(
@@ -164,7 +164,7 @@ def call_viz_tool(state: GraphState) -> Dict:
         return state_updates
 
     except Exception as e:
-        print(f"[VIZ TOOL] Exception: {e}")
+        print(f"[VIS TOOL] Exception: {e}")
         error_result = {
             "status": "error",
             "message": f"Exception in {tool_name}: {str(e)}"

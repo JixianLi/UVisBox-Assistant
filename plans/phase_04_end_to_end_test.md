@@ -285,7 +285,7 @@ def test_non_blocking():
 
 def test_multiple_viz_calls():
     """Simulate multiple visualization calls like in our pipeline."""
-    from viz_tools import plot_functional_boxplot
+    from vis_tools import plot_functional_boxplot
     from data_tools import generate_ensemble_curves
 
     print("\nTesting multiple viz tool calls...")
@@ -453,7 +453,7 @@ For each test:
 ## Troubleshooting
 
 **Matplotlib windows don't appear:**
-- Check `plt.show(block=False)` in viz_tools.py
+- Check `plt.show(block=False)` in vis_tools.py
 - Verify display environment (not headless)
 - Try `export MPLBACKEND=TkAgg` or other backend
 
@@ -516,7 +516,7 @@ Additional test created:
 
 **Implementation Complete** (files created, non-blocking configured):
 - ✅ All test files created with correct structure
-- ✅ Matplotlib non-blocking behavior configured in viz_tools.py
+- ✅ Matplotlib non-blocking behavior configured in vis_tools.py
 - ✅ Interactive test script implemented
 - ✅ Rate limit considerations included
 

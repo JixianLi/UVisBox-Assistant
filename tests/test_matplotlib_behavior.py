@@ -47,7 +47,7 @@ def test_multiple_viz_calls():
     print("TEST: Multiple Viz Tool Calls")
     print("="*70)
 
-    from viz_tools import plot_functional_boxplot
+    from vis_tools import plot_functional_boxplot
     from data_tools import generate_ensemble_curves
 
     # Generate data

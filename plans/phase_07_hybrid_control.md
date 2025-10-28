@@ -177,7 +177,7 @@ python command_parser.py
 
 from typing import Optional, Dict
 from command_parser import parse_simple_command, apply_command_to_params
-from viz_tools import VIZ_TOOLS
+from vis_tools import VIS_TOOLS
 
 
 def execute_simple_command(
@@ -220,7 +220,7 @@ def execute_simple_command(
     updated_params = apply_command_to_params(command, last_viz_params)
 
     # Execute viz tool directly
-    viz_func = VIZ_TOOLS.get(viz_tool_name)
+    viz_func = VIS_TOOLS.get(viz_tool_name)
 
     if not viz_func:
         return False, None, f"Unknown viz tool: {viz_tool_name}"
@@ -254,9 +254,9 @@ def is_hybrid_eligible(user_input: str) -> bool:
     return command is not None
 ```
 
-### Task 7.3: Update viz_tools to Track Tool Name
+### Task 7.3: Update vis_tools to Track Tool Name
 
-**File**: Update `viz_tools.py`
+**File**: Update `vis_tools.py`
 
 We need to store `_tool_name` in viz params so we can re-execute the same tool.
 

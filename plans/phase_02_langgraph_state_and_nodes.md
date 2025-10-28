@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- Phase 1 completed (data_tools.py, viz_tools.py, config.py working)
+- Phase 1 completed (data_tools.py, vis_tools.py, config.py working)
 - Understanding of LangGraph concepts: State, Nodes, Edges
 
 ## Tasks
@@ -174,7 +174,7 @@ def create_model_with_tools(tools: list, temperature: float = 0.0):
     Create a ChatGoogleGenerativeAI model with tools bound.
 
     Args:
-        tools: List of tool schemas (from data_tools and viz_tools)
+        tools: List of tool schemas (from data_tools and vis_tools)
         temperature: Model temperature (0 = deterministic)
 
     Returns:
@@ -217,14 +217,14 @@ def prepare_messages_for_model(state: dict, file_list: list = None) -> list:
 # test_model.py
 from model import get_system_prompt, create_model_with_tools
 from data_tools import DATA_TOOL_SCHEMAS
-from viz_tools import VIZ_TOOL_SCHEMAS
+from vis_tools import VIS_TOOL_SCHEMAS
 
 # Test system prompt
 prompt = get_system_prompt(["sample_curves.csv", "sample_scalar_field.npy"])
 print(prompt)
 
 # Test model creation
-all_tools = DATA_TOOL_SCHEMAS + VIZ_TOOL_SCHEMAS
+all_tools = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS
 model = create_model_with_tools(all_tools)
 print(f"Model created: {model}")
 
@@ -247,12 +247,12 @@ import os
 from state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
 from model import create_model_with_tools, prepare_messages_for_model
 from data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
-from viz_tools import VIZ_TOOLS, VIZ_TOOL_SCHEMAS
+from vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
 import config
 
 
 # Create model with all tools
-ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIZ_TOOL_SCHEMAS
+ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS
 MODEL = create_model_with_tools(ALL_TOOL_SCHEMAS)
 
 
@@ -351,7 +351,7 @@ def call_data_tool(state: GraphState) -> Dict:
         }
 
 
-def call_viz_tool(state: GraphState) -> Dict:
+def call_vis_tool(state: GraphState) -> Dict:
     """
     Node that executes a visualization tool.
 
@@ -365,27 +365,27 @@ def call_viz_tool(state: GraphState) -> Dict:
 
     # Extract tool call
     if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
-        raise ValueError("call_viz_tool invoked but no tool_calls in last message")
+        raise ValueError("call_vis_tool invoked but no tool_calls in last message")
 
     tool_call = last_message.tool_calls[0]
     tool_name = tool_call["name"]
     tool_args = tool_call["args"]
     tool_call_id = tool_call["id"]
 
-    print(f"[VIZ TOOL] Calling {tool_name} with args: {tool_args}")
+    print(f"[VIS TOOL] Calling {tool_name} with args: {tool_args}")
 
     # Execute tool
     try:
-        if tool_name not in VIZ_TOOLS:
+        if tool_name not in VIS_TOOLS:
             result = {
                 "status": "error",
                 "message": f"Unknown viz tool: {tool_name}"
             }
         else:
-            tool_func = VIZ_TOOLS[tool_name]
+            tool_func = VIS_TOOLS[tool_name]
             result = tool_func(**tool_args)
 
-        print(f"[VIZ TOOL] Result: {result}")
+        print(f"[VIS TOOL] Result: {result}")
 
         # Create tool message
         tool_message = ToolMessage(
@@ -404,7 +404,7 @@ def call_viz_tool(state: GraphState) -> Dict:
         return state_updates
 
     except Exception as e:
-        print(f"[VIZ TOOL] Exception: {e}")
+        print(f"[VIS TOOL] Exception: {e}")
         error_result = {
             "status": "error",
             "message": f"Exception in {tool_name}: {str(e)}"
@@ -457,10 +457,10 @@ def is_data_tool(tool_name: str) -> bool:
     return tool_name in DATA_TOOLS
 
 
-def is_viz_tool(tool_name: str) -> bool:
+def is_vis_tool(tool_name: str) -> bool:
     """Check if a tool name corresponds to a viz tool."""
-    from viz_tools import VIZ_TOOLS
-    return tool_name in VIZ_TOOLS
+    from vis_tools import VIS_TOOLS
+    return tool_name in VIS_TOOLS
 
 
 def get_tool_type(tool_name: str) -> Optional[str]:
@@ -472,7 +472,7 @@ def get_tool_type(tool_name: str) -> Optional[str]:
     """
     if is_data_tool(tool_name):
         return "data"
-    elif is_viz_tool(tool_name):
+    elif is_vis_tool(tool_name):
         return "viz"
     return None
 
@@ -509,10 +509,10 @@ def format_file_list(files: list) -> str:
 **Test:**
 ```python
 # test_utils.py
-from utils import is_data_tool, is_viz_tool, get_tool_type, get_available_files
+from utils import is_data_tool, is_vis_tool, get_tool_type, get_available_files
 
 print(is_data_tool("load_csv_to_numpy"))  # True
-print(is_viz_tool("plot_functional_boxplot"))  # True
+print(is_vis_tool("plot_functional_boxplot"))  # True
 print(get_tool_type("load_csv_to_numpy"))  # "data"
 print(get_tool_type("unknown_tool"))  # None
 
@@ -528,7 +528,7 @@ print(get_available_files())
 - [x] System prompt includes file list when provided
 - [x] `nodes.py` `call_model` node returns AIMessage with tool_calls
 - [x] `nodes.py` `call_data_tool` executes data tools and updates state
-- [x] `nodes.py` `call_viz_tool` executes viz tools and updates state
+- [x] `nodes.py` `call_vis_tool` executes viz tools and updates state
 - [x] Error handling in tool nodes catches exceptions and returns error messages
 - [x] `utils.py` correctly identifies tool types
 - [x] All modules import without errors
@@ -559,7 +559,7 @@ Expected outcomes:
 After Phase 2, you should have:
 - Complete state management system
 - LLM model configured with Gemini and tools bound
-- Three core nodes: `call_model`, `call_data_tool`, `call_viz_tool`
+- Three core nodes: `call_model`, `call_data_tool`, `call_vis_tool`
 - Utility functions for tool dispatching
 - All components tested individually
 

@@ -404,7 +404,7 @@ log_tool_call(tool_name, tool_args)
 # ... execute tool ...
 log_tool_result(tool_name, result)
 
-# Similar for call_viz_tool
+# Similar for call_vis_tool
 ```
 
 ## Validation Checklist

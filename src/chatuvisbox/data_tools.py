@@ -208,11 +208,110 @@ def load_npy(filepath: str) -> Dict[str, str]:
         }
 
 
+def generate_vector_field_ensemble(
+    x_res: int = 30,
+    y_res: int = 30,
+    n_instances: int = 30,
+    initial_direction: float = 0.0,
+    initial_magnitude: float = 1.0,
+    direction_variation_factor: float = 0.3,
+    magnitude_variation_factor: float = 0.3,
+    output_path: Optional[str] = None
+) -> Dict[str, str]:
+    """
+    Generate synthetic 2D vector field ensemble on a regular grid.
+
+    Direction variation increases with x coordinate.
+    Magnitude variation increases with y coordinate.
+
+    Args:
+        x_res: Grid resolution in x direction (default: 30)
+        y_res: Grid resolution in y direction (default: 30)
+        n_instances: Number of ensemble members (default: 30)
+        initial_direction: Base direction in radians (default: 0.0 = rightward)
+        initial_magnitude: Base magnitude (default: 1.0)
+        direction_variation_factor: Controls how much direction varies with x (default: 0.3)
+        magnitude_variation_factor: Controls how much magnitude varies with y (default: 0.3)
+        output_path: Output path for positions and vectors files
+
+    Returns:
+        Dict with status, positions_path, vectors_path, message
+    """
+    try:
+        # Convert to int in case LLM passes floats
+        x_res = int(x_res)
+        y_res = int(y_res)
+        n_instances = int(n_instances)
+
+        # Create regular grid positions
+        x = np.arange(x_res)
+        y = np.arange(y_res)
+        X, Y = np.meshgrid(x, y)
+
+        # Flatten to (n_positions, 2) where n_positions = x_res * y_res
+        positions = np.stack([X.flatten(), Y.flatten()], axis=1)
+        n_positions = positions.shape[0]
+
+        # Generate ensemble vectors with shape (n_positions, n_instances, 2)
+        vectors = np.zeros((n_positions, n_instances, 2))
+
+        for instance_idx in range(n_instances):
+            for pos_idx in range(n_positions):
+                x_coord = positions[pos_idx, 0]
+                y_coord = positions[pos_idx, 1]
+
+                # Direction variation increases with x
+                # Normalize x to [0, 1] range
+                x_normalized = x_coord / max(x_res - 1, 1)
+                direction_std = direction_variation_factor * np.pi * x_normalized
+                direction = initial_direction + np.random.normal(0, direction_std)
+
+                # Magnitude variation increases with y
+                # Normalize y to [0, 1] range
+                y_normalized = y_coord / max(y_res - 1, 1)
+                magnitude_std = magnitude_variation_factor * initial_magnitude * y_normalized
+                magnitude = initial_magnitude + np.random.normal(0, magnitude_std)
+                magnitude = max(0, magnitude)  # Ensure non-negative
+
+                # Convert to Cartesian coordinates [vx, vy]
+                vectors[pos_idx, instance_idx, 0] = magnitude * np.cos(direction)
+                vectors[pos_idx, instance_idx, 1] = magnitude * np.sin(direction)
+
+        # Generate output paths
+        if output_path is None:
+            positions_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}vector_positions.npy"
+            vectors_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}vector_ensemble.npy"
+        else:
+            base_path = Path(output_path)
+            positions_path = base_path.parent / f"{base_path.stem}_positions.npy"
+            vectors_path = base_path.parent / f"{base_path.stem}_vectors.npy"
+
+        # Save arrays
+        np.save(positions_path, positions)
+        np.save(vectors_path, vectors)
+
+        return {
+            "status": "success",
+            "positions_path": str(positions_path),
+            "vectors_path": str(vectors_path),
+            "message": f"Generated vector field ensemble: {x_res}x{y_res} grid, {n_instances} instances",
+            "positions_shape": positions.shape,
+            "vectors_shape": vectors.shape
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error generating vector field ensemble: {str(e)}"
+        }
+
+
 # Tool registry for LangGraph
 DATA_TOOLS = {
     "load_csv_to_numpy": load_csv_to_numpy,
     "generate_ensemble_curves": generate_ensemble_curves,
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
+    "generate_vector_field_ensemble": generate_vector_field_ensemble,
     "load_npy": load_npy,
 }
 
@@ -267,6 +366,40 @@ DATA_TOOL_SCHEMAS = [
                     "type": "integer",
                     "description": "Grid size in y direction",
                     "default": 50
+                }
+            }
+        }
+    },
+    {
+        "name": "generate_vector_field_ensemble",
+        "description": "Generate synthetic 2D vector field ensemble on a regular grid. Direction variation increases with x, magnitude variation increases with y.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "x_res": {
+                    "type": "integer",
+                    "description": "Grid resolution in x direction",
+                    "default": 30
+                },
+                "y_res": {
+                    "type": "integer",
+                    "description": "Grid resolution in y direction",
+                    "default": 30
+                },
+                "n_instances": {
+                    "type": "integer",
+                    "description": "Number of ensemble members",
+                    "default": 30
+                },
+                "initial_direction": {
+                    "type": "number",
+                    "description": "Base direction in radians (0 = rightward)",
+                    "default": 0.0
+                },
+                "initial_magnitude": {
+                    "type": "number",
+                    "description": "Base magnitude of vectors",
+                    "default": 1.0
                 }
             }
         }

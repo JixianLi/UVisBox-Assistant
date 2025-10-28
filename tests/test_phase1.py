@@ -38,21 +38,21 @@ except Exception as e:
     sys.exit(1)
 
 # Test 3: Viz tools import
-print("\n[3/6] Testing viz_tools.py...")
+print("\n[3/6] Testing vis_tools.py...")
 try:
-    from viz_tools import (
+    from vis_tools import (
         plot_functional_boxplot,
         plot_curve_boxplot,
         plot_probabilistic_marching_squares,
         plot_uncertainty_lobes,
-        VIZ_TOOLS,
-        VIZ_TOOL_SCHEMAS
+        VIS_TOOLS,
+        VIS_TOOL_SCHEMAS
     )
     print(f"  ✅ Viz tools imported successfully")
-    print(f"  - Tool registry has {len(VIZ_TOOLS)} tools")
-    print(f"  - Schema registry has {len(VIZ_TOOL_SCHEMAS)} schemas")
-    assert len(VIZ_TOOLS) == 4, "Expected 4 viz tools"
-    assert len(VIZ_TOOL_SCHEMAS) == 4, "Expected 4 viz tool schemas"
+    print(f"  - Tool registry has {len(VIS_TOOLS)} tools")
+    print(f"  - Schema registry has {len(VIS_TOOL_SCHEMAS)} schemas")
+    assert len(VIS_TOOLS) == 4, "Expected 4 viz tools"
+    assert len(VIS_TOOL_SCHEMAS) == 4, "Expected 4 viz tool schemas"
 except Exception as e:
     print(f"  ❌ Viz tools import failed: {e}")
     sys.exit(1)
@@ -159,7 +159,7 @@ print("  ✅ Project structure created")
 print("  ✅ .gitignore configured")
 print("  ✅ config.py works with API key")
 print("  ✅ data_tools.py with 4 tools + schemas")
-print("  ✅ viz_tools.py with 4 tools + schemas")
+print("  ✅ vis_tools.py with 4 tools + schemas")
 print("  ✅ Test data created")
 print("  ✅ Data generation works")
 print("  ✅ CSV loading works")

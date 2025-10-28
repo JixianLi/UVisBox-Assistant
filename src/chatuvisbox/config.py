@@ -26,7 +26,7 @@ TEMP_FILE_PREFIX = "_temp_"
 TEMP_FILE_EXTENSION = ".npy"
 
 # Visualization defaults (Tier-2 parameters)
-DEFAULT_VIZ_PARAMS = {
+DEFAULT_VIS_PARAMS = {
     "figsize": (10, 8),
     "dpi": 100,
     "cmap": "viridis",

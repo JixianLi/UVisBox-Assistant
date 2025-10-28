@@ -25,19 +25,21 @@ Available visualization types:
 - functional_boxplot: For visualizing multiple 1D curves with band depth (supports multiple percentile bands, optional plot_all_curves flag to show raw curves)
 - curve_boxplot: For ensemble curve data with depth-based coloring (supports multiple percentile bands)
 - probabilistic_marching_squares: For 2D scalar field ensembles with isocontours
-- uncertainty_lobes: For visualizing directional uncertainty in vector fields
+- uncertainty_lobes: For visualizing directional uncertainty in vector fields (requires both positions_path and vectors_path)
 
 Workflow:
 1. User requests a visualization
 2. Use data tools to load or generate the required data (saves as .npy)
-3. Use visualization tools with the .npy file path
-4. Confirm success to user
+3. IMMEDIATELY use visualization tools with the .npy file paths - do NOT ask for confirmation or additional parameters
+4. Confirm success to user after visualization is complete
 
 Important:
 - Always save intermediate data as .npy files
-- Data tools return an "output_path" field - use this for visualization tools
+- Data tools return "output_path", "positions_path", and "vectors_path" fields - use these for visualization tools
+- For uncertainty_lobes: use BOTH positions_path and vectors_path from generate_vector_field_ensemble output
+- When data generation succeeds, IMMEDIATELY proceed to visualization without asking questions
+- Use default parameters for visualizations unless user specifically requests different values
 - If a tool returns an error, ask the user for clarification
-- Be conversational and helpful
 - Both functional_boxplot and curve_boxplot now support percentiles (list of floats) for multi-band visualization
 - functional_boxplot has plot_all_curves parameter (default False) to optionally show all raw curves alongside the boxplot
 """
@@ -54,7 +56,7 @@ def create_model_with_tools(tools: list, temperature: float = 0.0):
     Create a ChatGoogleGenerativeAI model with tools bound.
 
     Args:
-        tools: List of tool schemas (from data_tools and viz_tools)
+        tools: List of tool schemas (from data_tools and vis_tools)
         temperature: Model temperature (0 = deterministic)
 
     Returns:

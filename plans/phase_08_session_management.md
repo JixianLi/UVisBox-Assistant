@@ -298,7 +298,7 @@ if __name__ == "__main__":
 
 ### Task 8.4: Matplotlib Window Management
 
-**File**: `viz_manager.py`
+**File**: `vis_manager.py`
 
 ```python
 """Matplotlib window management utilities."""
@@ -307,7 +307,7 @@ import matplotlib.pyplot as plt
 from typing import List
 
 
-class VizManager:
+class VisManager:
     """Manage matplotlib visualization windows."""
 
     def __init__(self):
@@ -350,16 +350,16 @@ class VizManager:
 
 
 # Global instance
-viz_manager = VizManager()
+vis_manager = VisManager()
 ```
 
-Update viz_tools.py to use VizManager:
+Update vis_tools.py to use VisManager:
 
 ```python
-from viz_manager import viz_manager
+from vis_manager import vis_manager
 
 # In each viz tool, after plt.show(block=False):
-viz_manager.show_plot(fig)
+vis_manager.show_plot(fig)
 ```
 
 ### Task 8.5: Add Progress Indicators

@@ -54,7 +54,7 @@ These plans provide step-by-step guidance for building a natural language interf
 
 ### 1. Agent Architecture ✅ Recommended
 
-**Use**: Single LangGraph workflow with two tool sets (data_tools + viz_tools)
+**Use**: Single LangGraph workflow with two tool sets (data_tools + vis_tools)
 
 **Why**:
 - More efficient than true two-agent handoff
@@ -189,14 +189,14 @@ chatuvisbox/
 ├── routing.py                 # Routing logic (Phase 3)
 ├── model.py                   # LLM setup (Phase 2)
 ├── data_tools.py              # Data tools (Phase 1)
-├── viz_tools.py               # Viz tools (Phase 1)
+├── vis_tools.py               # Viz tools (Phase 1)
 ├── hybrid_control.py          # Hybrid control (Phase 7)
 ├── command_parser.py          # Command parsing (Phase 7)
 ├── conversation.py            # Session management (Phase 6)
 ├── config.py                  # Configuration (Phase 1)
 ├── utils.py                   # Utilities (Phase 2)
 ├── logger.py                  # Logging (Phase 5)
-├── viz_manager.py             # Window management (Phase 8)
+├── vis_manager.py             # Window management (Phase 8)
 ├── test_data/                 # Sample data (Phase 1)
 ├── temp/                      # Temp files (Phase 1)
 ├── tests/                     # All test files (Phases 4-9)

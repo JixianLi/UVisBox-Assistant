@@ -67,7 +67,7 @@ chatuvisbox/                        # Project root
 │       ├── routing.py              # Routing logic
 │       ├── model.py                # LLM setup
 │       ├── data_tools.py           # Data tool functions
-│       ├── viz_tools.py            # Visualization tool functions
+│       ├── vis_tools.py            # Visualization tool functions
 │       ├── config.py               # Configuration
 │       └── utils.py                # Utility functions
 │
@@ -290,7 +290,7 @@ mv nodes.py src/chatuvisbox/
 mv routing.py src/chatuvisbox/
 mv model.py src/chatuvisbox/
 mv data_tools.py src/chatuvisbox/
-mv viz_tools.py src/chatuvisbox/
+mv vis_tools.py src/chatuvisbox/
 mv config.py src/chatuvisbox/
 mv utils.py src/chatuvisbox/
 ```
@@ -315,11 +315,11 @@ from chatuvisbox.data_tools import DATA_TOOL_FUNCTIONS
 
 **Files to update**:
 - `src/chatuvisbox/graph.py` - imports state, nodes, routing
-- `src/chatuvisbox/nodes.py` - imports model, data_tools, viz_tools, state, routing
+- `src/chatuvisbox/nodes.py` - imports model, data_tools, vis_tools, state, routing
 - `src/chatuvisbox/routing.py` - imports state
-- `src/chatuvisbox/model.py` - imports config, data_tools, viz_tools
+- `src/chatuvisbox/model.py` - imports config, data_tools, vis_tools
 - `src/chatuvisbox/data_tools.py` - imports config
-- `src/chatuvisbox/viz_tools.py` - imports config
+- `src/chatuvisbox/vis_tools.py` - imports config
 - `src/chatuvisbox/utils.py` - imports config (if needed)
 
 ---
@@ -349,14 +349,14 @@ mv run_tests_with_delays.py tests/
 ```python
 from graph import run_graph, stream_graph
 from data_tools import generate_ensemble_curves
-from viz_tools import plot_functional_boxplot
+from vis_tools import plot_functional_boxplot
 ```
 
 **After**:
 ```python
 from chatuvisbox.graph import run_graph, stream_graph
 from chatuvisbox.data_tools import generate_ensemble_curves
-from chatuvisbox.viz_tools import plot_functional_boxplot
+from chatuvisbox.vis_tools import plot_functional_boxplot
 ```
 
 **Files to update**: All test files in `tests/`

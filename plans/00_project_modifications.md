@@ -101,7 +101,7 @@ chatuvisbox/
 ├── graph.py                # LangGraph workflow definition
 ├── state.py                # GraphState definition
 ├── data_tools.py           # Data loading/transformation tools
-├── viz_tools.py            # UVisBox visualization wrappers
+├── vis_tools.py            # UVisBox visualization wrappers
 ├── utils.py                # Helper functions
 ├── config.py               # Configuration (reads GEMINI_API_KEY from env)
 ├── test_data/              # Sample datasets

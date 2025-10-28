@@ -183,7 +183,7 @@ chatuvisbox/
 ├── routing.py              # Routing logic
 ├── model.py                # LLM setup
 ├── data_tools.py           # Data loading/generation tools
-├── viz_tools.py            # Visualization wrappers
+├── vis_tools.py            # Visualization wrappers
 ├── hybrid_control.py       # Fast parameter updates
 ├── command_parser.py       # Command parsing
 ├── conversation.py         # Session management
@@ -246,9 +246,9 @@ python test_comprehensive.py
 
 ### Adding New Visualization Types
 
-1. Add wrapper function to `viz_tools.py`
-2. Add schema to `VIZ_TOOL_SCHEMAS`
-3. Register in `VIZ_TOOLS` dict
+1. Add wrapper function to `vis_tools.py`
+2. Add schema to `VIS_TOOL_SCHEMAS`
+3. Register in `VIS_TOOLS` dict
 4. Add tests
 5. Update documentation
 
