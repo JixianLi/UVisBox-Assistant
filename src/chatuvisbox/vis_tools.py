@@ -7,7 +7,7 @@ from chatuvisbox import config
 
 # Import UVisBox modules
 try:
-    from uvisbox.Modules import functional_boxplot,curve_boxplot, probabilistic_marching_squares, uncertainty_lobes
+    from uvisbox.Modules import functional_boxplot, curve_boxplot, probabilistic_marching_squares, uncertainty_lobes, contour_boxplot
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
     print("Make sure UVisBox is installed in the 'agent' conda environment")
@@ -317,12 +317,100 @@ def plot_uncertainty_lobes(
         }
 
 
+def plot_contour_boxplot(
+    data_path: str,
+    isovalue: float,
+    percentiles: Optional[List[float]] = None,
+    colormap: str = "viridis",
+    show_median: bool = True,
+    show_outliers: bool = True
+) -> Dict[str, str]:
+    """
+    Create a contour boxplot visualization from ensemble scalar fields.
+
+    Extracts binary contours at isovalue, computes band depths, and visualizes
+    uncertainty using band envelopes.
+
+    Args:
+        data_path: Path to .npy file with shape (ny, nx, n_ensemble)
+        isovalue: Threshold value for creating binary images
+        percentiles: List of percentiles (0-100) for band envelopes (default: [25, 50, 75, 90])
+        colormap: Matplotlib colormap name (default: "viridis")
+        show_median: Whether to overlay median contour in red (default: True)
+        show_outliers: Whether to overlay outlier contours in gray (default: True)
+
+    Returns:
+        Dict with status and message
+    """
+    try:
+        if not Path(data_path).exists():
+            return {"status": "error", "message": f"Data file not found: {data_path}"}
+
+        data = np.load(data_path)
+
+        # Validate shape (should be 3D)
+        if data.ndim != 3:
+            return {
+                "status": "error",
+                "message": f"Expected 3D array, got shape {data.shape}"
+            }
+
+        # Rearrange from (ny, nx, n_ensemble) to (n_ensemble, ny, nx)
+        ensemble_images = np.transpose(data, (2, 0, 1))
+
+        # Set defaults
+        if percentiles is None:
+            percentiles = [25, 50, 75, 90]
+
+        fig, ax = plt.subplots(
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
+        )
+
+        # Call UVisBox contour_boxplot
+        contour_boxplot(
+            ensemble_images=ensemble_images,
+            isovalue=isovalue,
+            percentiles=percentiles,
+            ax=ax,
+            colormap=colormap,
+            show_median=show_median,
+            show_outliers=show_outliers,
+            workers=12
+        )
+
+        ax.set_title(f"Contour Boxplot (isovalue={isovalue})")
+        plt.show(block=False)
+        plt.pause(0.1)
+
+        return {
+            "status": "success",
+            "message": f"Displayed contour boxplot for ensemble with {ensemble_images.shape[0]} members",
+            "_viz_params": {
+                "_tool_name": "plot_contour_boxplot",
+                "data_path": data_path,
+                "isovalue": isovalue,
+                "percentiles": percentiles,
+                "colormap": colormap,
+                "show_median": show_median,
+                "show_outliers": show_outliers
+            }
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error creating contour boxplot: {str(e)}"
+        }
+
+
 # Tool registry
 VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
+    "plot_contour_boxplot": plot_contour_boxplot,
 }
 
 
@@ -438,6 +526,45 @@ VIS_TOOL_SCHEMAS = [
                 }
             },
             "required": ["vectors_path", "positions_path"]
+        }
+    },
+    {
+        "name": "plot_contour_boxplot",
+        "description": "Create a contour boxplot showing band depth of binary contours extracted from ensemble scalar fields",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "data_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing 3D scalar field ensemble (ny, nx, n_ensemble)"
+                },
+                "isovalue": {
+                    "type": "number",
+                    "description": "Threshold value for creating binary contours"
+                },
+                "percentiles": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "List of percentiles (0-100) for band envelope visualization",
+                    "default": [25, 50, 75, 90]
+                },
+                "colormap": {
+                    "type": "string",
+                    "description": "Matplotlib colormap name for band visualization",
+                    "default": "viridis"
+                },
+                "show_median": {
+                    "type": "boolean",
+                    "description": "Whether to overlay median contour in red",
+                    "default": True
+                },
+                "show_outliers": {
+                    "type": "boolean",
+                    "description": "Whether to overlay outlier contours in gray",
+                    "default": True
+                }
+            },
+            "required": ["data_path", "isovalue"]
         }
     }
 ]

@@ -123,6 +123,12 @@ def generate_scalar_field_ensemble(
     """
     Generate synthetic 2D scalar field ensemble.
 
+    Each ensemble member is a Gaussian centered at (nx/2, ny/2) with:
+    - Standard deviation: (nx+ensemble_index, ny)
+    - Rescaled to [0, 1]
+    - Uniform noise added from [0, 0.1)
+    - Final rescale to [0, 1]
+
     Args:
         nx: Grid size in x
         ny: Grid size in y
@@ -138,22 +144,47 @@ def generate_scalar_field_ensemble(
         ny = int(ny)
         n_ensemble = int(n_ensemble)
 
-        x = np.linspace(-3, 3, nx)
-        y = np.linspace(-3, 3, ny)
+        # Create coordinate grids (0 to nx-1, 0 to ny-1)
+        x = np.arange(nx)
+        y = np.arange(ny)
         X, Y = np.meshgrid(x, y)
 
-        # Generate ensemble of 2D Gaussian-like fields
-        ensemble = []
-        for i in range(n_ensemble):
-            center_x = np.random.uniform(-1, 1)
-            center_y = np.random.uniform(-1, 1)
-            sigma = np.random.uniform(0.5, 1.5)
+        # Center of the field
+        center_x = nx / 2.0
+        center_y = ny / 2.0
 
-            Z = np.exp(-((X - center_x)**2 + (Y - center_y)**2) / (2 * sigma**2))
-            Z += np.random.normal(0, 0.05, Z.shape)
+        # Generate ensemble of 2D Gaussian fields
+        ensemble = []
+        for ensemble_index in range(n_ensemble):
+            # Standard deviation varies with ensemble index
+            sigma_x = nx + ensemble_index
+            sigma_y = ny
+
+            # Generate 2D Gaussian
+            Z = np.exp(-((X - center_x)**2 / (2 * sigma_x**2) +
+                         (Y - center_y)**2 / (2 * sigma_y**2)))
+
+            # Rescale to [0, 1]
+            Z_min, Z_max = Z.min(), Z.max()
+            if Z_max > Z_min:
+                Z = (Z - Z_min) / (Z_max - Z_min)
+            else:
+                Z = np.zeros_like(Z)
+
+            # Add uniform random noise from [0, 0.1)
+            noise = np.random.uniform(0, 0.1, Z.shape)
+            Z = Z + noise
+
+            # Rescale again to [0, 1]
+            Z_min, Z_max = Z.min(), Z.max()
+            if Z_max > Z_min:
+                Z = (Z - Z_min) / (Z_max - Z_min)
+            else:
+                Z = np.zeros_like(Z)
+
             ensemble.append(Z)
 
-        data = np.stack(ensemble, axis=-1)  # Shape: (nx, ny, n_ensemble)
+        data = np.stack(ensemble, axis=-1)  # Shape: (ny, nx, n_ensemble)
 
         if output_path is None:
             output_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}scalar_field.npy"
