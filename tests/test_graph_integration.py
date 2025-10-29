@@ -1,4 +1,6 @@
 """Integration test for the complete graph"""
+import sys
+from pathlib import Path
 
 from chatuvisbox.graph import run_graph
 import matplotlib.pyplot as plt

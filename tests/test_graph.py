@@ -1,4 +1,5 @@
 """Test graph compilation and basic execution"""
+import sys
 
 from chatuvisbox.graph import create_graph, run_graph, graph_app
 

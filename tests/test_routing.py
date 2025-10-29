@@ -1,4 +1,5 @@
 """Test routing logic"""
+import sys
 
 from chatuvisbox.routing import route_after_model, route_after_tool
 from chatuvisbox.state import create_initial_state
@@ -27,9 +28,9 @@ def test_route_after_model():
     assert route == "data_tool", f"Expected 'data_tool', got '{route}'"
     print(f"✅ Route with data tool: {route}")
 
-    # Test 2: Route with viz tool
+    # Test 2: Route with vis tool
     state2 = create_initial_state("test")
-    ai_msg_with_viz_tool = AIMessage(
+    ai_msg_with_vis_tool = AIMessage(
         content="",
         tool_calls=[{
             "name": "plot_functional_boxplot",
@@ -37,11 +38,11 @@ def test_route_after_model():
             "id": "456"
         }]
     )
-    state2["messages"].append(ai_msg_with_viz_tool)
+    state2["messages"].append(ai_msg_with_vis_tool)
 
     route2 = route_after_model(state2)
-    assert route2 == "viz_tool", f"Expected 'viz_tool', got '{route2}'"
-    print(f"✅ Route with viz tool: {route2}")
+    assert route2 == "vis_tool", f"Expected 'vis_tool', got '{route2}'"
+    print(f"✅ Route with vis tool: {route2}")
 
     # Test 3: Route without tool call (direct response)
     state3 = create_initial_state("test")

@@ -1,15 +1,16 @@
 """Comprehensive test for Phase 2: LangGraph State & Nodes"""
+import sys
 import os
 
 # Add project root to path
 
 from chatuvisbox import config
-from chatuvisbox.state import GraphState, create_initial_state, update_state_with_data, update_state_with_viz, increment_error_count
+from chatuvisbox.state import GraphState, create_initial_state, update_state_with_data, update_state_with_vis, increment_error_count
 from chatuvisbox.model import create_model_with_tools, prepare_messages_for_model, get_system_prompt
-from chatuvisbox.nodes import call_model, call_data_tool, call_viz_tool
-from chatuvisbox.utils import is_data_tool, is_viz_tool, get_tool_type, get_available_files, format_file_list
+from chatuvisbox.nodes import call_model, call_data_tool, call_vis_tool
+from chatuvisbox.utils import is_data_tool, is_vis_tool, get_tool_type, get_available_files, format_file_list
 from chatuvisbox.data_tools import DATA_TOOL_SCHEMAS
-from vis_tools import VIS_TOOL_SCHEMAS
+from chatuvisbox.vis_tools import VIS_TOOL_SCHEMAS
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
 
@@ -41,14 +42,14 @@ def test_1_state_management():
 
     print("✅ update_state_with_data works")
 
-    # Test update_state_with_viz
-    viz_params = {"_tool_name": "plot_functional_boxplot", "data_path": data_path}
-    updates = update_state_with_viz(state, viz_params)
+    # Test update_state_with_vis
+    vis_params = {"_tool_name": "plot_functional_boxplot", "data_path": data_path}
+    updates = update_state_with_vis(state, vis_params)
 
-    assert updates["last_viz_params"] == viz_params
+    assert updates["last_vis_params"] == vis_params
     assert updates["error_count"] == 0
 
-    print("✅ update_state_with_viz works")
+    print("✅ update_state_with_vis works")
 
     # Test increment_error_count
     updates = increment_error_count(state)
@@ -112,14 +113,14 @@ def test_3_utils():
     assert is_data_tool("load_csv_to_numpy") == True
     assert is_data_tool("plot_functional_boxplot") == False
 
-    assert is_viz_tool("plot_functional_boxplot") == True
-    assert is_viz_tool("load_csv_to_numpy") == False
+    assert is_vis_tool("plot_functional_boxplot") == True
+    assert is_vis_tool("load_csv_to_numpy") == False
 
     print("✅ Tool type detection works")
 
     # Test get_tool_type
     assert get_tool_type("load_csv_to_numpy") == "data"
-    assert get_tool_type("plot_functional_boxplot") == "viz"
+    assert get_tool_type("plot_functional_boxplot") == "vis"
     assert get_tool_type("unknown_tool") is None
 
     print("✅ get_tool_type works")

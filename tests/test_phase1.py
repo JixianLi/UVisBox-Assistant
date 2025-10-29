@@ -1,4 +1,6 @@
 """Phase 1 Validation Tests"""
+import sys
+from pathlib import Path
 
 print("=" * 60)
 print("Phase 1 Validation Tests")
@@ -7,7 +9,7 @@ print("=" * 60)
 # Test 1: Config import
 print("\n[1/6] Testing config.py...")
 try:
-    import config
+    from chatuvisbox import config
     print(f"  ✅ Config imported successfully")
     print(f"  - Model: {config.MODEL_NAME}")
     print(f"  - API Key present: {len(config.GEMINI_API_KEY) > 0}")
@@ -20,7 +22,7 @@ except Exception as e:
 # Test 2: Data tools import
 print("\n[2/6] Testing data_tools.py...")
 try:
-    from data_tools import (
+    from chatuvisbox.data_tools import (
         load_csv_to_numpy,
         generate_ensemble_curves,
         generate_scalar_field_ensemble,
@@ -37,24 +39,25 @@ except Exception as e:
     print(f"  ❌ Data tools import failed: {e}")
     sys.exit(1)
 
-# Test 3: Viz tools import
+# Test 3: Vis tools import
 print("\n[3/6] Testing vis_tools.py...")
 try:
-    from vis_tools import (
+    from chatuvisbox.vis_tools import (
         plot_functional_boxplot,
         plot_curve_boxplot,
         plot_probabilistic_marching_squares,
         plot_uncertainty_lobes,
+        plot_contour_boxplot,
         VIS_TOOLS,
         VIS_TOOL_SCHEMAS
     )
-    print(f"  ✅ Viz tools imported successfully")
+    print(f"  ✅ Vis tools imported successfully")
     print(f"  - Tool registry has {len(VIS_TOOLS)} tools")
     print(f"  - Schema registry has {len(VIS_TOOL_SCHEMAS)} schemas")
-    assert len(VIS_TOOLS) == 4, "Expected 4 viz tools"
-    assert len(VIS_TOOL_SCHEMAS) == 4, "Expected 4 viz tool schemas"
+    assert len(VIS_TOOLS) == 5, "Expected 5 vis tools"
+    assert len(VIS_TOOL_SCHEMAS) == 5, "Expected 5 vis tool schemas"
 except Exception as e:
-    print(f"  ❌ Viz tools import failed: {e}")
+    print(f"  ❌ Vis tools import failed: {e}")
     sys.exit(1)
 
 # Test 4: Data generation
@@ -112,9 +115,9 @@ try:
     viz_result = plot_functional_boxplot(data_path, percentiles=[25, 50, 75, 100])
     elapsed_ms = (time.time() - start_time) * 1000
     assert viz_result["status"] == "success", f"Expected success, got {viz_result['status']}"
-    assert "_viz_params" in viz_result, "Missing _viz_params in result"
-    assert viz_result["_viz_params"]["_tool_name"] == "plot_functional_boxplot"
-    assert viz_result["_viz_params"]["percentiles"] == [25, 50, 75, 100], "Percentiles not stored correctly"
+    assert "_vis_params" in viz_result, "Missing _vis_params in result"
+    assert viz_result["_vis_params"]["_tool_name"] == "plot_functional_boxplot"
+    assert viz_result["_vis_params"]["percentiles"] == [25, 50, 75, 100], "Percentiles not stored correctly"
     print(f"  ✅ plot_functional_boxplot() works ({elapsed_ms:.2f} ms)")
     print(f"    - Message: {viz_result['message']}")
 
@@ -123,9 +126,9 @@ try:
     viz_result = plot_curve_boxplot(data_path, percentiles=[25, 50, 75, 100])
     elapsed_ms = (time.time() - start_time) * 1000
     assert viz_result["status"] == "success", f"Expected success, got {viz_result['status']}"
-    assert "_viz_params" in viz_result, "Missing _viz_params in result"
-    assert viz_result["_viz_params"]["_tool_name"] == "plot_curve_boxplot"
-    assert viz_result["_viz_params"]["percentiles"] == [25, 50, 75, 100], "Percentiles not stored correctly"
+    assert "_vis_params" in viz_result, "Missing _vis_params in result"
+    assert viz_result["_vis_params"]["_tool_name"] == "plot_curve_boxplot"
+    assert viz_result["_vis_params"]["percentiles"] == [25, 50, 75, 100], "Percentiles not stored correctly"
     print(f"  ✅ plot_curve_boxplot() works ({elapsed_ms:.2f} ms)")
     print(f"    - Message: {viz_result['message']}")
 
@@ -136,8 +139,8 @@ try:
     viz_result = plot_probabilistic_marching_squares(field_path, isovalue=0.5, colormap="viridis")
     elapsed_ms = (time.time() - start_time) * 1000
     assert viz_result["status"] == "success", f"Expected success, got {viz_result['status']}"
-    assert "_viz_params" in viz_result, "Missing _viz_params in result"
-    assert viz_result["_viz_params"]["_tool_name"] == "plot_probabilistic_marching_squares"
+    assert "_vis_params" in viz_result, "Missing _vis_params in result"
+    assert viz_result["_vis_params"]["_tool_name"] == "plot_probabilistic_marching_squares"
     print(f"  ✅ plot_probabilistic_marching_squares() works ({elapsed_ms:.2f} ms)")
     print(f"    - Message: {viz_result['message']}")
 
@@ -159,7 +162,7 @@ print("  ✅ Project structure created")
 print("  ✅ .gitignore configured")
 print("  ✅ config.py works with API key")
 print("  ✅ data_tools.py with 4 tools + schemas")
-print("  ✅ vis_tools.py with 4 tools + schemas")
+print("  ✅ vis_tools.py with 5 tools + schemas")
 print("  ✅ Test data created")
 print("  ✅ Data generation works")
 print("  ✅ CSV loading works")

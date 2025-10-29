@@ -5,6 +5,7 @@ This script adds delays between test suites to avoid rate limiting.
 """
 import subprocess
 import time
+import sys
 
 
 def run_test(script_name, description, delay_after=0):
