@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 8 Complete (2025-10-29). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 9 Complete (2025-10-29). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ **Phase 6**: Multi-turn conversation with ConversationSession, interactive REPL (2025-10-28)
 - ✅ **Phase 7**: Hybrid control for 10-15x faster parameter updates (2025-10-28)
 - ✅ **Phase 8**: Session management, file cleanup, statistics, polished REPL (2025-10-29)
+- ✅ **Phase 9**: Comprehensive test reorganization with BoxplotStyleConfig testing (2025-10-29)
 - ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
 
 ## Architecture
@@ -121,9 +122,9 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 - ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE 2025-10-28)
 - ✅ Phase 7: Hybrid control with command_parser.py (COMPLETE 2025-10-28)
 
-**Milestone 3 (Days 9-11)**: Polish (1/3 complete)
+**Milestone 3 (Days 9-11)**: Polish (2/3 complete)
 - ✅ Phase 8: Session management with clear_session tool (COMPLETE 2025-10-29)
-- ⏭️ Phase 9: Comprehensive testing (pytest + manual)
+- ✅ Phase 9: Comprehensive testing with BoxplotStyleConfig coverage (COMPLETE 2025-10-29)
 - ⏭️ Phase 10: Documentation and packaging
 
 ### Temporary Verification Files
@@ -141,48 +142,58 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 
 **Purpose**: Provide detailed verification context for human review, then discard.
 
-### Testing Commands
+### Testing Commands (Phase 9 v2.0)
 
 **⚠️ IMPORTANT: Gemini Free Tier Rate Limits**
 - 30 requests per minute (using gemini-2.0-flash-lite)
-- See `TESTING.md` and `RATE_LIMIT_FRIENDLY_TESTING.md` for details
+- See `TESTING.md` for comprehensive testing guide
 
-**Recommended for development (respects rate limits):**
+**Quick Start (Recommended):**
 ```bash
-# Quick test - 9 API calls, ~5 seconds (RECOMMENDED)
-python tests/test_graph_quick.py
+# Quick sanity check (30 seconds, 1-2 API calls)
+python tests/test_simple.py
 
-# No API calls - instant validation
-python tests/test_routing.py
-python tests/test_phase1.py
+# Run unit tests only (instant, 0 API calls) ⭐ RECOMMENDED FOR DEVELOPMENT
+python tests/utils/run_all_tests.py --unit
 
-# Interactive menu-driven testing - user-paced, 24+ scenarios (BEST FOR DEMOS)
-python tests/interactive_test.py
-
-# Full suite with automatic delays - ~5-7 minutes
-python tests/run_tests_with_delays.py
+# Run all tests with automatic delays (~10 minutes)
+python tests/utils/run_all_tests.py
 ```
 
-**Individual phase tests:**
+**Category-Based Testing (Phase 9 Structure):**
 ```bash
-python tests/test_phase1.py           # Phase 1: 0 API calls
-python tests/test_phase2.py           # Phase 2: 10-15 API calls (wait 60s between runs)
-python tests/test_routing.py          # Phase 3: 0 API calls
-python tests/test_graph.py            # Phase 3: 5-8 API calls (wait 60s between runs)
-python tests/test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
-python tests/test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
-python tests/test_error_handling.py   # Phase 5: 15-20 API calls, 6 tests with delays
-python tests/test_multiturn.py        # Phase 6: 50-60 API calls, 5 multi-turn tests
-python tests/test_hybrid_control.py   # Phase 7: 50-60 API calls, 4 hybrid tests with speedup demo
-python tests/test_session_management.py # Phase 8: 15-20 API calls, 3 session management tests
-python validate_phase6.py             # Phase 6: 0 API calls, quick validation
-python src/chatuvisbox/command_parser.py  # Phase 7: 0 API calls, command parser test
+# Unit tests (0 API calls, < 15 seconds)
+python tests/utils/run_all_tests.py --unit
+python tests/unit/test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
+python tests/unit/test_config.py          # 8 tests: Configuration validation
+python tests/unit/test_routing.py         # Routing logic tests
+python tests/unit/test_tools.py           # 10 tests: Direct tool function calls
+
+# Integration tests (15-25 API calls per file, 2-4 minutes each)
+python tests/utils/run_all_tests.py --integration
+python tests/integration/test_hybrid_control.py      # Fast parameter updates
+python tests/integration/test_error_handling.py      # Error recovery
+python tests/integration/test_session_management.py  # Session cleanup
+
+# End-to-end tests (20-30 API calls per file, 3-5 minutes each)
+python tests/utils/run_all_tests.py --e2e
+python tests/e2e/test_matplotlib_behavior.py
+
+# Interactive testing (user-paced)
+python tests/interactive/interactive_test.py
 ```
 
-**Interactive testing:**
+**Quick Validation:**
 ```bash
-python repl.py                        # Phase 6: Interactive multi-turn REPL (user-paced)
+# Quick validation (unit + sanity check)
+python tests/utils/run_all_tests.py --quick
 ```
+
+**BoxplotStyleConfig Testing (Phase 9 v2.0):**
+- 17 command parser tests for new styling parameters (median/outliers color/width/alpha)
+- 8 config tests for BoxplotStyleConfig defaults
+- 10 tool tests for direct function calls with full styling
+- Total: 45+ unit tests, all 0 API calls, instant execution
 
 ### Running the Application
 
@@ -241,9 +252,30 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Maintains flexibility for ambiguous requests
 
 **Implementation**:
-- `command_parser.py`: Pattern matching for 7 simple command types
+- `command_parser.py`: Pattern matching for 13+ simple command types (includes BoxplotStyleConfig)
 - `hybrid_control.py`: Direct execution with parameter validation
 - `conversation.py`: Checks hybrid eligibility before full graph
+
+### 7. Test Organization (Phase 9 v2.0)
+**Decision**: Category-based test structure (unit/integration/e2e/interactive) instead of phase-based.
+
+**Test Categories**:
+- **Unit tests** (`tests/unit/`): 0 API calls, instant execution, 45+ tests
+- **Integration tests** (`tests/integration/`): 15-25 API calls per file, workflow testing
+- **E2E tests** (`tests/e2e/`): 20-30 API calls per file, complete scenarios
+- **Interactive tests** (`tests/interactive/`): User-paced, menu-driven exploration
+
+**BoxplotStyleConfig Testing** (v2.0):
+- 17 command parser tests for styling parameters (median/outliers color/width/alpha)
+- 8 config tests for BoxplotStyleConfig defaults
+- 10 tool tests for direct function calls with full styling
+- All 13+ hybrid control commands tested
+
+**Benefits**:
+- Clear separation by API usage (unit tests = 0 calls, safe to run repeatedly)
+- Test runner with category flags (--unit, --integration, --e2e, --quick)
+- Reduced from ~2600 lines (17 files) to ~1600 lines (14 files)
+- Deleted ~1444 lines of obsolete phase-based tests
 
 ## Important Implementation Notes
 
@@ -396,6 +428,8 @@ All expect numpy arrays and return matplotlib axes.
 8. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
 9. **Check logs for debugging** - All tool calls logged to `logs/chatuvisbox.log` (Phase 5)
 10. **Error count resets on success** - Don't manually reset error_count (Phase 5)
+11. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development (Phase 9)
+12. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params` (Phase 9)
 
 ## Implementation-Specific Notes (From Phase 1)
 
@@ -632,24 +666,36 @@ chatuvisbox/
 │   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
 │   └── config.py            # ✅ DONE Phase 1: Configuration
 │
-├── tests/                   # ✅ DONE Phase 4.5: Test suite
+├── tests/                   # ✅ DONE Phase 9: Reorganized test suite (v2.0)
 │   ├── __init__.py          # ✅ Test package marker
 │   ├── conftest.py          # ✅ Pytest fixtures
-│   ├── test_phase1.py       # ✅ Phase 1: 0 API calls
-│   ├── test_phase2.py       # ✅ Phase 2: 10-15 API calls
-│   ├── test_routing.py      # ✅ Phase 3: 0 API calls
-│   ├── test_graph.py        # ✅ Phase 3: 5-8 API calls
-│   ├── test_graph_quick.py  # ✅ Phase 3: 6-10 API calls ⭐ RECOMMENDED
-│   ├── test_graph_integration.py # ✅ Phase 3: 15-20 API calls
-│   ├── test_happy_path.py   # ✅ Phase 4: 25-35 API calls
-│   ├── test_matplotlib_behavior.py # ✅ Phase 4: 0 API calls
-│   ├── test_error_handling.py # ✅ Phase 5: 6 tests (15-20 API calls)
-│   ├── test_multiturn.py    # ✅ Phase 6: 5 multi-turn tests (50-60 API calls)
-│   ├── test_hybrid_control.py # ✅ Phase 7: 4 hybrid tests (50-60 API calls, speedup demo)
-│   ├── test_session_management.py # ✅ Phase 8: 3 session tests (15-20 API calls)
-│   ├── interactive_test.py  # ✅ Phase 4: Interactive menu testing
-│   ├── run_tests_with_delays.py # ✅ Automated test runner
-│   └── simple_test.py       # ✅ Simple validation
+│   ├── README.md            # ✅ Phase 9: Test structure documentation
+│   ├── test_simple.py       # ✅ Phase 9: Quick sanity check (30s, 1-2 API calls)
+│   │
+│   ├── unit/                # ✅ Phase 9: Unit tests (0 API calls, < 15s)
+│   │   ├── __init__.py
+│   │   ├── test_command_parser.py  # ✅ 17 tests: BoxplotStyleConfig commands
+│   │   ├── test_config.py          # ✅ 8 tests: Configuration validation
+│   │   ├── test_routing.py         # ✅ Routing logic tests
+│   │   └── test_tools.py           # ✅ 10 tests: Direct tool function calls
+│   │
+│   ├── integration/         # ✅ Phase 9: Integration tests (15-25 API calls per file)
+│   │   ├── __init__.py
+│   │   ├── test_hybrid_control.py      # ✅ Fast parameter updates
+│   │   ├── test_error_handling.py      # ✅ Error recovery & circuit breaker
+│   │   └── test_session_management.py  # ✅ Session cleanup & stats
+│   │
+│   ├── e2e/                 # ✅ Phase 9: End-to-end tests (20-30 API calls per file)
+│   │   ├── __init__.py
+│   │   └── test_matplotlib_behavior.py # ✅ Matplotlib non-blocking
+│   │
+│   ├── interactive/         # ✅ Phase 9: Interactive tests (user-paced)
+│   │   ├── __init__.py
+│   │   └── interactive_test.py  # ✅ Menu-driven testing (24+ scenarios)
+│   │
+│   └── utils/               # ✅ Phase 9: Test utilities
+│       ├── __init__.py
+│       └── run_all_tests.py     # ✅ Category-based test runner
 │
 ├── test_data/               # ✅ DONE Phase 1: Sample data files
 │   ├── sample_curves.csv
@@ -683,7 +729,10 @@ chatuvisbox/
     ├── phase_03_*.md        # ✅ Phase 3 complete
     ├── phase_04_*.md        # ✅ Phase 4 complete
     ├── phase_05_*.md        # ✅ Phase 5 complete
-    └── phase_06_*.md        # ✅ Phase 6 complete
+    ├── phase_06_*.md        # ✅ Phase 6 complete
+    ├── phase_07_*.md        # ✅ Phase 7 complete
+    ├── phase_08_*.md        # ✅ Phase 8 complete
+    └── phase_09_*.md        # ✅ Phase 9 complete (updated for BoxplotStyleConfig)
 ```
 
 ## Reference Documentation
