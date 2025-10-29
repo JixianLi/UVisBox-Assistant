@@ -6,13 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 4 Complete + Enhancements (2025-10-28). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 5 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
 - ✅ **Phase 2**: LangGraph state management, model setup, core nodes (2025-10-26)
 - ✅ **Phase 3**: Graph wiring, routing logic, end-to-end workflow (2025-10-26)
 - ✅ **Phase 4**: End-to-end happy path tests, matplotlib verification, interactive testing (2025-10-27)
+- ✅ **Phase 4.5**: Codebase restructure to professional Python package with Poetry (2025-10-27)
+- ✅ **Phase 5**: Error handling, circuit breaker, context awareness, logging (2025-10-28)
 - ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
 
 ## Architecture
@@ -35,14 +37,15 @@ The system uses a **two-tier execution model**:
 
 ```
 graph.py          - ✅ DONE: LangGraph StateGraph definition with conditional routing
-state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_vis_params, session_files
-nodes.py          - ✅ DONE: Three core nodes: call_model, call_data_tool, call_vis_tool
-routing.py        - ✅ DONE: Conditional logic: route_after_model, route_after_tool
-model.py          - ✅ DONE: ChatGoogleGenerativeAI setup with tool binding (updated with directive prompt)
+state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_vis_params, session_files, error_count
+nodes.py          - ✅ DONE: Three core nodes with error handling: call_model, call_data_tool, call_vis_tool
+routing.py        - ✅ DONE: Conditional logic with circuit breaker: route_after_model, route_after_tool
+model.py          - ✅ DONE: ChatGoogleGenerativeAI with error recovery prompt and context awareness
 utils.py          - ✅ DONE: Tool type detection and file management utilities
 data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_curves, load_npy, generate_scalar_field_ensemble, generate_vector_field_ensemble
 vis_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, plot_uncertainty_lobes, plot_contour_boxplot
 config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
+logger.py         - ✅ DONE Phase 5: Logging infrastructure with file and console output
 hybrid_control.py - Pattern matching for fast parameter updates (TODO: Phase 7)
 conversation.py   - ConversationSession class for multi-turn state management (TODO: Phase 6)
 main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit) (TODO: Phase 8)
@@ -102,21 +105,22 @@ pip install -r requirements.txt
 
 Follow `plans/README.md` for complete guidance. Phases must be completed in order:
 
-**Milestone 1 (Days 1-5)**: Core Pipeline
-- Phase 1: Create data_tools.py, vis_tools.py, config.py with tool schemas
-- Phase 2: Create state.py, nodes.py, model.py
-- Phase 3: Create graph.py with routing logic
-- Phase 4: End-to-end happy path test
+**Milestone 1 (Days 1-5)**: Core Pipeline ✅ COMPLETE
+- ✅ Phase 1: Create data_tools.py, vis_tools.py, config.py with tool schemas
+- ✅ Phase 2: Create state.py, nodes.py, model.py
+- ✅ Phase 3: Create graph.py with routing logic
+- ✅ Phase 4: End-to-end happy path test
+- ✅ Phase 4.5: Professional package structure with Poetry
 
-**Milestone 2 (Days 6-8)**: Robustness
-- Phase 5: Error handling with circuit breaker
-- Phase 6: Multi-turn conversation with ConversationSession
-- Phase 7: Hybrid control with command_parser.py
+**Milestone 2 (Days 6-8)**: Robustness (1/3 complete)
+- ✅ Phase 5: Error handling with circuit breaker (COMPLETE)
+- ⏭️ Phase 6: Multi-turn conversation with ConversationSession
+- ⏭️ Phase 7: Hybrid control with command_parser.py
 
 **Milestone 3 (Days 9-11)**: Polish
-- Phase 8: Session management with clear_session tool
-- Phase 9: Comprehensive testing (pytest + manual)
-- Phase 10: Documentation and packaging
+- ⏭️ Phase 8: Session management with clear_session tool
+- ⏭️ Phase 9: Comprehensive testing (pytest + manual)
+- ⏭️ Phase 10: Documentation and packaging
 
 ### Temporary Verification Files
 
@@ -142,34 +146,40 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 **Recommended for development (respects rate limits):**
 ```bash
 # Quick test - 9 API calls, ~5 seconds (RECOMMENDED)
-python test_graph_quick.py
+python tests/test_graph_quick.py
 
 # No API calls - instant validation
-python test_routing.py
-python test_phase1.py
+python tests/test_routing.py
+python tests/test_phase1.py
 
 # Interactive menu-driven testing - user-paced, 24+ scenarios (BEST FOR DEMOS)
-python interactive_test.py
+python tests/interactive_test.py
 
 # Full suite with automatic delays - ~5-7 minutes
-python run_tests_with_delays.py
+python tests/run_tests_with_delays.py
 ```
 
 **Individual phase tests:**
 ```bash
-python test_phase1.py           # Phase 1: 0 API calls
-python test_phase2.py           # Phase 2: 10-15 API calls (wait 60s between runs)
-python test_routing.py          # Phase 3: 0 API calls
-python test_graph.py            # Phase 3: 5-8 API calls (wait 60s between runs)
-python test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
-python test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
+python tests/test_phase1.py           # Phase 1: 0 API calls
+python tests/test_phase2.py           # Phase 2: 10-15 API calls (wait 60s between runs)
+python tests/test_routing.py          # Phase 3: 0 API calls
+python tests/test_graph.py            # Phase 3: 5-8 API calls (wait 60s between runs)
+python tests/test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
+python tests/test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
+python tests/test_error_handling.py   # Phase 5: 15-20 API calls, 6 tests with delays
 ```
 
 ### Running the Application
 
 ```bash
-# After implementation is complete
-python main.py
+# After Phase 8 implementation (REPL)
+python -m chatuvisbox
+
+# Or via entry point (if configured)
+chatuvisbox
+
+# Current status: Entry point placeholder exists but REPL not yet implemented
 ```
 
 ## Key Design Decisions
@@ -191,11 +201,14 @@ python main.py
 ### 3. Matplotlib Non-Blocking
 Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction while plots are open.
 
-### 4. Error Handling Pattern
+### 4. Error Handling Pattern (Phase 5)
 - All tool functions return `{"status": "success"|"error", "message": ..., ...}`
 - Tool nodes wrap execution in try-except, always return ToolMessage
 - Graph loops back to model on error for clarification
 - Circuit breaker: `error_count >= 3` → route to END
+- Error recovery: error_count resets to 0 on successful tool execution
+- Context awareness: file list injected in system prompt for helpful suggestions
+- Logging: all tool calls, results, and errors logged to `logs/chatuvisbox.log`
 
 ### 5. File Naming Convention
 - Test data: `test_data/sample_curves.csv`, `test_data/sample_scalar_field.npy`
@@ -349,8 +362,10 @@ All expect numpy arrays and return matplotlib axes.
 4. **Don't skip phase validation** - Each phase has a checklist; complete before moving on
 5. **Don't hardcode file paths** - Use `config.TEMP_DIR` and `config.TEST_DATA_DIR`
 6. **Don't forget _tool_name** - Required in vis params for hybrid control
-7. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors
+7. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors (Phase 5)
 8. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
+9. **Check logs for debugging** - All tool calls logged to `logs/chatuvisbox.log` (Phase 5)
+10. **Error count resets on success** - Don't manually reset error_count (Phase 5)
 
 ## Implementation-Specific Notes (From Phase 1)
 
@@ -378,52 +393,128 @@ return {
 }
 ```
 
+## Implementation-Specific Notes (From Phase 5)
+
+### Error Handling Architecture
+
+**Circuit Breaker** (`src/chatuvisbox/routing.py:64-71`):
+```python
+def route_after_tool(state: GraphState) -> Literal["model", "end"]:
+    MAX_ERRORS = 3
+    if state.get("error_count", 0) >= MAX_ERRORS:
+        print(f"ERROR: Exceeded {MAX_ERRORS} consecutive errors. Ending.")
+        return "end"
+    return "model"
+```
+
+**Error Recovery** (`src/chatuvisbox/state.py`):
+- `increment_error_count()`: Called on tool failure
+- `update_state_with_data()`: Resets error_count to 0 on success
+- `update_state_with_vis()`: Resets error_count to 0 on success
+
+**Context Awareness** (`src/chatuvisbox/nodes.py:29-32`):
+```python
+# Get list of available files for context
+file_list = []
+if config.TEST_DATA_DIR.exists():
+    file_list = [f.name for f in config.TEST_DATA_DIR.iterdir() if f.is_file()]
+```
+
+**Logging System** (`src/chatuvisbox/logger.py`):
+- Dual output: file (`logs/chatuvisbox.log`) + console
+- Functions: `log_tool_call()`, `log_tool_result()`, `log_error()`, `log_state_update()`
+- Integrated in `nodes.py` for all tool executions
+
+### Phase 5 Error Handling Patterns
+
+**Pattern 1: File Not Found**
+- Tool returns `{"status": "error", "message": "File not found: <path>"}`
+- Agent receives error and file list in context
+- Agent suggests available files or alternatives
+
+**Pattern 2: Data Shape Mismatch**
+- UVisBox raises exception on incompatible data
+- try-except in tool node catches and wraps error
+- Agent explains incompatibility and suggests alternatives
+
+**Pattern 3: Circuit Breaker**
+- After 3 consecutive errors, routing goes to END
+- Prevents infinite error loops
+- Error count resets on any successful tool execution
+
+**Pattern 4: Multi-turn Error Recovery**
+- User can correct errors in follow-up messages
+- Conversation state maintained across turns
+- Error count persists but resets on success
+
 ## File Structure (Current Implementation Status)
 
 ```
 chatuvisbox/
-├── main.py                  # TODO Phase 8: REPL entry point
-├── graph.py                 # ✅ DONE Phase 3: LangGraph workflow (127 lines)
-├── state.py                 # ✅ DONE Phase 2: GraphState definition (85 lines)
-├── nodes.py                 # ✅ DONE Phase 2: call_model, call_data_tool, call_vis_tool (182 lines)
-├── routing.py               # ✅ DONE Phase 3: Conditional routing logic (90 lines)
-├── model.py                 # ✅ DONE Phase 2: ChatGoogleGenerativeAI setup with directive prompt (95 lines)
-├── utils.py                 # ✅ DONE Phase 2: Utility functions (60 lines)
-├── data_tools.py            # ✅ DONE Phase 1: Data loading/generation + vector field ensemble (~420 lines)
-├── vis_tools.py             # ✅ DONE Phase 1: UVisBox wrappers + contour_boxplot (570 lines)
-├── config.py                # ✅ DONE Phase 1: Configuration with DEFAULT_VIS_PARAMS (37 lines)
-├── hybrid_control.py        # TODO Phase 7: Fast path for simple commands
-├── command_parser.py        # TODO Phase 7: Pattern matching for hybrid control
-├── conversation.py          # TODO Phase 6: ConversationSession class
-├── logger.py                # TODO Phase 5: Logging setup (optional)
-├── vis_manager.py           # TODO Phase 8: Matplotlib window tracking (optional)
-├── test_data/               # ✅ DONE Phase 1: Sample CSV/NPY files
+├── pyproject.toml           # ✅ DONE Phase 4.5: Poetry configuration
+├── environment.yml          # ✅ DONE Phase 4.5: Conda environment
+├── requirements.txt         # ✅ DONE: Python dependencies (legacy)
+├── README.md                # ✅ DONE Phase 4.5: Package documentation
+├── CLAUDE.md                # ✅ DONE: AI agent guidance (this file)
+├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
+├── TESTING.md               # ✅ DONE: Comprehensive testing guide
+├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy
+├── .gitignore               # ✅ DONE Phase 1
+│
+├── src/chatuvisbox/         # ✅ DONE Phase 4.5: Package source (src layout)
+│   ├── __init__.py          # ✅ Package exports
+│   ├── __main__.py          # ✅ Entry point (placeholder for Phase 8)
+│   ├── graph.py             # ✅ DONE Phase 3: LangGraph workflow
+│   ├── state.py             # ✅ DONE Phase 2: GraphState with error_count
+│   ├── nodes.py             # ✅ DONE Phase 5: Nodes with error handling (189 lines)
+│   ├── routing.py           # ✅ DONE Phase 5: Routing with circuit breaker (86 lines)
+│   ├── model.py             # ✅ DONE Phase 5: Model with error recovery prompt (109 lines)
+│   ├── logger.py            # ✅ DONE Phase 5: Logging infrastructure (42 lines)
+│   ├── utils.py             # ✅ DONE Phase 2: Utility functions
+│   ├── data_tools.py        # ✅ DONE Phase 1: Data tools (~420 lines)
+│   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
+│   └── config.py            # ✅ DONE Phase 1: Configuration
+│
+├── tests/                   # ✅ DONE Phase 4.5: Test suite
+│   ├── __init__.py          # ✅ Test package marker
+│   ├── conftest.py          # ✅ Pytest fixtures
+│   ├── test_phase1.py       # ✅ Phase 1: 0 API calls
+│   ├── test_phase2.py       # ✅ Phase 2: 10-15 API calls
+│   ├── test_routing.py      # ✅ Phase 3: 0 API calls
+│   ├── test_graph.py        # ✅ Phase 3: 5-8 API calls
+│   ├── test_graph_quick.py  # ✅ Phase 3: 6-10 API calls ⭐ RECOMMENDED
+│   ├── test_graph_integration.py # ✅ Phase 3: 15-20 API calls
+│   ├── test_happy_path.py   # ✅ Phase 4: 25-35 API calls
+│   ├── test_matplotlib_behavior.py # ✅ Phase 4: 0 API calls
+│   ├── test_error_handling.py # ✅ DONE Phase 5: 6 tests (15-20 API calls)
+│   ├── interactive_test.py  # ✅ Phase 4: Interactive menu testing
+│   ├── run_tests_with_delays.py # ✅ Automated test runner
+│   └── simple_test.py       # ✅ Simple validation
+│
+├── test_data/               # ✅ DONE Phase 1: Sample data files
 │   ├── sample_curves.csv
 │   ├── sample_scalar_field.npy
 │   └── README.md
-├── temp/                    # ✅ DONE Phase 1: Generated .npy files (gitignored)
-├── plans/                   # ✅ DONE: Implementation phase guides
-│   ├── phase_01_*.md        # ✅ Phase 1 complete
-│   ├── phase_02_*.md        # ✅ Phase 2 complete
-│   └── phase_03_*.md        # ✅ Phase 3 complete
-├── requirements.txt         # ✅ DONE: Python dependencies
-├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
-├── .gitignore               # ✅ DONE Phase 1
-├── test_phase1.py           # ✅ DONE Phase 1: Validation test suite (0 API calls)
-├── test_phase2.py           # ✅ DONE Phase 2: Comprehensive test suite (10-15 API calls)
-├── test_routing.py          # ✅ DONE Phase 3: Routing logic tests (0 API calls)
-├── test_graph.py            # ✅ DONE Phase 3: Graph compilation tests (5-8 API calls)
-├── test_graph_quick.py      # ✅ DONE Phase 3: Quick integration test (6-10 API calls) ⭐ RECOMMENDED
-├── test_graph_integration.py # ✅ DONE Phase 3: Full integration tests (15-20 API calls)
-├── test_happy_path.py       # ✅ DONE Phase 4: End-to-end tests all vis types (25-35 API calls)
-├── test_matplotlib_behavior.py # ✅ DONE Phase 4: Matplotlib non-blocking tests (0 API calls)
-├── interactive_test.py      # ✅ DONE Phase 4: Menu-driven testing with 24+ pre-defined scenarios (user-paced)
-├── run_tests_with_delays.py # ✅ DONE: Automated test runner (respects rate limits)
-├── TESTING.md               # ✅ DONE: Comprehensive testing guide
-├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy
-├── UPDATE_*.md              # Temporary: API update summaries (verified then deleted before commit)
-├── PHASE_*_COMPLETION_REPORT.md  # Temporary: Phase verification (deleted before commit)
-└── create_test_data.py      # ✅ DONE Phase 1: Test data generator
+│
+├── temp/                    # ✅ DONE Phase 1: Generated files (gitignored)
+├── logs/                    # ✅ DONE Phase 5: Log files (gitignored)
+│   └── chatuvisbox.log
+│
+├── reports/                 # Temporary: Phase completion reports (gitignored)
+│   ├── PHASE_2_COMPLETION_REPORT.md
+│   ├── PHASE_3_COMPLETION_REPORT.md
+│   ├── PHASE_4_COMPLETION_REPORT.md
+│   ├── PHASE_4.5_COMPLETION_REPORT.md
+│   ├── PHASE_5_COMPLETION_REPORT.md  # ✅ NEW
+│   └── UPDATE_*.md
+│
+└── plans/                   # ✅ DONE: Implementation phase guides
+    ├── README.md
+    ├── phase_01_*.md        # ✅ Phase 1 complete
+    ├── phase_02_*.md        # ✅ Phase 2 complete
+    ├── phase_03_*.md        # ✅ Phase 3 complete
+    ├── phase_04_*.md        # ✅ Phase 4 complete
+    └── phase_05_*.md        # ✅ Phase 5 complete
 ```
 
 ## Reference Documentation
