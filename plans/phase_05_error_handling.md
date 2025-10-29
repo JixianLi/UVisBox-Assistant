@@ -117,7 +117,7 @@ def test_wrong_data_shape():
     from pathlib import Path
     import config
 
-    # Create 1D array (wrong shape for most viz functions expecting 2D)
+    # Create 1D array (wrong shape for most vis functions expecting 2D)
     wrong_data = np.array([1, 2, 3, 4, 5])
     wrong_path = config.TEMP_DIR / "wrong_shape.npy"
     np.save(wrong_path, wrong_data)

@@ -660,7 +660,7 @@ Add Phase 4.5 to the milestone table:
 
 | Phase | Document | Focus | Duration | Status |
 |-------|----------|-------|----------|--------|
-| **Phase 1** ✅ | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/viz tools | 1-2 days | Complete |
+| **Phase 1** ✅ | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/vis tools | 1-2 days | Complete |
 | **Phase 2** ✅ | [State & Nodes](phase_02_langgraph_state_and_nodes.md) | State and nodes | 1 day | Complete |
 | **Phase 3** ✅ | [Graph Wiring](phase_03_graph_wiring_and_routing.md) | Graph assembly | 0.5-1 day | Complete |
 | **Phase 4** ✅ | [End-to-End Test](phase_04_end_to_end_test.md) | Happy path | 0.5 day | Complete |

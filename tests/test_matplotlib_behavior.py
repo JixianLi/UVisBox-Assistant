@@ -41,10 +41,10 @@ def test_non_blocking():
     print("\n✅ Non-blocking test passed!")
 
 
-def test_multiple_viz_calls():
+def test_multiple_vis_calls():
     """Simulate multiple visualization calls like in our pipeline."""
     print("\n" + "="*70)
-    print("TEST: Multiple Viz Tool Calls")
+    print("TEST: Multiple Vis Tool Calls")
     print("="*70)
 
     from chatuvisbox.vis_tools import plot_functional_boxplot
@@ -55,10 +55,10 @@ def test_multiple_viz_calls():
     result1 = generate_ensemble_curves(n_curves=20, n_points=50)
     print(f"  ✓ Generated data: {result1['output_path']}")
 
-    # First viz
+    # First vis
     print("  Creating first visualization...")
-    viz1 = plot_functional_boxplot(result1['output_path'])
-    print(f"  ✓ First viz: {viz1['status']}")
+    vis1 = plot_functional_boxplot(result1['output_path'])
+    print(f"  ✓ First vis: {vis1['status']}")
 
     time.sleep(1)
 
@@ -67,17 +67,17 @@ def test_multiple_viz_calls():
     result2 = generate_ensemble_curves(n_curves=15, n_points=60)
     print(f"  ✓ Generated data: {result2['output_path']}")
 
-    # Second viz
+    # Second vis
     print("  Creating second visualization...")
-    viz2 = plot_functional_boxplot(result2['output_path'], percentiles=[50, 75, 100])
-    print(f"  ✓ Second viz: {viz2['status']}")
+    vis2 = plot_functional_boxplot(result2['output_path'], percentiles=[50, 75, 100])
+    print(f"  ✓ Second vis: {vis2['status']}")
 
     print("\n  ✓ Both plots should be visible")
     print("  ✓ Terminal remained responsive throughout")
 
     input("\nPress Enter to close...")
     plt.close('all')
-    print("\n✅ Multiple viz calls test passed!")
+    print("\n✅ Multiple vis calls test passed!")
 
 
 def test_window_persistence():
@@ -114,7 +114,7 @@ def run_all_tests():
 
     try:
         test_non_blocking()
-        test_multiple_viz_calls()
+        test_multiple_vis_calls()
         test_window_persistence()
 
         print("\n" + "="*70)

@@ -118,7 +118,7 @@ class TestVizTools:
         assert ctx["last_vis"] is not None
         assert "plot_contour_boxplot" in str(ctx["last_vis"])
 
-    def test_viz_with_parameters(self):
+    def test_vis_with_parameters(self):
         """Test visualization with specific parameters."""
         session = ConversationSession()
         session.send("Generate curves and plot functional boxplot with percentile 85 and hide median")
@@ -190,8 +190,8 @@ class TestHybridControl:
         ctx = session.get_context_summary()
         assert ctx["error_count"] == 0
 
-    def test_hybrid_without_viz(self):
-        """Test hybrid command without prior viz."""
+    def test_hybrid_without_vis(self):
+        """Test hybrid command without prior vis."""
         session = ConversationSession()
 
         session.send("colormap viridis")
@@ -271,7 +271,7 @@ class TestSessionManagement:
         stats = session.get_stats()
         assert stats["turns"] == 2
         assert stats["current_data"] is True
-        assert stats["current_viz"] is True
+        assert stats["current_vis"] is True
 
 
 class TestEdgeCases:
@@ -499,7 +499,7 @@ def benchmark_visualization():
     # Setup
     session.send("Generate 40 curves")
 
-    # Benchmark viz
+    # Benchmark vis
     start = time.time()
     session.send("Plot functional boxplot")
     elapsed = time.time() - start

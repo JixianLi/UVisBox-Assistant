@@ -26,7 +26,7 @@ def test_1_state_management():
     assert len(state["messages"]) == 1
     assert isinstance(state["messages"][0], HumanMessage)
     assert state["current_data_path"] is None
-    assert state["last_viz_params"] is None
+    assert state["last_vis_params"] is None
     assert state["session_files"] == []
     assert state["error_count"] == 0
 

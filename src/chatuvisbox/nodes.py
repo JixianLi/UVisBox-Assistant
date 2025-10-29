@@ -161,9 +161,9 @@ def call_vis_tool(state: GraphState) -> Dict:
         # Update state
         state_updates = {"messages": [tool_message]}
 
-        if result.get("status") == "success" and "_viz_params" in result:
-            # Extract _viz_params from result for state storage
-            state_updates.update(update_state_with_vis(state, result["_viz_params"]))
+        if result.get("status") == "success" and "_vis_params" in result:
+            # Extract _vis_params from result for state storage
+            state_updates.update(update_state_with_vis(state, result["_vis_params"]))
         else:
             state_updates.update(increment_error_count(state))
 

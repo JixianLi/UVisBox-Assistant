@@ -74,7 +74,7 @@ class ConversationSession:
             Dictionary with:
                 - turn_count: Number of turns in conversation
                 - current_data: Path to current data file
-                - last_viz: Last visualization parameters
+                - last_vis: Last visualization parameters
                 - session_files: List of files created this session
                 - error_count: Current error count
                 - message_count: Total number of messages
@@ -83,7 +83,7 @@ class ConversationSession:
             return {
                 "turn_count": 0,
                 "current_data": None,
-                "last_viz": None,
+                "last_vis": None,
                 "session_files": [],
                 "error_count": 0,
                 "message_count": 0
@@ -92,7 +92,7 @@ class ConversationSession:
         return {
             "turn_count": self.turn_count,
             "current_data": self.state.get("current_data_path"),
-            "last_viz": self.state.get("last_viz_params"),
+            "last_vis": self.state.get("last_vis_params"),
             "session_files": self.state.get("session_files", []),
             "error_count": self.state.get("error_count", 0),
             "message_count": len(self.state["messages"])

@@ -77,7 +77,7 @@ def plot_functional_boxplot(
         return {
             "status": "success",
             "message": f"Displayed functional boxplot for {curves.shape[0]} curves with percentiles {percentiles}",
-            "_viz_params": {
+            "_vis_params": {
                 "_tool_name": "plot_functional_boxplot",
                 "data_path": data_path,
                 "percentiles": percentiles,
@@ -157,7 +157,7 @@ def plot_curve_boxplot(
         return {
             "status": "success",
             "message": f"Displayed curve boxplot for {curves.shape[0]} curves with percentiles {percentiles}",
-            "_viz_params": {
+            "_vis_params": {
                 "_tool_name": "plot_curve_boxplot",
                 "data_path": data_path,
                 "percentiles": percentiles,
@@ -219,7 +219,7 @@ def plot_probabilistic_marching_squares(
         return {
             "status": "success",
             "message": f"Displayed probabilistic marching squares for field shape {field.shape}",
-            "_viz_params": {
+            "_vis_params": {
                 "_tool_name": "plot_probabilistic_marching_squares",
                 "data_path": data_path,
                 "isovalue": isovalue,
@@ -300,7 +300,7 @@ def plot_uncertainty_lobes(
         return {
             "status": "success",
             "message": f"Displayed uncertainty lobes for {n_positions} positions",
-            "_viz_params": {
+            "_vis_params": {
                 "_tool_name": "plot_uncertainty_lobes",
                 "positions_path": positions_path,
                 "vectors_path": vectors_path,
@@ -386,7 +386,7 @@ def plot_contour_boxplot(
         return {
             "status": "success",
             "message": f"Displayed contour boxplot for ensemble with {ensemble_images.shape[0]} members",
-            "_viz_params": {
+            "_vis_params": {
                 "_tool_name": "plot_contour_boxplot",
                 "data_path": data_path,
                 "isovalue": isovalue,

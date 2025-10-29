@@ -11,7 +11,7 @@
 3. The `LangGraph` orchestrator uses the **Google `Gemini` API** for tool-calling and chat logic.  
 4. The orchestrator has access to two distinct toolsets:  
    * **Data Tools:** A curated set of Python functions for loading/transforming **2D data** (e.g., `load_csv_as_2d_array`).  
-   * **Viz Tools:** `UVisBox` functions that produce **2D visualizations** (e.g., `plot_2d_contour`).  
+   * **Vis Tools:** `UVisBox` functions that produce **2D visualizations** (e.g., `plot_2d_contour`).  
 5. Executes multi-step tasks (e.g., "load this CSV, then show me its contour plot").  
 6. Manages all intermediate data state via the **local file system** (e.g., as `.npy` files).  
 7. Renders the final visualization in an **interactive Matplotlib window**.
@@ -32,21 +32,21 @@
 
   ### **Milestone 1: Core Pipeline Implementation (Phases 1-4)**
 
-**Goal:** Build the essential `LangGraph` state machine capable of a single `Data Tool -> Viz Tool` chain.
+**Goal:** Build the essential `LangGraph` state machine capable of a single `Data Tool -> Vis Tool` chain.
 
 * **Phase 1: Schemas & Dispatchers**  
-  * Define the Python functions for your `data_tools` (file-in, `.npy`\-out) and `viz_tools` (`.npy`\-in, `matplotlib`\-out).  
+  * Define the Python functions for your `data_tools` (file-in, `.npy`\-out) and `vis_tools` (`.npy`\-in, `matplotlib`\-out).  
   * Use the 3-Tier Parameter system from the start: define simple Tier-1 schemas for `Gemini` and hard-code Tier-2 defaults (e.g., `figsize`, `interpolation`) in your Python functions.  
 * **Phase 2: LangGraph State & Nodes**  
   * Define your `GraphState` `TypedDict` (e.g., `messages`, `current_file_path`).  
-  * Implement the core nodes: `call_model` (contacts `Gemini`), `call_data_tool`, and `call_viz_tool`.  
+  * Implement the core nodes: `call_model` (contacts `Gemini`), `call_data_tool`, and `call_vis_tool`.  
   * Ensure tool-calling nodes have robust `try...except` blocks that return a JSON-friendly `{"error": ...}` message on failure.  
 * **Phase 3: Graph Wiring & Routing**  
-  * Implement the conditional router logic that checks the `Gemini` response for tool calls (data or viz) and directs the graph to the correct node or to `END`.  
+  * Implement the conditional router logic that checks the `Gemini` response for tool calls (data or vis) and directs the graph to the correct node or to `END`.  
   * Set the `call_model` node as the entry point and wire the complete graph.  
 * **Phase 4: End-to-End "Happy Path" Test**  
   * **Test Case:** `User:` "Load `my_data.csv` as a 2D array, then show me a heatmap."  
-  * **Success:** Trace the graph: `call_model` \-\> `call_data_tool` \-\> `call_model` \-\> `call_viz_tool` \-\> `END`. A Matplotlib window appears.
+  * **Success:** Trace the graph: `call_model` \-\> `call_data_tool` \-\> `call_model` \-\> `call_vis_tool` \-\> `END`. A Matplotlib window appears.
 
     ---
 
@@ -65,7 +65,7 @@
   * **Success:** The graph uses its `messages` history and `current_file_path` state to correctly call `viz_tool(file_path="_temp_data.npy")`.  
 * **Phase 7: Implement Hybrid Control Model**  
   * Implement the "pre-graph" logic in your main `main.py` REPL.  
-  * If a user types a simple command (e.g., "colormap jet"), your script should intercept this, manually update the *last known* viz parameters, and call the `execute_viz_tool` dispatcher directly, bypassing the (slower) `LangGraph` call. This ensures a fast, interactive feel for simple tweaks.
+  * If a user types a simple command (e.g., "colormap jet"), your script should intercept this, manually update the *last known* vis parameters, and call the `execute_vis_tool` dispatcher directly, bypassing the (slower) `LangGraph` call. This ensures a fast, interactive feel for simple tweaks.
 
     ---
 
@@ -83,5 +83,5 @@
   * Create the final `requirements.txt` file.  
   * Write a `README.md` that explains:  
     1. Installation and setting the **Google AI Studio API Key**.  
-    2. A full list of available `data_tools` and `viz_tools`.  
+    2. A full list of available `data_tools` and `vis_tools`.  
     3. Example prompts (simple, multi-step, and error-correction).

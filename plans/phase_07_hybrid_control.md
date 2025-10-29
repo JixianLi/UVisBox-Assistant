@@ -117,7 +117,7 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
 
 def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dict:
     """
-    Apply a simple command to existing viz parameters.
+    Apply a simple command to existing vis parameters.
 
     Args:
         command: The parsed command
@@ -128,7 +128,7 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
     """
     updated = current_params.copy()
 
-    # Map command param names to viz tool param names
+    # Map command param names to vis tool param names
     param_mapping = {
         'colormap': 'colormap',
         'percentile': 'percentile',
@@ -446,8 +446,8 @@ def test_hybrid_fallback():
     print("\n✅ Fallback test passed")
 
 
-def test_hybrid_without_prior_viz():
-    """Test: Hybrid command without prior viz falls back to graph."""
+def test_hybrid_without_prior_vis():
+    """Test: Hybrid command without prior vis falls back to graph."""
     print("\n" + "="*70)
     print("TEST: Hybrid Without Prior Visualization")
     print("="*70)
@@ -478,7 +478,7 @@ def run_all_hybrid_tests():
         test_hybrid_parameter_update,
         test_hybrid_vs_full_graph,
         test_hybrid_fallback,
-        test_hybrid_without_prior_viz,
+        test_hybrid_without_prior_vis,
     ]
 
     passed = 0
@@ -526,7 +526,7 @@ python tests/test_hybrid_control.py
 - [ ] Parameter updates execute without full graph
 - [ ] Hybrid execution is faster than full graph
 - [ ] Complex queries fall back to full graph
-- [ ] Hybrid commands without prior viz are handled gracefully
+- [ ] Hybrid commands without prior vis are handled gracefully
 - [ ] All simple command patterns work:
   - [ ] colormap
   - [ ] percentile

@@ -80,7 +80,7 @@ class ConversationSession:
         return {
             "turn_count": self.turn_count,
             "current_data": self.state.get("current_data_path"),
-            "last_viz": self.state.get("last_viz_params"),
+            "last_vis": self.state.get("last_vis_params"),
             "session_files": self.state.get("session_files", []),
             "error_count": self.state.get("error_count"),
             "message_count": len(self.state["messages"])
@@ -146,10 +146,10 @@ def test_sequential_operations():
     print(f"   Response: {response2[:150]}")
 
     ctx = session.get_context_summary()
-    assert ctx["last_viz"] is not None, "Should have viz params"
+    assert ctx["last_vis"] is not None, "Should have vis params"
     print(f"   ✓ Visualization created")
 
-    # Turn 3: Modify viz
+    # Turn 3: Modify vis
     print("\n🔹 Turn 3: Modify visualization")
     session.send("Change the percentile to 80")
     response3 = session.get_last_response()
@@ -193,7 +193,7 @@ def test_context_preservation():
     session.send("Show probabilistic marching squares at isovalue 0.6")
     ctx4 = session.get_context_summary()
 
-    assert ctx4["last_viz"] is not None, "Should have new viz"
+    assert ctx4["last_vis"] is not None, "Should have new vis"
     print(f"✓ New visualization created")
 
     print("\n✅ Context preservation test passed")
@@ -217,11 +217,11 @@ def test_pronoun_reference():
     session.send("Plot it")  # "it" should refer to the generated data
     ctx2 = session.get_context_summary()
 
-    assert ctx2["last_viz"] is not None, "Should have created viz"
+    assert ctx2["last_vis"] is not None, "Should have created vis"
     print(f"✓ Agent understood 'it' refers to {data_path}")
 
     # Another reference
-    session.send("Make it prettier")  # Should modify last viz
+    session.send("Make it prettier")  # Should modify last vis
     response = session.get_last_response()
 
     print(f"   Response: {response[:150]}")
@@ -252,7 +252,7 @@ def test_error_and_recovery_in_conversation():
     session.send("Actually, just plot the curves I generated earlier")
     ctx3 = session.get_context_summary()
 
-    # Should have reset error count and created viz
+    # Should have reset error count and created vis
     assert ctx3["error_count"] == 0, "Error count should reset after success"
     print(f"   ✓ Recovered: error_count = {ctx3['error_count']}")
 
@@ -260,7 +260,7 @@ def test_error_and_recovery_in_conversation():
     return session
 
 
-def test_multi_viz_same_data():
+def test_multi_vis_same_data():
     """Test: Multiple visualizations from same data."""
     print("\n" + "="*70)
     print("TEST: Multiple Visualizations from Same Data")
@@ -273,21 +273,21 @@ def test_multi_viz_same_data():
     ctx1 = session.get_context_summary()
     data_path = ctx1["current_data"]
 
-    # Viz 1
+    # Vis 1
     session.send("Show functional boxplot")
     ctx2 = session.get_context_summary()
-    viz1 = ctx2["last_viz"]
+    viz1 = ctx2["last_vis"]
 
-    # Viz 2 from same data
+    # Vis 2 from same data
     session.send("Now show curve boxplot with percentile 60")
     ctx3 = session.get_context_summary()
-    viz2 = ctx3["last_viz"]
+    viz2 = ctx3["last_vis"]
 
     assert ctx3["current_data"] == data_path, "Should still use same data"
-    assert viz1 != viz2, "Should have different viz params"
+    assert viz1 != viz2, "Should have different vis params"
 
     print(f"   ✓ Created 2 visualizations from {data_path}")
-    print("\n✅ Multiple viz test passed")
+    print("\n✅ Multiple vis test passed")
 
     return session
 
@@ -303,7 +303,7 @@ def run_all_multiturn_tests():
         test_context_preservation,
         test_pronoun_reference,
         test_error_and_recovery_in_conversation,
-        test_multi_viz_same_data,
+        test_multi_vis_same_data,
     ]
 
     passed = 0
@@ -482,7 +482,7 @@ User: "Perfect, visualize it"
 Agent: "Created functional boxplot visualization."
 ```
 
-### Pattern 3: Multi-Viz Workflow
+### Pattern 3: Multi-Vis Workflow
 ```
 User: "Generate scalar field 40x40"
 Agent: "Generated 40x40 scalar field ensemble."

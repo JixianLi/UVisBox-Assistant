@@ -35,11 +35,11 @@ def test_data_and_viz():
 
     # Check final state
     assert result.get("current_data_path") is not None, "No data path"
-    assert result.get("last_viz_params") is not None, "No viz params"
+    assert result.get("last_vis_params") is not None, "No vis params"
     assert result.get("error_count") == 0, "Errors occurred"
 
     print(f"✅ Data path: {result['current_data_path']}")
-    print(f"✅ Viz params: {result.get('last_viz_params', {}).get('_tool_name', 'N/A')}")
+    print(f"✅ Vis params: {result.get('last_vis_params', {}).get('_tool_name', 'N/A')}")
     print(f"✅ Total messages: {len(result['messages'])}")
     print(f"✅ Error count: {result.get('error_count')}")
     print("\n  ℹ️  Check if matplotlib window appeared!")
@@ -63,10 +63,10 @@ def test_load_and_viz():
     )
 
     assert result.get("error_count") == 0, "Errors occurred"
-    assert result.get("last_viz_params") is not None, "No visualization created"
+    assert result.get("last_vis_params") is not None, "No visualization created"
 
     print(f"✅ Loaded and visualized {result.get('current_data_path')}")
-    print(f"✅ Viz params: {result.get('last_viz_params', {}).get('_tool_name', 'N/A')}")
+    print(f"✅ Vis params: {result.get('last_vis_params', {}).get('_tool_name', 'N/A')}")
     print(f"✅ Total messages: {len(result['messages'])}")
 
 
@@ -81,10 +81,10 @@ def test_curve_boxplot():
     )
 
     assert result.get("current_data_path") is not None, "No data path"
-    assert result.get("last_viz_params") is not None, "No viz params"
+    assert result.get("last_vis_params") is not None, "No vis params"
     assert result.get("error_count") == 0, "Errors occurred"
 
-    viz_tool = result.get('last_viz_params', {}).get('_tool_name', 'N/A')
+    viz_tool = result.get('last_vis_params', {}).get('_tool_name', 'N/A')
     print(f"✅ Data generated and visualized")
     print(f"✅ Visualization tool: {viz_tool}")
     print(f"✅ Total messages: {len(result['messages'])}")
@@ -103,10 +103,10 @@ def test_scalar_field_viz():
     assert result.get("current_data_path") is not None, "No data path"
     assert result.get("error_count") == 0, "Errors occurred"
 
-    # Viz params should be set if visualization succeeded
-    if result.get("last_viz_params"):
+    # Vis params should be set if visualization succeeded
+    if result.get("last_vis_params"):
         print(f"✅ Scalar field visualized")
-        print(f"✅ Viz tool: {result.get('last_viz_params', {}).get('_tool_name', 'N/A')}")
+        print(f"✅ Vis tool: {result.get('last_vis_params', {}).get('_tool_name', 'N/A')}")
     else:
         print(f"✅ Scalar field generated: {result.get('current_data_path')}")
         print(f"   Note: Visualization may not have been created")
@@ -133,8 +133,8 @@ def test_multi_step_workflow():
     print(f"✅ Workflow completed with {len(tool_messages)} tool executions")
     print(f"✅ Data path: {result.get('current_data_path')}")
 
-    if result.get("last_viz_params"):
-        print(f"✅ Visualization created: {result.get('last_viz_params', {}).get('_tool_name', 'N/A')}")
+    if result.get("last_vis_params"):
+        print(f"✅ Visualization created: {result.get('last_vis_params', {}).get('_tool_name', 'N/A')}")
 
     print(f"✅ Total messages: {len(result['messages'])}")
 

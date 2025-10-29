@@ -12,7 +12,7 @@ This document outlines recommended modifications to the original 10-phase plan b
 **Recommendation**: Keep the current plan's architecture (single graph with two tool sets) because:
 - More efficient for MVP - single conversation context
 - Easier state management - one graph state
-- Natural tool-calling flow: User → Model → Data Tool → Model → Viz Tool → End
+- Natural tool-calling flow: User → Model → Data Tool → Model → Vis Tool → End
 - The "two agents" concept is effectively implemented as two specialized tool dispatchers
 
 **If you prefer true two-agent architecture**, we would need:
@@ -29,7 +29,7 @@ This document outlines recommended modifications to the original 10-phase plan b
 |----------|----------|--------|
 | `functional_boxplot` | ✅ Yes | 2D, matplotlib, good starter |
 | `curve_boxplot` | ✅ Yes | 2D, matplotlib, core use case |
-| `probabilistic_marching_squares` | ✅ Yes | 2D, matplotlib, uncertainty viz |
+| `probabilistic_marching_squares` | ✅ Yes | 2D, matplotlib, uncertainty vis |
 | `squid_glyph_2D` | ✅ Yes | 2D, matplotlib, vector uncertainty |
 | `uncertainty_lobes` | ✅ Yes | 2D, matplotlib, vector uncertainty |
 | `uncertainty_tubes_2D` | ✅ Yes | 2D, matplotlib, trajectory uncertainty |
@@ -78,19 +78,19 @@ def clear_session() -> dict:
 - Define GraphState with fields:
   - `messages: List[BaseMessage]`
   - `current_data_path: Optional[str]`
-  - `last_viz_params: Optional[dict]`
+  - `last_vis_params: Optional[dict]`
   - `session_files: List[str]`
 
 #### Phase 4 Additions:
-- Test with all 3-4 selected viz functions
+- Test with all 3-4 selected vis functions
 - Verify matplotlib window doesn't block execution
 
 #### Phase 7 Clarification:
 - Hybrid control commands: `"colormap viridis"`, `"percentile 90"`, `"show median"`
-- These bypass LangGraph and directly update viz params
+- These bypass LangGraph and directly update vis params
 
 #### Phase 9 Additions:
-- Test prompts for each viz function
+- Test prompts for each vis function
 - Test error cases: missing files, wrong data shapes, invalid parameters
 
 ### 5. Project Structure
@@ -163,7 +163,7 @@ echo $GEMINI_API_KEY
 
 Please confirm:
 1. **Agent Architecture**: Stick with single-graph + two-tool-sets approach? (Recommended)
-2. **Viz Functions**: Start with which 3-4 functions for MVP?
+2. **Vis Functions**: Start with which 3-4 functions for MVP?
 3. **LLM Provider**: Confirm Google Gemini API (gemini-2.0-flash)
 4. **Data Format**: Stick with .npy for intermediate storage? (Could also use pickle or JSON for metadata)
 

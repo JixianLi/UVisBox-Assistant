@@ -3,7 +3,7 @@ End-to-end happy path tests for all visualization types.
 
 Each test follows the pattern:
 1. User provides natural language prompt
-2. Graph executes (data tool → viz tool)
+2. Graph executes (data tool → vis tool)
 3. Matplotlib window appears
 4. Final state is correct
 
@@ -31,9 +31,9 @@ def print_state_summary(state: dict):
     print(f"\n📊 Final State:")
     print(f"  Messages: {len(state['messages'])}")
     print(f"  Data path: {state.get('current_data_path')}")
-    viz_params = state.get('last_viz_params')
-    if viz_params:
-        print(f"  Viz tool: {viz_params.get('_tool_name', 'N/A')}")
+    vis_params = state.get('last_vis_params')
+    if vis_params:
+        print(f"  Vis tool: {vis_params.get('_tool_name', 'N/A')}")
     print(f"  Error count: {state.get('error_count')}")
     print(f"  Session files: {len(state.get('session_files', []))}")
 
@@ -55,8 +55,8 @@ def test_functional_boxplot():
     # Assertions
     assert result.get("error_count") == 0, "❌ Errors occurred"
     assert result.get("current_data_path") is not None, "❌ No data generated"
-    assert result.get("last_viz_params") is not None, "❌ No visualization created"
-    assert "plot_functional_boxplot" in str(result.get("last_viz_params")), "❌ Wrong viz type"
+    assert result.get("last_vis_params") is not None, "❌ No visualization created"
+    assert "plot_functional_boxplot" in str(result.get("last_vis_params")), "❌ Wrong vis type"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -79,7 +79,7 @@ def test_functional_boxplot_with_csv():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -96,7 +96,7 @@ def test_curve_boxplot():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -113,8 +113,8 @@ def test_probabilistic_marching_squares():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
-    assert "plot_probabilistic_marching_squares" in str(result.get("last_viz_params")), "❌ Wrong viz"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
+    assert "plot_probabilistic_marching_squares" in str(result.get("last_vis_params")), "❌ Wrong vis"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -140,7 +140,7 @@ def test_multi_step_workflow():
 
     result2 = graph_app.invoke(result1)
 
-    assert result2.get("last_viz_params") is not None, "❌ No visualization"
+    assert result2.get("last_vis_params") is not None, "❌ No visualization"
     print(f"  ✓ Visualization created")
 
     print("✅ Multi-step test passed!")
@@ -158,11 +158,11 @@ def test_plot_all_curves():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
 
     # Check if plot_all_curves was used (LLM should understand the request)
-    viz_params = result.get("last_viz_params", {})
-    print(f"  Viz params: {viz_params}")
+    vis_params = result.get("last_vis_params", {})
+    print(f"  Vis params: {vis_params}")
 
     print("✅ Test passed!")
     print_state_summary(result)

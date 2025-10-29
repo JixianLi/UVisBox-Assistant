@@ -359,7 +359,7 @@ Update vis_tools.py to use VisManager:
 ```python
 from vis_manager import vis_manager
 
-# In each viz tool, after plt.show(block=False):
+# In each vis tool, after plt.show(block=False):
 vis_manager.show_plot(fig)
 ```
 
@@ -488,7 +488,7 @@ def test_session_stats():
 
     assert stats["turns"] == 3
     assert stats["current_data"] is True
-    assert stats["current_viz"] is True
+    assert stats["current_vis"] is True
 
     print("\n✅ Session stats test passed")
 

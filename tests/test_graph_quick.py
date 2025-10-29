@@ -36,11 +36,11 @@ def test_data_and_viz():
     result = run_graph("Generate 15 curves and show a functional boxplot")
 
     assert result.get("current_data_path") is not None
-    assert result.get("last_viz_params") is not None
+    assert result.get("last_vis_params") is not None
     assert result.get("error_count") == 0
 
     print(f"✅ Data generated: {result['current_data_path']}")
-    print(f"✅ Visualization: {result.get('last_viz_params', {}).get('_tool_name', 'N/A')}")
+    print(f"✅ Visualization: {result.get('last_vis_params', {}).get('_tool_name', 'N/A')}")
     print(f"✅ Messages: {len(result['messages'])}")
     print(f"✅ Matplotlib window should have appeared")
 

@@ -247,12 +247,12 @@ model_with_tools = model.bind_tools(DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS)
 ```
 
 ### Visualization Tool Return Pattern
-Include `_viz_params` in return dict for hybrid control:
+Include `_vis_params` in return dict for hybrid control:
 ```python
 return {
     "status": "success",
     "message": "...",
-    "_viz_params": {
+    "_vis_params": {
         "_tool_name": "plot_functional_boxplot",
         "data_path": data_path,
         "percentile": percentile,
@@ -312,10 +312,10 @@ All expect numpy arrays and return matplotlib axes.
 - Range changed from [0,1] to [0,100] for percentiles
 
 **File Naming Convention**:
-- All `viz_tools.py` → `vis_tools.py`
-- All `VIZ_TOOLS` → `VIS_TOOLS`
-- All `VIZ_TOOL_SCHEMAS` → `VIS_TOOL_SCHEMAS`
-- All `DEFAULT_VIZ_PARAMS` → `DEFAULT_VIS_PARAMS`
+- All `vis_tools.py` → `vis_tools.py`
+- All `VIS_TOOLS` → `VIS_TOOLS`
+- All `VIS_TOOL_SCHEMAS` → `VIS_TOOL_SCHEMAS`
+- All `DEFAULT_VIS_PARAMS` → `DEFAULT_VIS_PARAMS`
 
 **Model Prompt** (UPDATED):
 - More directive: "IMMEDIATELY use visualization tools" without asking for confirmation
@@ -387,12 +387,12 @@ from uvisbox.Modules import uncertainty_lobes
 ```
 
 ### Visualization Return Format
-All vis tools MUST include `_viz_params` for hybrid control (Phase 7):
+All vis tools MUST include `_vis_params` for hybrid control (Phase 7):
 ```python
 return {
     "status": "success",
     "message": "Displayed functional boxplot for 30 curves",
-    "_viz_params": {
+    "_vis_params": {
         "_tool_name": "plot_functional_boxplot",
         "data_path": data_path,
         "percentile": percentile,
@@ -479,7 +479,7 @@ class ConversationSession:
         """Get most recent assistant message."""
 
     def get_context_summary(self) -> dict:
-        """Return turn_count, current_data, last_viz, etc."""
+        """Return turn_count, current_data, last_vis, etc."""
 
     def reset(self):
         """Clear state and start fresh."""
@@ -488,7 +488,7 @@ class ConversationSession:
 **State Persistence Across Turns**:
 - Messages accumulate in `state["messages"]`
 - `current_data_path` preserved until new data generated
-- `last_viz_params` updated with each visualization
+- `last_vis_params` updated with each visualization
 - `error_count` tracked and reset on success
 - `session_files` accumulates all created files
 
@@ -509,7 +509,7 @@ Agent: [creates data, saves to .npy]
 User: "Plot them"  ← Implicit reference to turn 1 data
 Agent: [creates functional boxplot from current_data_path]
 
-User: "Change percentile to 90"  ← Implicit reference to last viz
+User: "Change percentile to 90"  ← Implicit reference to last vis
 Agent: [re-creates plot with new percentile]
 ```
 
@@ -521,7 +521,7 @@ Agent: [creates data]
 User: "Plot it"  ← "it" = current_data_path
 Agent: [creates visualization]
 
-User: "Make it prettier"  ← "it" = last_viz_params
+User: "Make it prettier"  ← "it" = last_vis_params
 Agent: [adjusts visualization]
 ```
 
@@ -531,10 +531,10 @@ User: "Generate 40 curves"
 Agent: [creates data]
 
 User: "Show functional boxplot"
-Agent: [creates viz 1]
+Agent: [creates vis 1]
 
-User: "Now show curve boxplot"  ← Same data, different viz
-Agent: [creates viz 2, current_data_path unchanged]
+User: "Now show curve boxplot"  ← Same data, different vis
+Agent: [creates vis 2, current_data_path unchanged]
 ```
 
 **Pattern 4: Error Recovery**
@@ -572,7 +572,7 @@ You: /context
 📊 Context:
   turn_count: 2
   current_data: temp/_temp_ensemble_curves.npy
-  last_viz: {'_tool_name': 'plot_functional_boxplot', ...}
+  last_vis: {'_tool_name': 'plot_functional_boxplot', ...}
   error_count: 0
   message_count: 4
 

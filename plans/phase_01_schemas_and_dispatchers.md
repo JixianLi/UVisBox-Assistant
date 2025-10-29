@@ -900,8 +900,8 @@ python create_test_data.py
 - [x] `config.py` imports without errors
 - [x] All data tools return proper JSON-formatted responses
 - [x] All data tools have corresponding schemas in `DATA_TOOL_SCHEMAS`
-- [x] All viz tools accept .npy file paths and show matplotlib windows
-- [x] All viz tools have corresponding schemas in `VIS_TOOL_SCHEMAS`
+- [x] All vis tools accept .npy file paths and show matplotlib windows
+- [x] All vis tools have corresponding schemas in `VIS_TOOL_SCHEMAS`
 - [x] Test data created in `test_data/`
 - [x] Manual test: generate curves → plot functional boxplot (window appears)
 
@@ -909,7 +909,7 @@ python create_test_data.py
 
 **Implementation Notes**:
 - UVisBox import requires full module path: `from uvisbox.Modules.FunctionalBoxplot.functional_boxplot import functional_boxplot`
-- All visualization tools include `_viz_params` in return dict for Phase 7 hybrid control
+- All visualization tools include `_vis_params` in return dict for Phase 7 hybrid control
 - Test suite created: `test_phase1.py` validates all components
 - Total implementation: 713 lines across config.py (34), data_tools.py (278), vis_tools.py (401)
 
@@ -917,7 +917,7 @@ python create_test_data.py
 
 After Phase 1, you should have:
 - Working data tools that save to `.npy` files
-- Working viz tools that read `.npy` and display matplotlib figures
+- Working vis tools that read `.npy` and display matplotlib figures
 - Tool schemas ready for Gemini function calling
 - Test data for development
 - Configuration system in place

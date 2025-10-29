@@ -47,7 +47,7 @@ python run_tests_with_delays.py
 # Routing changes? (0 API calls - instant)
 python test_routing.py
 
-# Data/viz tools changes? (0 API calls - instant)
+# Data/vis tools changes? (0 API calls - instant)
 python test_phase1.py
 
 # Graph/nodes changes? (6-10 API calls - wait 60s between runs)
@@ -112,10 +112,10 @@ Test 1: Data only
   → Model responds → End (3)
   Total: 3 calls
 
-Test 2: Data + viz
+Test 2: Data + vis
   → User → Model (4)
   → Model → Data tool → Model (5)
-  → Model → Viz tool → Model (6)
+  → Model → Vis tool → Model (6)
   → Model responds (7)
   Total: 4 calls (7 cumulative)
 

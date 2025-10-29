@@ -29,7 +29,7 @@ def route_after_model(state: GraphState) -> Literal["data_tool", "viz_tool", "en
     Logic:
     - If the last message contains tool_calls:
       - Route to "data_tool" if it's a data tool
-      - Route to "viz_tool" if it's a viz tool
+      - Route to "viz_tool" if it's a vis tool
     - Otherwise, route to "end" (conversation response without tool call)
 
     Args:
@@ -54,7 +54,7 @@ def route_after_model(state: GraphState) -> Literal["data_tool", "viz_tool", "en
 
     if tool_type == "data":
         return "data_tool"
-    elif tool_type == "viz":
+    elif tool_type == "vis":
         return "viz_tool"
     else:
         # Unknown tool - end and let user see the error
@@ -311,7 +311,7 @@ try:
 
 except Exception as e:
     print(f"Could not generate graph visualization: {e}")
-    print("Try: pip install pygraphviz or pip install graphviz")
+    print("Try: pip install pygraphvis or pip install graphvis")
 
 # Also print mermaid text
 print("\nMermaid diagram:")
@@ -361,11 +361,11 @@ def test_data_and_viz():
 
     # Check final state
     assert result.get("current_data_path") is not None, "No data path"
-    assert result.get("last_viz_params") is not None, "No viz params"
+    assert result.get("last_vis_params") is not None, "No vis params"
     assert result.get("error_count") == 0, "Errors occurred"
 
     print(f"✓ Data path: {result['current_data_path']}")
-    print(f"✓ Viz params: {result['last_viz_params']}")
+    print(f"✓ Vis params: {result['last_vis_params']}")
     print(f"✓ Total messages: {len(result['messages'])}")
     print("\n  Check if matplotlib window appeared!")
 
@@ -389,7 +389,7 @@ def test_load_and_viz():
     )
 
     assert result.get("error_count") == 0, "Errors occurred"
-    assert result.get("last_viz_params") is not None, "No visualization created"
+    assert result.get("last_vis_params") is not None, "No visualization created"
 
     print(f"✓ Loaded and visualized {result.get('current_data_path')}")
 
@@ -414,15 +414,15 @@ python test_graph_integration.py
 
 ## Validation Checklist
 
-- [x] `routing.py` correctly identifies data tools vs viz tools
+- [x] `routing.py` correctly identifies data tools vs vis tools
 - [x] `route_after_model` returns correct next node based on tool calls
 - [x] `route_after_tool` implements circuit breaker for error loops
 - [x] `graph.py` creates and compiles the StateGraph without errors
 - [x] Graph visualization shows correct node connections (Graph object accessible)
 - [x] `run_graph` executes full workflow and returns final state
 - [x] Integration test: data-only request works
-- [x] Integration test: data + viz request works
-- [x] Integration test: load file + viz request works
+- [x] Integration test: data + vis request works
+- [x] Integration test: load file + vis request works
 - [x] Matplotlib windows appear and don't block execution
 
 **Phase 3 Status**: ✅ COMPLETE (2025-10-26)
@@ -473,7 +473,7 @@ END
 After Phase 3, you should have:
 - Complete LangGraph workflow assembled and compiled
 - Conditional routing logic working correctly
-- Integration tests passing for data-only and data+viz scenarios
+- Integration tests passing for data-only and data+vis scenarios
 - Graph visualization showing the workflow structure
 
 ## Next Phase

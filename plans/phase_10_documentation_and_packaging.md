@@ -261,7 +261,7 @@ ChatUVisBox uses a **hybrid control architecture**:
 
 **LangGraph Workflow**:
 ```
-User Input → Model → [Data Tool / Viz Tool] → Model → Response
+User Input → Model → [Data Tool / Vis Tool] → Model → Response
               ↑                                       ↓
               └───────── Loop for multi-step ────────┘
 ```
@@ -633,7 +633,7 @@ Load CSV → Inspect shape → Visualize → Adjust → Export/save
 ### Workflow 3: Comparison
 
 ```
-Load data → Viz 1 (functional) → Viz 2 (curve) → Compare windows
+Load data → Vis 1 (functional) → Vis 2 (curve) → Compare windows
 ```
 
 ## Troubleshooting
@@ -749,7 +749,7 @@ Create functional boxplot visualization with multiple percentile bands.
 - `colors` (list): Colors for each band (optional)
 - `plot_all_curves` (bool): Plot all individual curves (default: False)
 
-**Returns**: Dict with status, message, _viz_params
+**Returns**: Dict with status, message, _vis_params
 
 ### plot_curve_boxplot(data_path, percentiles=None, colors=None)
 
@@ -760,7 +760,7 @@ Create curve boxplot for ensemble curves.
 - `percentiles` (list): List of percentiles for bands (default: [25, 50, 90, 100])
 - `colors` (list): Colors for each band (optional)
 
-**Returns**: Dict with status, message, _viz_params
+**Returns**: Dict with status, message, _vis_params
 
 ### plot_probabilistic_marching_squares(data_path, isovalue=0.5, colormap="viridis")
 
@@ -771,7 +771,7 @@ Visualize probabilistic isocontours from scalar field ensemble.
 - `isovalue` (float): Isovalue for contour extraction
 - `colormap` (str): Matplotlib colormap name
 
-**Returns**: Dict with status, message, _viz_params
+**Returns**: Dict with status, message, _vis_params
 
 ### plot_contour_boxplot(data_path, isovalue, percentiles=None, colormap="viridis", show_median=True, show_outliers=True)
 
@@ -785,7 +785,7 @@ Create contour boxplot from scalar field ensemble.
 - `show_median` (bool): Show median contour in red
 - `show_outliers` (bool): Show outlier contours in gray
 
-**Returns**: Dict with status, message, _viz_params
+**Returns**: Dict with status, message, _vis_params
 
 ### plot_uncertainty_lobes(vectors_path, positions_path, percentile1=90, percentile2=50, scale=0.2)
 
@@ -798,7 +798,7 @@ Create uncertainty lobe glyphs for vector ensembles.
 - `percentile2` (float): Second percentile (0-100), should be < percentile1
 - `scale` (float): Scale factor for glyph size
 
-**Returns**: Dict with status, message, _viz_params
+**Returns**: Dict with status, message, _vis_params
 
 ## State Management
 

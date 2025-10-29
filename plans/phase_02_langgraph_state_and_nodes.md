@@ -29,7 +29,7 @@ class GraphState(TypedDict):
     Attributes:
         messages: List of conversation messages (user, assistant, tool messages)
         current_data_path: Path to the most recently created/loaded .npy data file
-        last_viz_params: Parameters used in the last visualization call (for hybrid control)
+        last_vis_params: Parameters used in the last visualization call (for hybrid control)
         session_files: List of temporary files created during this session
         error_count: Number of consecutive errors (for circuit breaking)
     """
@@ -38,7 +38,7 @@ class GraphState(TypedDict):
 
     # Single-value state fields (overwritten, not appended)
     current_data_path: Optional[str]
-    last_viz_params: Optional[dict]
+    last_vis_params: Optional[dict]
     session_files: List[str]
     error_count: int
 
@@ -58,7 +58,7 @@ def create_initial_state(user_message: str) -> GraphState:
     return GraphState(
         messages=[HumanMessage(content=user_message)],
         current_data_path=None,
-        last_viz_params=None,
+        last_vis_params=None,
         session_files=[],
         error_count=0
     )
@@ -78,15 +78,15 @@ def update_state_with_data(state: GraphState, data_path: str) -> dict:
     }
 
 
-def update_state_with_viz(state: GraphState, viz_params: dict) -> dict:
+def update_state_with_vis(state: GraphState, vis_params: dict) -> dict:
     """
-    Update state after successful viz tool execution.
+    Update state after successful vis tool execution.
 
     Returns:
         Dict of updates to merge into state
     """
     return {
-        "last_viz_params": viz_params,
+        "last_vis_params": vis_params,
         "error_count": 0  # Reset error count on success
     }
 
@@ -244,7 +244,7 @@ from typing import Dict
 from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 import os
 
-from state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
+from state import GraphState, update_state_with_data, update_state_with_vis, increment_error_count
 from model import create_model_with_tools, prepare_messages_for_model
 from data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
 from vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
@@ -379,7 +379,7 @@ def call_vis_tool(state: GraphState) -> Dict:
         if tool_name not in VIS_TOOLS:
             result = {
                 "status": "error",
-                "message": f"Unknown viz tool: {tool_name}"
+                "message": f"Unknown vis tool: {tool_name}"
             }
         else:
             tool_func = VIS_TOOLS[tool_name]
@@ -397,7 +397,7 @@ def call_vis_tool(state: GraphState) -> Dict:
         state_updates = {"messages": [tool_message]}
 
         if result.get("status") == "success":
-            state_updates.update(update_state_with_viz(state, tool_args))
+            state_updates.update(update_state_with_vis(state, tool_args))
         else:
             state_updates.update(increment_error_count(state))
 
@@ -458,7 +458,7 @@ def is_data_tool(tool_name: str) -> bool:
 
 
 def is_vis_tool(tool_name: str) -> bool:
-    """Check if a tool name corresponds to a viz tool."""
+    """Check if a tool name corresponds to a vis tool."""
     from vis_tools import VIS_TOOLS
     return tool_name in VIS_TOOLS
 
@@ -468,12 +468,12 @@ def get_tool_type(tool_name: str) -> Optional[str]:
     Determine the type of tool.
 
     Returns:
-        "data", "viz", or None if unknown
+        "data", "vis", or None if unknown
     """
     if is_data_tool(tool_name):
         return "data"
     elif is_vis_tool(tool_name):
-        return "viz"
+        return "vis"
     return None
 
 
@@ -528,7 +528,7 @@ print(get_available_files())
 - [x] System prompt includes file list when provided
 - [x] `nodes.py` `call_model` node returns AIMessage with tool_calls
 - [x] `nodes.py` `call_data_tool` executes data tools and updates state
-- [x] `nodes.py` `call_vis_tool` executes viz tools and updates state
+- [x] `nodes.py` `call_vis_tool` executes vis tools and updates state
 - [x] Error handling in tool nodes catches exceptions and returns error messages
 - [x] `utils.py` correctly identifies tool types
 - [x] All modules import without errors
@@ -549,8 +549,8 @@ python test_utils.py
 ```
 
 Expected outcomes:
-- State updates correctly after data/viz operations
-- Model generates tool calls when prompted for data/viz tasks
+- State updates correctly after data/vis operations
+- Model generates tool calls when prompted for data/vis tasks
 - Nodes execute tools and return properly formatted messages
 - Errors are caught and formatted as tool messages
 

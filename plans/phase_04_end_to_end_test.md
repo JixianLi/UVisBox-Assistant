@@ -8,7 +8,7 @@
 
 - Phase 3 completed (complete graph working)
 - Test data files exist in `test_data/`
-- All 4 viz tools implemented
+- All 4 vis tools implemented
 
 ## Tasks
 
@@ -22,7 +22,7 @@ End-to-end happy path tests for all visualization types.
 
 Each test follows the pattern:
 1. User provides natural language prompt
-2. Graph executes (data tool → viz tool)
+2. Graph executes (data tool → vis tool)
 3. Matplotlib window appears
 4. Final state is correct
 """
@@ -45,7 +45,7 @@ def print_state_summary(state: dict):
     print(f"\n📊 Final State:")
     print(f"  Messages: {len(state['messages'])}")
     print(f"  Data path: {state.get('current_data_path')}")
-    print(f"  Viz params: {state.get('last_viz_params')}")
+    print(f"  Vis params: {state.get('last_vis_params')}")
     print(f"  Error count: {state.get('error_count')}")
     print(f"  Session files: {len(state.get('session_files', []))}")
 
@@ -67,8 +67,8 @@ def test_functional_boxplot():
     # Assertions
     assert result.get("error_count") == 0, "❌ Errors occurred"
     assert result.get("current_data_path") is not None, "❌ No data generated"
-    assert result.get("last_viz_params") is not None, "❌ No visualization created"
-    assert "plot_functional_boxplot" in str(result.get("last_viz_params")), "❌ Wrong viz type"
+    assert result.get("last_vis_params") is not None, "❌ No visualization created"
+    assert "plot_functional_boxplot" in str(result.get("last_vis_params")), "❌ Wrong vis type"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -91,7 +91,7 @@ def test_functional_boxplot_with_csv():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -108,7 +108,7 @@ def test_curve_boxplot():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -125,8 +125,8 @@ def test_probabilistic_marching_squares():
     result = run_graph(prompt)
 
     assert result.get("error_count") == 0, "❌ Errors occurred"
-    assert result.get("last_viz_params") is not None, "❌ No visualization"
-    assert "plot_probabilistic_marching_squares" in str(result.get("last_viz_params")), "❌ Wrong viz"
+    assert result.get("last_vis_params") is not None, "❌ No visualization"
+    assert "plot_probabilistic_marching_squares" in str(result.get("last_vis_params")), "❌ Wrong vis"
 
     print("✅ Test passed!")
     print_state_summary(result)
@@ -154,7 +154,7 @@ def test_multi_step_workflow():
     from graph import graph_app
     result2 = graph_app.invoke(result1)
 
-    assert result2.get("last_viz_params") is not None, "❌ No visualization"
+    assert result2.get("last_vis_params") is not None, "❌ No visualization"
     print(f"  ✓ Visualization created")
 
     print("✅ Multi-step test passed!")
@@ -163,7 +163,7 @@ def test_multi_step_workflow():
     return result2
 
 
-def test_all_viz_params():
+def test_all_vis_params():
     """Test 6: Test various parameter configurations"""
     print_test_header("Visualization Parameters")
 
@@ -192,7 +192,7 @@ def run_all_tests():
         test_curve_boxplot,
         test_probabilistic_marching_squares,
         test_multi_step_workflow,
-        test_all_viz_params,
+        test_all_vis_params,
     ]
 
     results = []
@@ -283,29 +283,29 @@ def test_non_blocking():
     plt.close('all')
 
 
-def test_multiple_viz_calls():
+def test_multiple_vis_calls():
     """Simulate multiple visualization calls like in our pipeline."""
     from vis_tools import plot_functional_boxplot
     from data_tools import generate_ensemble_curves
 
-    print("\nTesting multiple viz tool calls...")
+    print("\nTesting multiple vis tool calls...")
 
     # Generate data
     result1 = generate_ensemble_curves(n_curves=20, n_points=50)
     print(f"  Generated data: {result1['output_path']}")
 
-    # First viz
-    viz1 = plot_functional_boxplot(result1['output_path'])
-    print(f"  ✓ First viz: {viz1['status']}")
+    # First vis
+    vis1 = plot_functional_boxplot(result1['output_path'])
+    print(f"  ✓ First vis: {vis1['status']}")
 
     time.sleep(1)
 
     # Generate more data
     result2 = generate_ensemble_curves(n_curves=15, n_points=60)
 
-    # Second viz
-    viz2 = plot_functional_boxplot(result2['output_path'], percentile=80.0)
-    print(f"  ✓ Second viz: {viz2['status']}")
+    # Second vis
+    vis2 = plot_functional_boxplot(result2['output_path'], percentile=80.0)
+    print(f"  ✓ Second vis: {vis2['status']}")
 
     print("\n  Both plots should be visible")
     input("\nPress Enter to close...")
@@ -314,7 +314,7 @@ def test_multiple_viz_calls():
 
 if __name__ == "__main__":
     test_non_blocking()
-    test_multiple_viz_calls()
+    test_multiple_vis_calls()
     print("\n✅ Matplotlib behavior tests complete!")
 ```
 
@@ -368,7 +368,7 @@ def run_test(prompt: str, stream: bool = False):
         # Print result
         print(f"\n✅ Complete")
         print(f"  Data path: {result.get('current_data_path')}")
-        print(f"  Viz params: {result.get('last_viz_params')}")
+        print(f"  Vis params: {result.get('last_vis_params')}")
         print(f"  Errors: {result.get('error_count')}")
 
         # Print final message
@@ -444,8 +444,8 @@ For each test:
 1. **User prompt** is sent to graph
 2. **Model node** decides to call data tool
 3. **Data tool node** executes and returns success
-4. **Model node** (again) decides to call viz tool
-5. **Viz tool node** executes and matplotlib window appears
+4. **Model node** (again) decides to call vis tool
+5. **Vis tool node** executes and matplotlib window appears
 6. **Model node** (again) responds to user with confirmation
 7. **END** state reached
 8. Terminal is still interactive (non-blocking)
@@ -475,7 +475,7 @@ For each test:
 ## Output
 
 After Phase 4, you should have:
-- Comprehensive test suite covering all viz types
+- Comprehensive test suite covering all vis types
 - Verified end-to-end "happy path" for all scenarios
 - Matplotlib windows appearing correctly without blocking
 - Interactive test tool for manual verification
@@ -494,7 +494,7 @@ After Phase 4, you should have:
 
 ✅ **test_matplotlib_behavior.py** (145 lines)
 - 0 API calls - safe to run anytime
-- Tests non-blocking behavior, multiple viz calls, window persistence
+- Tests non-blocking behavior, multiple vis calls, window persistence
 - Verifies `plt.show(block=False)` works correctly
 
 ✅ **interactive_test.py** (135 lines)

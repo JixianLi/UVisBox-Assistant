@@ -12,13 +12,13 @@ These plans provide step-by-step guidance for building a natural language interf
 
 | Phase | Document | Focus | Duration | Status |
 |-------|----------|-------|----------|--------|
-| **Phase 1** ✅ | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/viz tools and function schemas | 1-2 days | Complete (2025-10-26) |
+| **Phase 1** ✅ | [Schemas & Dispatchers](phase_01_schemas_and_dispatchers.md) | Data/vis tools and function schemas | 1-2 days | Complete (2025-10-26) |
 | **Phase 2** ✅ | [LangGraph State & Nodes](phase_02_langgraph_state_and_nodes.md) | State definition and core nodes | 1 day | Complete (2025-10-26) |
 | **Phase 3** ✅ | [Graph Wiring & Routing](phase_03_graph_wiring_and_routing.md) | Complete graph assembly | 0.5-1 day | Complete (2025-10-26) |
 | **Phase 4** ✅ | [End-to-End Test](phase_04_end_to_end_test.md) | Happy path validation | 0.5 day | Complete (2025-10-27) |
 | **Phase 4.5** ✅ | [Codebase Restructure](phase_04.5_codebase_restructure.md) | Professional package structure | 1-2 days | Complete (2025-10-27) |
 
-**Milestone 1 Output**: ✅ Working data → viz pipeline with professional Python package structure
+**Milestone 1 Output**: ✅ Working data → vis pipeline with professional Python package structure
 
 ---
 
@@ -189,7 +189,7 @@ chatuvisbox/
 ├── routing.py                 # Routing logic (Phase 3)
 ├── model.py                   # LLM setup (Phase 2)
 ├── data_tools.py              # Data tools (Phase 1)
-├── vis_tools.py               # Viz tools (Phase 1)
+├── vis_tools.py               # Vis tools (Phase 1)
 ├── hybrid_control.py          # Hybrid control (Phase 7)
 ├── command_parser.py          # Command parsing (Phase 7)
 ├── conversation.py            # Session management (Phase 6)

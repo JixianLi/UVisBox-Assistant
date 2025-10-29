@@ -11,7 +11,7 @@ class GraphState(TypedDict):
     Attributes:
         messages: List of conversation messages (user, assistant, tool messages)
         current_data_path: Path to the most recently created/loaded .npy data file
-        last_viz_params: Parameters used in the last visualization call (for hybrid control)
+        last_vis_params: Parameters used in the last visualization call (for hybrid control)
         session_files: List of temporary files created during this session
         error_count: Number of consecutive errors (for circuit breaking)
     """
@@ -20,7 +20,7 @@ class GraphState(TypedDict):
 
     # Single-value state fields (overwritten, not appended)
     current_data_path: Optional[str]
-    last_viz_params: Optional[dict]
+    last_vis_params: Optional[dict]
     session_files: List[str]
     error_count: int
 
@@ -40,7 +40,7 @@ def create_initial_state(user_message: str) -> GraphState:
     return GraphState(
         messages=[HumanMessage(content=user_message)],
         current_data_path=None,
-        last_viz_params=None,
+        last_vis_params=None,
         session_files=[],
         error_count=0
     )
@@ -68,7 +68,7 @@ def update_state_with_vis(state: GraphState, vis_params: dict) -> dict:
         Dict of updates to merge into state
     """
     return {
-        "last_viz_params": vis_params,
+        "last_vis_params": vis_params,
         "error_count": 0  # Reset error count on success
     }
 
