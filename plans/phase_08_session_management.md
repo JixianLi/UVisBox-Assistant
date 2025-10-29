@@ -13,7 +13,7 @@
 
 ### Task 8.1: Implement Session Cleanup Tool
 
-**File**: Update `data_tools.py`
+**File**: Update `src/chatuvisbox/data_tools.py`
 
 ```python
 # Add to data_tools.py
@@ -96,7 +96,7 @@ print(list(config.TEMP_DIR.glob("_temp_*")))
 
 ### Task 8.2: Enhance Conversation Session Management
 
-**File**: Update `conversation.py`
+**File**: Update `src/chatuvisbox/conversation.py`
 
 ```python
 # Add to ConversationSession class:
@@ -129,7 +129,7 @@ class ConversationSession:
             "messages": ctx["message_count"],
             "files_created": len(ctx.get("session_files", [])),
             "current_data": ctx.get("current_data") is not None,
-            "current_viz": ctx.get("last_viz") is not None,
+            "current_vis": ctx.get("last_vis") is not None,
         }
 ```
 
@@ -299,7 +299,7 @@ if __name__ == "__main__":
 
 ### Task 8.4: Matplotlib Window Management
 
-**File**: `vis_manager.py`
+**File**: `src/chatuvisbox/vis_manager.py`
 
 ```python
 """Matplotlib window management utilities."""
@@ -392,7 +392,7 @@ try:
 
 ### Task 8.6: Test Session Management
 
-**File**: `test_session_management.py`
+**File**: `tests/test_session_management.py`
 
 ```python
 """Test session management features."""

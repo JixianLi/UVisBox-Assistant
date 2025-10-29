@@ -14,7 +14,7 @@
 
 ### Task 9.1: Comprehensive Test Suite
 
-**File**: `test_comprehensive.py`
+**File**: `tests/test_comprehensive.py`
 
 ```python
 """
@@ -90,8 +90,8 @@ class TestVizTools:
         session.send("Generate 30 curves and plot functional boxplot")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
-        assert "plot_functional_boxplot" in str(ctx["last_viz"])
+        assert ctx["last_vis"] is not None
+        assert "plot_functional_boxplot" in str(ctx["last_vis"])
 
     def test_curve_boxplot(self):
         """Test curve boxplot."""
@@ -99,7 +99,7 @@ class TestVizTools:
         session.send("Generate curves and show curve boxplot")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
+        assert ctx["last_vis"] is not None
 
     def test_probabilistic_marching_squares(self):
         """Test probabilistic marching squares."""
@@ -107,7 +107,7 @@ class TestVizTools:
         session.send("Generate scalar field and visualize with probabilistic marching squares")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
+        assert ctx["last_vis"] is not None
 
     def test_contour_boxplot(self):
         """Test contour boxplot."""
@@ -115,8 +115,8 @@ class TestVizTools:
         session.send("Generate scalar field and create contour boxplot with isovalue 0.5")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
-        assert "plot_contour_boxplot" in str(ctx["last_viz"])
+        assert ctx["last_vis"] is not None
+        assert "plot_contour_boxplot" in str(ctx["last_vis"])
 
     def test_viz_with_parameters(self):
         """Test visualization with specific parameters."""
@@ -124,14 +124,14 @@ class TestVizTools:
         session.send("Generate curves and plot functional boxplot with percentile 85 and hide median")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
+        assert ctx["last_vis"] is not None
 
 
 class TestConversationalFeatures:
     """Test multi-turn conversations."""
 
     def test_sequential_workflow(self):
-        """Test sequential data → viz workflow."""
+        """Test sequential data → vis workflow."""
         session = ConversationSession()
 
         session.send("Generate 20 curves")
@@ -142,7 +142,7 @@ class TestConversationalFeatures:
         ctx2 = session.get_context_summary()
 
         assert ctx2["current_data"] == data_path
-        assert ctx2["last_viz"] is not None
+        assert ctx2["last_vis"] is not None
 
     def test_context_preservation(self):
         """Test context preserved across multiple turns."""
@@ -164,7 +164,7 @@ class TestConversationalFeatures:
         session.send("Visualize it")
 
         ctx = session.get_context_summary()
-        assert ctx["last_viz"] is not None
+        assert ctx["last_vis"] is not None
 
 
 class TestHybridControl:
@@ -197,7 +197,7 @@ class TestHybridControl:
         session.send("colormap viridis")
 
         response = session.get_last_response()
-        # Should explain no viz to update
+        # Should explain no vis to update
         assert "no" in response.lower() or "first" in response.lower()
 
 
@@ -341,7 +341,7 @@ python test_comprehensive.py
 
 ### Task 9.2: User Acceptance Test Scenarios
 
-**File**: `user_acceptance_tests.md`
+**File**: `tests/user_acceptance_tests.md`
 
 ```markdown
 # User Acceptance Test Scenarios
@@ -459,7 +459,7 @@ Test these scenarios manually in the REPL to verify user experience.
 
 ### Task 9.3: Performance Testing
 
-**File**: `test_performance.py`
+**File**: `tests/test_performance.py`
 
 ```python
 """Performance testing for ChatUVisBox."""
@@ -588,7 +588,7 @@ python test_performance.py
 
 ### Task 9.4: Create Master Test Runner
 
-**File**: `run_all_tests.py`
+**File**: `tests/run_all_tests.py`
 
 ```python
 """Master test runner for all test suites."""

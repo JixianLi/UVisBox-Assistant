@@ -462,7 +462,7 @@ You: Change colormap     # Updates the current plot
 
 The system tracks:
 - **current_data_path**: Most recent data file
-- **last_viz_params**: Last visualization parameters
+- **last_vis_params**: Last visualization parameters
 - **session_files**: All files created this session
 
 ### Hybrid Control
@@ -807,7 +807,7 @@ Create uncertainty lobe glyphs for vector ensembles.
 **Fields**:
 - `messages`: Conversation history
 - `current_data_path`: Most recent data file
-- `last_viz_params`: Last visualization parameters
+- `last_vis_params`: Last visualization parameters
 - `session_files`: List of session files
 - `error_count`: Consecutive errors
 

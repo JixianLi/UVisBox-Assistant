@@ -24,15 +24,15 @@ Examples of simple commands:
 
 These should:
 1. Be detected by pattern matching
-2. Update `last_viz_params`
-3. Call viz tool directly
+2. Update `last_vis_params`
+3. Call vis tool directly
 4. Skip LangGraph entirely
 
 ## Tasks
 
 ### Task 7.1: Implement Command Parser
 
-**File**: `command_parser.py`
+**File**: `src/chatuvisbox/command_parser.py`
 
 ```python
 """Parse simple direct commands for hybrid control."""
@@ -165,19 +165,19 @@ if __name__ == "__main__":
 
 Run:
 ```bash
-python command_parser.py
+python src/chatuvisbox/command_parser.py
 ```
 
 ### Task 7.2: Implement Hybrid Executor
 
-**File**: `hybrid_control.py`
+**File**: `src/chatuvisbox/hybrid_control.py`
 
 ```python
 """Hybrid control system for fast parameter updates."""
 
-from typing import Optional, Dict
-from command_parser import parse_simple_command, apply_command_to_params
-from vis_tools import VIS_TOOLS
+from typing import Optional, Dict, Tuple
+from chatuvisbox.command_parser import parse_simple_command, apply_command_to_params
+from chatuvisbox.vis_tools import VIS_TOOLS
 
 
 def execute_simple_command(
@@ -189,12 +189,12 @@ def execute_simple_command(
 
     Args:
         command_str: User's command string
-        current_state: Current conversation state with last_viz_params
+        current_state: Current conversation state with last_vis_params
 
     Returns:
         Tuple of (success, result, message)
         - success: True if command was handled, False if needs full graph
-        - result: Result from viz tool execution (if applicable)
+        - result: Result from vis tool execution (if applicable)
         - message: Status message
     """
     # Try to parse as simple command
@@ -203,38 +203,38 @@ def execute_simple_command(
     if command is None:
         return False, None, "Not a simple command"
 
-    # Need existing viz params to update
-    last_viz_params = current_state.get("last_viz_params")
+    # Need existing vis params to update
+    last_vis_params = current_state.get("last_vis_params")
 
-    if not last_viz_params:
+    if not last_vis_params:
         return False, None, "No previous visualization to update"
 
-    # Extract the tool name and data path from last viz
-    viz_tool_name = last_viz_params.get("_tool_name")
-    data_path = last_viz_params.get("data_path")
+    # Extract the tool name and data path from last vis
+    vis_tool_name = last_vis_params.get("_tool_name")
+    data_path = last_vis_params.get("data_path")
 
-    if not viz_tool_name or not data_path:
+    if not vis_tool_name or not data_path:
         return False, None, "Cannot determine visualization to update"
 
     # Apply command to params
-    updated_params = apply_command_to_params(command, last_viz_params)
+    updated_params = apply_command_to_params(command, last_vis_params)
 
-    # Execute viz tool directly
-    viz_func = VIS_TOOLS.get(viz_tool_name)
+    # Execute vis tool directly
+    vis_func = VIS_TOOLS.get(vis_tool_name)
 
-    if not viz_func:
-        return False, None, f"Unknown viz tool: {viz_tool_name}"
+    if not vis_func:
+        return False, None, f"Unknown vis tool: {vis_tool_name}"
 
-    print(f"[HYBRID] Executing {viz_tool_name} with updated params")
+    print(f"[HYBRID] Executing {vis_tool_name} with updated params")
 
     # Remove internal fields before calling tool
     call_params = {k: v for k, v in updated_params.items() if not k.startswith('_')}
 
-    result = viz_func(**call_params)
+    result = vis_func(**call_params)
 
     if result.get("status") == "success":
         # Update state (caller should do this)
-        updated_params['_tool_name'] = viz_tool_name
+        updated_params['_tool_name'] = vis_tool_name
         return True, updated_params, f"Updated {command.param_name} to {command.value}"
     else:
         return False, None, f"Error updating: {result.get('message')}"
@@ -254,43 +254,43 @@ def is_hybrid_eligible(user_input: str) -> bool:
     return command is not None
 ```
 
-### Task 7.3: Update vis_tools to Track Tool Name
+### Task 7.3: Verify vis_tools Includes Tool Name
 
-**File**: Update `vis_tools.py`
+**File**: `src/chatuvisbox/vis_tools.py` (already complete)
 
-We need to store `_tool_name` in viz params so we can re-execute the same tool.
+The vis tools already store `_tool_name` in vis params for re-execution.
 
+**Example** (already implemented):
 ```python
-# In each viz tool function, modify return dict to include tool name:
-
 def plot_functional_boxplot(...) -> Dict[str, str]:
     # ... existing code ...
 
     # After successful visualization, save params with tool name
-    last_viz_params = {
+    last_vis_params = {
         "_tool_name": "plot_functional_boxplot",
         "data_path": data_path,
-        "percentile": percentile,
-        "show_median": show_median,
+        "percentiles": percentiles,
+        "colors": colors,
+        "plot_all_curves": plot_all_curves,
     }
 
     return {
         "status": "success",
         "message": f"Displayed functional boxplot for {curves.shape[0]} curves",
-        "_viz_params": last_viz_params  # Include for hybrid control
+        "_vis_params": last_vis_params  # Include for hybrid control
     }
 ```
 
-Do this for all viz tools.
+All vis tools already include `_vis_params` with `_tool_name`.
 
 ### Task 7.4: Update Conversation Session for Hybrid Control
 
-**File**: Update `conversation.py`
+**File**: `src/chatuvisbox/conversation.py`
 
 ```python
 # Add to ConversationSession class:
 
-from hybrid_control import execute_simple_command, is_hybrid_eligible
+from chatuvisbox.hybrid_control import execute_simple_command, is_hybrid_eligible
 
 class ConversationSession:
     # ... existing code ...
@@ -319,7 +319,7 @@ class ConversationSession:
 
             if success:
                 # Update state directly without graph execution
-                self.state["last_viz_params"] = updated_params
+                self.state["last_vis_params"] = updated_params
                 self.state["error_count"] = 0
 
                 # Add messages to maintain conversation history
@@ -343,12 +343,12 @@ class ConversationSession:
 
 ### Task 7.5: Test Hybrid Control
 
-**File**: `test_hybrid_control.py`
+**File**: `tests/test_hybrid_control.py`
 
 ```python
 """Test hybrid control functionality."""
 
-from conversation import ConversationSession
+from chatuvisbox.conversation import ConversationSession
 import matplotlib.pyplot as plt
 import time
 
@@ -366,8 +366,8 @@ def test_hybrid_parameter_update():
     session.send("Generate 30 curves and plot functional boxplot")
 
     ctx1 = session.get_context_summary()
-    assert ctx1["last_viz"] is not None
-    print(f"   ✓ Initial viz created")
+    assert ctx1["last_vis"] is not None
+    print(f"   ✓ Initial vis created")
 
     # Test 1: Change colormap (should use hybrid)
     print("\n🔹 Test: Change colormap via hybrid control")
@@ -455,7 +455,7 @@ def test_hybrid_without_prior_viz():
     session = ConversationSession()
 
     # Try hybrid command without any prior visualization
-    print("\n🔹 Trying 'colormap plasma' with no prior viz")
+    print("\n🔹 Trying 'colormap plasma' with no prior vis")
     session.send("colormap plasma")
 
     response = session.get_last_response()
@@ -463,9 +463,9 @@ def test_hybrid_without_prior_viz():
 
     # Should explain that there's nothing to update
     assert "no" in response.lower() or "first" in response.lower(), \
-        "Should indicate no prior viz to update"
+        "Should indicate no prior vis to update"
 
-    print("\n✅ No-prior-viz test passed")
+    print("\n✅ No-prior-vis test passed")
 
 
 def run_all_hybrid_tests():
@@ -517,7 +517,7 @@ if __name__ == "__main__":
 
 Run:
 ```bash
-python test_hybrid_control.py
+python tests/test_hybrid_control.py
 ```
 
 ## Validation Checklist
@@ -568,12 +568,12 @@ User: "Make it prettier and use good parameters"
 - Print debug messages in `execute_simple_command()`
 
 **Parameters not updating:**
-- Check `last_viz_params` is stored correctly
+- Check `last_vis_params` is stored correctly
 - Verify `_tool_name` is in params
-- Ensure viz tools include `_viz_params` in return
+- Ensure vis tools include `_vis_params` in return
 
 **Hybrid slower than expected:**
-- Check if viz tool is re-reading data unnecessarily
+- Check if vis tool is re-reading data unnecessarily
 - Verify matplotlib isn't blocking
 - Profile execution with timing prints
 
