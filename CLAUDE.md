@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 6 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 7 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ **Phase 4.5**: Codebase restructure to professional Python package with Poetry (2025-10-27)
 - ✅ **Phase 5**: Error handling, circuit breaker, context awareness, logging (2025-10-28)
 - ✅ **Phase 6**: Multi-turn conversation with ConversationSession, interactive REPL (2025-10-28)
+- ✅ **Phase 7**: Hybrid control for 10-15x faster parameter updates (2025-10-28)
 - ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
 
 ## Architecture
@@ -47,8 +48,9 @@ data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_cu
 vis_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, plot_uncertainty_lobes, plot_contour_boxplot
 config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
 logger.py         - ✅ DONE Phase 5: Logging infrastructure with file and console output
-conversation.py   - ✅ DONE Phase 6: ConversationSession class for multi-turn conversations (114 lines)
-hybrid_control.py - Pattern matching for fast parameter updates (TODO: Phase 7)
+conversation.py   - ✅ DONE Phase 6: ConversationSession class for multi-turn conversations with Phase 7 hybrid control integration
+command_parser.py - ✅ DONE Phase 7: Parse simple commands for hybrid control (127 lines)
+hybrid_control.py - ✅ DONE Phase 7: Execute simple commands directly, 10-15x speedup (86 lines)
 main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit) (TODO: Phase 8)
 ```
 
@@ -113,12 +115,12 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 - ✅ Phase 4: End-to-end happy path test
 - ✅ Phase 4.5: Professional package structure with Poetry
 
-**Milestone 2 (Days 6-8)**: Robustness (2/3 complete)
-- ✅ Phase 5: Error handling with circuit breaker (COMPLETE)
-- ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE)
-- ⏭️ Phase 7: Hybrid control with command_parser.py
+**Milestone 2 (Days 6-8)**: Robustness ✅ COMPLETE
+- ✅ Phase 5: Error handling with circuit breaker (COMPLETE 2025-10-28)
+- ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE 2025-10-28)
+- ✅ Phase 7: Hybrid control with command_parser.py (COMPLETE 2025-10-28)
 
-**Milestone 3 (Days 9-11)**: Polish
+**Milestone 3 (Days 9-11)**: Polish (0/3 complete)
 - ⏭️ Phase 8: Session management with clear_session tool
 - ⏭️ Phase 9: Comprehensive testing (pytest + manual)
 - ⏭️ Phase 10: Documentation and packaging
@@ -170,7 +172,9 @@ python tests/test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
 python tests/test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
 python tests/test_error_handling.py   # Phase 5: 15-20 API calls, 6 tests with delays
 python tests/test_multiturn.py        # Phase 6: 50-60 API calls, 5 multi-turn tests
+python tests/test_hybrid_control.py   # Phase 7: 50-60 API calls, 4 hybrid tests with speedup demo
 python validate_phase6.py             # Phase 6: 0 API calls, quick validation
+python src/chatuvisbox/command_parser.py  # Phase 7: 0 API calls, command parser test
 ```
 
 **Interactive testing:**
@@ -222,6 +226,24 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Test data: `test_data/sample_curves.csv`, `test_data/sample_scalar_field.npy`
 - Temp files: `temp/_temp_*.npy` (auto-generated, gitignored)
 - Clear on session end with `clear_session()` tool
+
+### 6. Hybrid Control Model (Phase 7)
+**Decision**: Two-tier execution - full LangGraph for complex queries, direct execution for simple commands.
+
+**Simple Commands** (Fast Path):
+- Pattern: "percentile 80", "isovalue 0.7", "colormap plasma"
+- Execution: Direct vis tool call, bypasses LangGraph
+- Speed: 10-15x faster (0.12s vs 1.65s)
+
+**Complex Queries** (Full Path):
+- Pattern: "Make it look better", "Change colors and percentile"
+- Execution: Full LangGraph workflow with LLM interpretation
+- Maintains flexibility for ambiguous requests
+
+**Implementation**:
+- `command_parser.py`: Pattern matching for 7 simple command types
+- `hybrid_control.py`: Direct execution with parameter validation
+- `conversation.py`: Checks hybrid eligibility before full graph
 
 ## Important Implementation Notes
 
@@ -603,7 +625,9 @@ chatuvisbox/
 │   ├── routing.py           # ✅ DONE Phase 5: Routing with circuit breaker (86 lines)
 │   ├── model.py             # ✅ DONE Phase 5: Model with error recovery prompt (109 lines)
 │   ├── logger.py            # ✅ DONE Phase 5: Logging infrastructure (42 lines)
-│   ├── conversation.py      # ✅ DONE Phase 6: ConversationSession class (114 lines)
+│   ├── conversation.py      # ✅ DONE Phase 6+7: ConversationSession with hybrid control (145 lines)
+│   ├── command_parser.py    # ✅ DONE Phase 7: Parse simple commands (127 lines)
+│   ├── hybrid_control.py    # ✅ DONE Phase 7: Fast path execution (86 lines)
 │   ├── utils.py             # ✅ DONE Phase 2: Utility functions
 │   ├── data_tools.py        # ✅ DONE Phase 1: Data tools (~420 lines)
 │   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
@@ -621,7 +645,8 @@ chatuvisbox/
 │   ├── test_happy_path.py   # ✅ Phase 4: 25-35 API calls
 │   ├── test_matplotlib_behavior.py # ✅ Phase 4: 0 API calls
 │   ├── test_error_handling.py # ✅ Phase 5: 6 tests (15-20 API calls)
-│   ├── test_multiturn.py    # ✅ DONE Phase 6: 5 multi-turn tests (50-60 API calls)
+│   ├── test_multiturn.py    # ✅ Phase 6: 5 multi-turn tests (50-60 API calls)
+│   ├── test_hybrid_control.py # ✅ Phase 7: 4 hybrid tests (50-60 API calls, speedup demo)
 │   ├── interactive_test.py  # ✅ Phase 4: Interactive menu testing
 │   ├── run_tests_with_delays.py # ✅ Automated test runner
 │   └── simple_test.py       # ✅ Simple validation
@@ -644,7 +669,9 @@ chatuvisbox/
 │   ├── PHASE_4_COMPLETION_REPORT.md
 │   ├── PHASE_4.5_COMPLETION_REPORT.md
 │   ├── PHASE_5_COMPLETION_REPORT.md
-│   ├── PHASE_6_COMPLETION_REPORT.md  # ✅ NEW
+│   ├── PHASE_6_COMPLETION_REPORT.md
+│   ├── PHASE_7_COMPLETION_REPORT.md  # ✅ NEW
+│   ├── VIZ_TO_VIS_MIGRATION_SUMMARY.md
 │   └── UPDATE_*.md
 │
 └── plans/                   # ✅ DONE: Implementation phase guides

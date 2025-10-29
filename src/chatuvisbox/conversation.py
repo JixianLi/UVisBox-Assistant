@@ -3,7 +3,8 @@
 from typing import Optional
 from chatuvisbox.state import GraphState, create_initial_state
 from chatuvisbox.graph import graph_app
-from langchain_core.messages import HumanMessage
+from chatuvisbox.hybrid_control import execute_simple_command, is_hybrid_eligible
+from langchain_core.messages import HumanMessage, AIMessage
 
 
 class ConversationSession:
@@ -28,6 +29,9 @@ class ConversationSession:
         """
         Send a user message and get response.
 
+        Checks for simple commands first (hybrid control).
+        Falls back to full graph execution if needed.
+
         Args:
             user_message: User's input text
 
@@ -36,6 +40,26 @@ class ConversationSession:
         """
         self.turn_count += 1
 
+        # Try hybrid control first (only if we have existing state)
+        if self.state and is_hybrid_eligible(user_message):
+            success, updated_params, message = execute_simple_command(
+                user_message,
+                self.state
+            )
+
+            if success:
+                # Update state directly without graph execution
+                self.state["last_vis_params"] = updated_params
+                self.state["error_count"] = 0
+
+                # Add messages to maintain conversation history
+                self.state["messages"].append(HumanMessage(content=user_message))
+                self.state["messages"].append(AIMessage(content=message))
+
+                print(f"[HYBRID] Fast path executed: {message}")
+                return self.state
+
+        # Fall back to full graph execution
         if self.state is None:
             # First turn - create initial state
             self.state = create_initial_state(user_message)
