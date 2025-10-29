@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 5 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 6 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ **Phase 4**: End-to-end happy path tests, matplotlib verification, interactive testing (2025-10-27)
 - ✅ **Phase 4.5**: Codebase restructure to professional Python package with Poetry (2025-10-27)
 - ✅ **Phase 5**: Error handling, circuit breaker, context awareness, logging (2025-10-28)
+- ✅ **Phase 6**: Multi-turn conversation with ConversationSession, interactive REPL (2025-10-28)
 - ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
 
 ## Architecture
@@ -46,8 +47,8 @@ data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_cu
 vis_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, plot_uncertainty_lobes, plot_contour_boxplot
 config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
 logger.py         - ✅ DONE Phase 5: Logging infrastructure with file and console output
+conversation.py   - ✅ DONE Phase 6: ConversationSession class for multi-turn conversations (114 lines)
 hybrid_control.py - Pattern matching for fast parameter updates (TODO: Phase 7)
-conversation.py   - ConversationSession class for multi-turn state management (TODO: Phase 6)
 main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit) (TODO: Phase 8)
 ```
 
@@ -112,9 +113,9 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 - ✅ Phase 4: End-to-end happy path test
 - ✅ Phase 4.5: Professional package structure with Poetry
 
-**Milestone 2 (Days 6-8)**: Robustness (1/3 complete)
+**Milestone 2 (Days 6-8)**: Robustness (2/3 complete)
 - ✅ Phase 5: Error handling with circuit breaker (COMPLETE)
-- ⏭️ Phase 6: Multi-turn conversation with ConversationSession
+- ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE)
 - ⏭️ Phase 7: Hybrid control with command_parser.py
 
 **Milestone 3 (Days 9-11)**: Polish
@@ -168,6 +169,13 @@ python tests/test_graph.py            # Phase 3: 5-8 API calls (wait 60s between
 python tests/test_graph_quick.py      # Phase 3: 6-10 API calls (RECOMMENDED)
 python tests/test_graph_integration.py # Phase 3: 15-20 API calls (will hit limit)
 python tests/test_error_handling.py   # Phase 5: 15-20 API calls, 6 tests with delays
+python tests/test_multiturn.py        # Phase 6: 50-60 API calls, 5 multi-turn tests
+python validate_phase6.py             # Phase 6: 0 API calls, quick validation
+```
+
+**Interactive testing:**
+```bash
+python repl.py                        # Phase 6: Interactive multi-turn REPL (user-paced)
 ```
 
 ### Running the Application
@@ -412,12 +420,17 @@ def route_after_tool(state: GraphState) -> Literal["model", "end"]:
 - `update_state_with_data()`: Resets error_count to 0 on success
 - `update_state_with_vis()`: Resets error_count to 0 on success
 
-**Context Awareness** (`src/chatuvisbox/nodes.py:29-32`):
+**Context Awareness** (`src/chatuvisbox/nodes.py:29-32` and `model.py:44-48`):
 ```python
-# Get list of available files for context
+# In nodes.py: Get list of available files for context
 file_list = []
 if config.TEST_DATA_DIR.exists():
     file_list = [f.name for f in config.TEST_DATA_DIR.iterdir() if f.is_file()]
+
+# In model.py: System prompt guidance
+"Remember the current_data_path from previous operations"
+"If user requests a different visualization type, use current_data_path
+ unless they explicitly mention new data"
 ```
 
 **Logging System** (`src/chatuvisbox/logger.py`):
@@ -447,6 +460,126 @@ if config.TEST_DATA_DIR.exists():
 - Conversation state maintained across turns
 - Error count persists but resets on success
 
+## Implementation-Specific Notes (From Phase 6)
+
+### Multi-Turn Conversation Architecture
+
+**ConversationSession Class** (`src/chatuvisbox/conversation.py`):
+```python
+class ConversationSession:
+    """Manages a multi-turn conversation session."""
+
+    def send(self, user_message: str) -> GraphState:
+        """Send message and get response."""
+        # First turn: create_initial_state()
+        # Subsequent turns: append HumanMessage
+        # Always: invoke graph_app with current state
+
+    def get_last_response(self) -> str:
+        """Get most recent assistant message."""
+
+    def get_context_summary(self) -> dict:
+        """Return turn_count, current_data, last_viz, etc."""
+
+    def reset(self):
+        """Clear state and start fresh."""
+```
+
+**State Persistence Across Turns**:
+- Messages accumulate in `state["messages"]`
+- `current_data_path` preserved until new data generated
+- `last_viz_params` updated with each visualization
+- `error_count` tracked and reset on success
+- `session_files` accumulates all created files
+
+**Turn Flow**:
+```
+Turn 1: user input → create_initial_state() → graph_app.invoke() → state
+Turn 2: user input → append to state["messages"] → graph_app.invoke() → updated state
+Turn N: user input → append to state["messages"] → graph_app.invoke() → updated state
+```
+
+### Phase 6 Conversation Patterns
+
+**Pattern 1: Sequential Workflow**
+```
+User: "Generate 30 curves"
+Agent: [creates data, saves to .npy]
+
+User: "Plot them"  ← Implicit reference to turn 1 data
+Agent: [creates functional boxplot from current_data_path]
+
+User: "Change percentile to 90"  ← Implicit reference to last viz
+Agent: [re-creates plot with new percentile]
+```
+
+**Pattern 2: Pronoun Resolution**
+```
+User: "Generate some curves"
+Agent: [creates data]
+
+User: "Plot it"  ← "it" = current_data_path
+Agent: [creates visualization]
+
+User: "Make it prettier"  ← "it" = last_viz_params
+Agent: [adjusts visualization]
+```
+
+**Pattern 3: Multi-Visualization**
+```
+User: "Generate 40 curves"
+Agent: [creates data]
+
+User: "Show functional boxplot"
+Agent: [creates viz 1]
+
+User: "Now show curve boxplot"  ← Same data, different viz
+Agent: [creates viz 2, current_data_path unchanged]
+```
+
+**Pattern 4: Error Recovery**
+```
+User: "Generate curves"
+Agent: [success, error_count = 0]
+
+User: "Load bad_file.csv"
+Agent: [error, error_count = 1]
+
+User: "Plot the curves I generated"  ← Uses context to recover
+Agent: [success, error_count = 0]
+```
+
+### Interactive REPL Commands
+
+**File**: `repl.py`
+
+**Commands**:
+- `/quit` - Exit REPL and close matplotlib windows
+- `/reset` - Reset conversation (clear state, start fresh)
+- `/context` - Display current conversation context
+
+**Usage**:
+```bash
+$ python repl.py
+
+You: Generate 30 curves
+Assistant: Generated 30 curves...
+
+You: Plot them
+Assistant: Created functional boxplot...
+
+You: /context
+📊 Context:
+  turn_count: 2
+  current_data: temp/_temp_ensemble_curves.npy
+  last_viz: {'_tool_name': 'plot_functional_boxplot', ...}
+  error_count: 0
+  message_count: 4
+
+You: /quit
+👋 Goodbye!
+```
+
 ## File Structure (Current Implementation Status)
 
 ```
@@ -462,7 +595,7 @@ chatuvisbox/
 ├── .gitignore               # ✅ DONE Phase 1
 │
 ├── src/chatuvisbox/         # ✅ DONE Phase 4.5: Package source (src layout)
-│   ├── __init__.py          # ✅ Package exports
+│   ├── __init__.py          # ✅ Package exports (updated Phase 6: ConversationSession)
 │   ├── __main__.py          # ✅ Entry point (placeholder for Phase 8)
 │   ├── graph.py             # ✅ DONE Phase 3: LangGraph workflow
 │   ├── state.py             # ✅ DONE Phase 2: GraphState with error_count
@@ -470,6 +603,7 @@ chatuvisbox/
 │   ├── routing.py           # ✅ DONE Phase 5: Routing with circuit breaker (86 lines)
 │   ├── model.py             # ✅ DONE Phase 5: Model with error recovery prompt (109 lines)
 │   ├── logger.py            # ✅ DONE Phase 5: Logging infrastructure (42 lines)
+│   ├── conversation.py      # ✅ DONE Phase 6: ConversationSession class (114 lines)
 │   ├── utils.py             # ✅ DONE Phase 2: Utility functions
 │   ├── data_tools.py        # ✅ DONE Phase 1: Data tools (~420 lines)
 │   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
@@ -486,7 +620,8 @@ chatuvisbox/
 │   ├── test_graph_integration.py # ✅ Phase 3: 15-20 API calls
 │   ├── test_happy_path.py   # ✅ Phase 4: 25-35 API calls
 │   ├── test_matplotlib_behavior.py # ✅ Phase 4: 0 API calls
-│   ├── test_error_handling.py # ✅ DONE Phase 5: 6 tests (15-20 API calls)
+│   ├── test_error_handling.py # ✅ Phase 5: 6 tests (15-20 API calls)
+│   ├── test_multiturn.py    # ✅ DONE Phase 6: 5 multi-turn tests (50-60 API calls)
 │   ├── interactive_test.py  # ✅ Phase 4: Interactive menu testing
 │   ├── run_tests_with_delays.py # ✅ Automated test runner
 │   └── simple_test.py       # ✅ Simple validation
@@ -500,12 +635,16 @@ chatuvisbox/
 ├── logs/                    # ✅ DONE Phase 5: Log files (gitignored)
 │   └── chatuvisbox.log
 │
+├── repl.py                  # ✅ DONE Phase 6: Interactive REPL for multi-turn testing (79 lines)
+├── validate_phase6.py       # ✅ DONE Phase 6: Validation script (117 lines)
+│
 ├── reports/                 # Temporary: Phase completion reports (gitignored)
 │   ├── PHASE_2_COMPLETION_REPORT.md
 │   ├── PHASE_3_COMPLETION_REPORT.md
 │   ├── PHASE_4_COMPLETION_REPORT.md
 │   ├── PHASE_4.5_COMPLETION_REPORT.md
-│   ├── PHASE_5_COMPLETION_REPORT.md  # ✅ NEW
+│   ├── PHASE_5_COMPLETION_REPORT.md
+│   ├── PHASE_6_COMPLETION_REPORT.md  # ✅ NEW
 │   └── UPDATE_*.md
 │
 └── plans/                   # ✅ DONE: Implementation phase guides
@@ -514,7 +653,8 @@ chatuvisbox/
     ├── phase_02_*.md        # ✅ Phase 2 complete
     ├── phase_03_*.md        # ✅ Phase 3 complete
     ├── phase_04_*.md        # ✅ Phase 4 complete
-    └── phase_05_*.md        # ✅ Phase 5 complete
+    ├── phase_05_*.md        # ✅ Phase 5 complete
+    └── phase_06_*.md        # ✅ Phase 6 complete
 ```
 
 ## Reference Documentation

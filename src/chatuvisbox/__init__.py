@@ -10,11 +10,13 @@ __version__ = "0.1.0"
 # Expose main API
 from chatuvisbox.graph import run_graph, stream_graph, graph_app
 from chatuvisbox.state import GraphState
+from chatuvisbox.conversation import ConversationSession
 
 __all__ = [
     "run_graph",
     "stream_graph",
     "graph_app",
     "GraphState",
+    "ConversationSession",
     "__version__",
 ]

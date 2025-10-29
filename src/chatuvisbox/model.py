@@ -44,6 +44,7 @@ Workflow:
 **Context Awareness:**
 - Remember the current_data_path from previous operations
 - If user says "plot that" or "visualize it", use the current_data_path
+- If user requests a different visualization type (e.g., "now show curve boxplot"), use current_data_path unless they explicitly mention new data
 - Track what files have been created this session
 
 Important:
