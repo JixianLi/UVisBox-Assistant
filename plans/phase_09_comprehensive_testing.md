@@ -1,8 +1,10 @@
-# Phase 9: Comprehensive Testing & Test Reorganization
+# Phase 9: Comprehensive Testing & Test Reorganization (Updated for BoxplotStyleConfig)
 
 **Goal**: Reorganize test suite with clear structure, comprehensive coverage, and eliminate phase-specific tests that have served their purpose.
 
 **Duration**: 1 day
+
+**Updated**: 2025-01-29 - Reflects BoxplotStyleConfig interface changes
 
 ---
 
@@ -15,6 +17,7 @@ The current test suite has accumulated ~2600 lines across 17 files organized by 
 - Multiple similar integration tests (test_graph.py, test_graph_quick.py, test_graph_integration.py)
 - Unclear which test to run for specific scenarios
 - No quick sanity check test
+- **Tests don't reflect BoxplotStyleConfig interface changes**
 
 **Goals:**
 1. Create clear test categories (unit, integration, e2e, interactive)
@@ -22,6 +25,7 @@ The current test suite has accumulated ~2600 lines across 17 files organized by 
 3. Eliminate redundant and phase-specific tests
 4. Document what each test does and when to run it
 5. Reduce total test count while improving coverage clarity
+6. **Update tests to use new BoxplotStyleConfig parameters**
 
 ---
 
@@ -40,21 +44,21 @@ tests/
 │   ├── __init__.py
 │   ├── test_tools.py            # Test data_tools and vis_tools functions
 │   ├── test_routing.py          # Test routing logic (from current test_routing.py)
-│   ├── test_command_parser.py   # Test command parser patterns
+│   ├── test_command_parser.py   # Test command parser patterns (UPDATED)
 │   └── test_config.py           # Test configuration loading
 │
 ├── integration/                 # Integration tests (component interactions)
 │   ├── __init__.py
 │   ├── test_graph_workflow.py   # Test LangGraph execution (consolidated)
 │   ├── test_conversation.py     # Test ConversationSession (multi-turn)
-│   ├── test_hybrid_control.py   # Test hybrid control fast path
+│   ├── test_hybrid_control.py   # Test hybrid control fast path (UPDATED)
 │   ├── test_error_handling.py   # Test error recovery and circuit breaker
 │   └── test_session_management.py # Test session cleanup and stats
 │
 ├── e2e/                         # End-to-end tests (full system)
 │   ├── __init__.py
-│   ├── test_all_visualizations.py  # Test all 5 vis types end-to-end
-│   ├── test_user_workflows.py   # Test common user scenarios
+│   ├── test_all_visualizations.py  # Test all 5 vis types end-to-end (UPDATED)
+│   ├── test_user_workflows.py   # Test common user scenarios (UPDATED)
 │   └── test_matplotlib.py       # Test matplotlib non-blocking behavior
 │
 ├── interactive/                 # Interactive/manual tests
@@ -89,23 +93,23 @@ Total to delete: ~1444 lines
 ```
 ✅ tests/test_routing.py         → unit/test_routing.py (minimal changes)
 ✅ tests/test_error_handling.py  → integration/test_error_handling.py (keep as-is)
-✅ tests/test_hybrid_control.py  → integration/test_hybrid_control.py (keep as-is)
+✅ tests/test_hybrid_control.py  → integration/test_hybrid_control.py (UPDATE for new params)
 ✅ tests/test_session_management.py → integration/test_session_management.py (keep as-is)
 ✅ tests/test_matplotlib_behavior.py → e2e/test_matplotlib.py (keep as-is)
-✅ tests/interactive_test.py     → interactive/interactive_test.py (keep as-is)
+✅ tests/interactive_test.py     → interactive/interactive_test.py (UPDATE for new params)
 ```
 
 ### Files to CREATE
 
 ```
 🆕 test_simple.py                # Quick sanity check (prompt → output)
-🆕 unit/test_tools.py            # Test individual tool functions
-🆕 unit/test_command_parser.py   # Test command parsing
-🆕 unit/test_config.py           # Test configuration
+🆕 unit/test_tools.py            # Test individual tool functions (with BoxplotStyleConfig)
+🆕 unit/test_command_parser.py   # Test command parsing (with new styling params)
+🆕 unit/test_config.py           # Test configuration (with updated defaults)
 🆕 integration/test_graph_workflow.py # Consolidated graph tests
 🆕 integration/test_conversation.py   # Consolidated conversation tests
-🆕 e2e/test_all_visualizations.py     # Test all 5 vis types
-🆕 e2e/test_user_workflows.py         # Test common user scenarios
+🆕 e2e/test_all_visualizations.py     # Test all 5 vis types (with new params)
+🆕 e2e/test_user_workflows.py         # Test common user scenarios (with styling)
 🆕 utils/run_all_tests.py        # Improved test runner
 🆕 utils/test_helpers.py         # Shared utilities
 ```
@@ -193,53 +197,136 @@ pytest tests/test_simple.py        # Or with pytest
 
 #### File: `tests/unit/test_tools.py`
 
-Test individual tool functions without LangGraph:
+Test individual tool functions without LangGraph, with BoxplotStyleConfig parameters:
 
 ```python
 """Unit tests for data_tools and vis_tools."""
 
+import numpy as np
+from chatuvisbox.data_tools import (
+    generate_ensemble_curves,
+    generate_scalar_field_ensemble,
+    generate_vector_field_ensemble,
+    load_csv_to_numpy,
+    clear_session
+)
+from chatuvisbox.vis_tools import (
+    plot_functional_boxplot,
+    plot_curve_boxplot,
+    plot_contour_boxplot,
+    plot_probabilistic_marching_squares,
+    plot_uncertainty_lobes
+)
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+
+
 def test_generate_ensemble_curves():
     """Test curve generation with various parameters."""
-    pass
+    result = generate_ensemble_curves(n_curves=10, n_points=50)
+    assert result['status'] == 'success'
+    assert 'output_path' in result
 
-def test_generate_scalar_field_ensemble():
-    """Test scalar field generation."""
-    pass
+    data = np.load(result['output_path'])
+    assert data.shape == (10, 50)
 
-def test_generate_vector_field_ensemble():
-    """Test vector field generation."""
-    pass
 
-def test_load_csv_to_numpy():
-    """Test CSV loading."""
-    pass
+def test_plot_functional_boxplot_with_styling():
+    """Test functional boxplot with BoxplotStyleConfig parameters."""
+    # Generate test data
+    curves_result = generate_ensemble_curves(n_curves=10, n_points=50)
 
-def test_clear_session():
-    """Test session cleanup."""
-    pass
+    # Test with styling parameters
+    result = plot_functional_boxplot(
+        data_path=curves_result['output_path'],
+        percentiles=[25, 50, 75, 90],
+        percentile_colormap='plasma',
+        show_median=True,
+        median_color='blue',
+        median_width=2.5,
+        median_alpha=0.8,
+        show_outliers=True,
+        outliers_color='black',
+        outliers_width=1.5,
+        outliers_alpha=0.7
+    )
 
-def test_plot_functional_boxplot_direct():
-    """Test functional boxplot without graph."""
-    pass
+    assert result['status'] == 'success'
+    assert '_vis_params' in result
 
-# ... test all 5 visualization functions directly
+    # Verify all styling params preserved
+    params = result['_vis_params']
+    assert params['median_color'] == 'blue'
+    assert params['median_width'] == 2.5
+    assert params['median_alpha'] == 0.8
+    assert params['outliers_color'] == 'black'
+    assert params['outliers_width'] == 1.5
+    assert params['outliers_alpha'] == 0.7
+
+
+def test_plot_curve_boxplot_with_workers():
+    """Test curve boxplot with workers parameter."""
+    curves_result = generate_ensemble_curves(n_curves=10, n_points=50)
+
+    result = plot_curve_boxplot(
+        data_path=curves_result['output_path'],
+        percentiles=[50, 90],
+        percentile_colormap='viridis',
+        show_median=True,
+        show_outliers=False,
+        workers=4
+    )
+
+    assert result['status'] == 'success'
+    assert result['_vis_params']['workers'] == 4
+
+
+def test_plot_contour_boxplot_full_params():
+    """Test contour boxplot with all BoxplotStyleConfig parameters."""
+    field_result = generate_scalar_field_ensemble(nx=20, ny=20, n_ensemble=10)
+
+    result = plot_contour_boxplot(
+        data_path=field_result['output_path'],
+        isovalue=0.5,
+        percentiles=[25, 50, 75],
+        percentile_colormap='plasma',
+        show_median=True,
+        median_color='red',
+        median_width=3.0,
+        median_alpha=1.0,
+        show_outliers=True,
+        outliers_color='gray',
+        outliers_width=1.0,
+        outliers_alpha=0.5,
+        workers=8
+    )
+
+    assert result['status'] == 'success'
+    params = result['_vis_params']
+    assert params['workers'] == 8
+    assert params['outliers_alpha'] == 0.5
+
+
+# ... continue with all visualization functions
 ```
 
 **Characteristics**:
 - 0 API calls (direct function tests)
 - Fast execution (< 5 seconds total)
 - Test return values, error handling, parameter validation
+- **Test all new BoxplotStyleConfig parameters**
 
 ---
 
 #### File: `tests/unit/test_command_parser.py`
 
-Test command parsing patterns:
+Test command parsing patterns, including new styling parameters:
 
 ```python
 """Unit tests for hybrid control command parser."""
 
-from chatuvisbox.command_parser import parse_simple_command
+from chatuvisbox.command_parser import parse_simple_command, apply_command_to_params
+
 
 def test_parse_colormap():
     cmd = parse_simple_command("colormap plasma")
@@ -247,11 +334,72 @@ def test_parse_colormap():
     assert cmd.param_name == "colormap"
     assert cmd.value == "plasma"
 
-def test_parse_percentile():
-    cmd = parse_simple_command("percentile 75")
+
+def test_parse_median_color():
+    """Test parsing median color command."""
+    cmd = parse_simple_command("median color blue")
     assert cmd is not None
-    assert cmd.param_name == "percentiles"
-    assert cmd.value == [75.0]
+    assert cmd.param_name == "median_color"
+    assert cmd.value == "blue"
+
+
+def test_parse_median_width():
+    """Test parsing median width command."""
+    cmd = parse_simple_command("median width 2.5")
+    assert cmd is not None
+    assert cmd.param_name == "median_width"
+    assert cmd.value == 2.5
+
+
+def test_parse_median_alpha():
+    """Test parsing median alpha command."""
+    cmd = parse_simple_command("median alpha 0.8")
+    assert cmd is not None
+    assert cmd.param_name == "median_alpha"
+    assert cmd.value == 0.8
+
+
+def test_parse_outliers_color():
+    """Test parsing outliers color command."""
+    cmd = parse_simple_command("outliers color black")
+    assert cmd is not None
+    assert cmd.param_name == "outliers_color"
+    assert cmd.value == "black"
+
+
+def test_parse_outliers_width():
+    """Test parsing outliers width command."""
+    cmd = parse_simple_command("outliers width 1.5")
+    assert cmd is not None
+    assert cmd.param_name == "outliers_width"
+    assert cmd.value == 1.5
+
+
+def test_parse_outliers_alpha():
+    """Test parsing outliers alpha command."""
+    cmd = parse_simple_command("outliers alpha 1.0")
+    assert cmd is not None
+    assert cmd.param_name == "outliers_alpha"
+    assert cmd.value == 1.0
+
+
+def test_apply_styling_params():
+    """Test applying BoxplotStyleConfig params to current params."""
+    current = {
+        "_tool_name": "plot_functional_boxplot",
+        "data_path": "/path/to/data.npy",
+        "median_color": "red",
+        "outliers_alpha": 0.5
+    }
+
+    # Update outliers color
+    cmd = parse_simple_command("outliers color black")
+    updated = apply_command_to_params(cmd, current)
+
+    assert updated["outliers_color"] == "black"
+    assert updated["median_color"] == "red"  # Unchanged
+    assert updated["outliers_alpha"] == 0.5  # Unchanged
+
 
 # ... test all command patterns
 ```
@@ -260,12 +408,13 @@ def test_parse_percentile():
 
 #### File: `tests/unit/test_config.py`
 
-Test configuration:
+Test configuration with updated BoxplotStyleConfig defaults:
 
 ```python
 """Unit tests for configuration."""
 
 from chatuvisbox import config
+
 
 def test_config_paths_exist():
     """Test that all configured paths exist."""
@@ -273,11 +422,38 @@ def test_config_paths_exist():
     assert config.TEST_DATA_DIR.exists()
     assert config.LOG_DIR.exists()
 
-def test_default_vis_params():
-    """Test that default params are properly set."""
-    assert "percentiles" in config.DEFAULT_VIS_PARAMS
-    assert config.DEFAULT_VIS_PARAMS["isovalue"] == 0.5
-    # ... test all defaults
+
+def test_boxplot_style_config_defaults():
+    """Test BoxplotStyleConfig default parameters."""
+    params = config.DEFAULT_VIS_PARAMS
+
+    # Percentiles and colormap
+    assert params["percentiles"] == [25, 50, 90, 100]
+    assert params["percentile_colormap"] == "viridis"
+
+    # Median styling
+    assert params["show_median"] == True
+    assert params["median_color"] == "red"
+    assert params["median_width"] == 3.0
+    assert params["median_alpha"] == 1.0
+
+    # Outliers styling
+    assert params["show_outliers"] == False
+    assert params["outliers_color"] == "gray"
+    assert params["outliers_width"] == 1.0
+    assert params["outliers_alpha"] == 0.5
+
+    # Parallel computation
+    assert params["workers"] == 12
+
+
+def test_no_plot_all_curves_param():
+    """Verify plot_all_curves parameter is removed."""
+    params = config.DEFAULT_VIS_PARAMS
+    assert "plot_all_curves" not in params
+
+
+# ... test all defaults
 ```
 
 ---
@@ -286,52 +462,100 @@ def test_default_vis_params():
 
 #### File: `tests/integration/test_graph_workflow.py`
 
-Consolidate test_graph.py, test_graph_quick.py, test_graph_integration.py:
+Consolidate test_graph.py, test_graph_quick.py, test_graph_integration.py with updated parameters:
 
 ```python
 """Integration tests for LangGraph workflow execution."""
 
-def test_graph_compilation():
-    """Test that graph compiles without errors."""
-    pass
+def test_functional_boxplot_with_styling():
+    """Test functional boxplot with styling parameters through graph."""
+    session = ConversationSession()
 
-def test_data_generation_workflow():
-    """Test data generation through graph."""
-    pass
+    # Request with specific styling
+    result = session.send(
+        "Generate 20 curves and plot functional boxplot with "
+        "median color blue and outliers color black"
+    )
 
-def test_visualization_workflow():
-    """Test visualization through graph."""
-    pass
+    assert result['last_vis_params'] is not None
+    params = result['last_vis_params']
 
-def test_chained_workflow():
-    """Test data generation → visualization in one prompt."""
-    pass
+    # Verify styling applied (may be defaults if LLM didn't parse)
+    assert 'median_color' in params
+    assert 'outliers_color' in params
+
+    session.clear()
+
 
 # 4-5 focused tests, ~150 lines total, 15-20 API calls
 ```
 
 ---
 
-#### File: `tests/integration/test_conversation.py`
+#### File: `tests/integration/test_hybrid_control.py`
 
-Consolidate test_multiturn.py:
+**UPDATED** - Test fast parameter updates with new styling parameters:
 
 ```python
-"""Integration tests for multi-turn conversations."""
+"""Integration tests for hybrid control fast path."""
 
-def test_conversation_state_persistence():
-    """Test state persists across turns."""
-    pass
+from chatuvisbox.hybrid_control import try_hybrid_control
+from chatuvisbox.data_tools import generate_ensemble_curves
+import matplotlib.pyplot as plt
 
-def test_conversation_context_reference():
-    """Test 'plot that', 'change it' references work."""
-    pass
 
-def test_conversation_reset():
-    """Test reset clears state."""
-    pass
+def test_hybrid_median_styling():
+    """Test fast update of median styling parameters."""
+    # Generate initial visualization
+    curves_result = generate_ensemble_curves(n_curves=10, n_points=50)
 
-# 5-6 focused tests, ~150 lines total, 20-25 API calls
+    initial_params = {
+        "_tool_name": "plot_functional_boxplot",
+        "data_path": curves_result['output_path'],
+        "median_color": "red",
+        "median_width": 3.0,
+        "median_alpha": 1.0
+    }
+
+    # Try hybrid update - median color
+    result = try_hybrid_control("median color blue", initial_params)
+    assert result is not None
+    assert result['_vis_params']['median_color'] == "blue"
+
+    # Try hybrid update - median width
+    result = try_hybrid_control("median width 2.0", initial_params)
+    assert result is not None
+    assert result['_vis_params']['median_width'] == 2.0
+
+    plt.close('all')
+
+
+def test_hybrid_outliers_styling():
+    """Test fast update of outliers styling parameters."""
+    curves_result = generate_ensemble_curves(n_curves=10, n_points=50)
+
+    initial_params = {
+        "_tool_name": "plot_functional_boxplot",
+        "data_path": curves_result['output_path'],
+        "show_outliers": True,
+        "outliers_color": "gray",
+        "outliers_alpha": 0.5
+    }
+
+    # Update outliers color
+    result = try_hybrid_control("outliers color black", initial_params)
+    assert result is not None
+    assert result['_vis_params']['outliers_color'] == "black"
+
+    # Update outliers alpha
+    result = try_hybrid_control("outliers alpha 1.0", initial_params)
+    assert result is not None
+    assert result['_vis_params']['outliers_alpha'] == 1.0
+
+    plt.close('all')
+
+
+# 8-10 focused tests covering all new parameters
 ```
 
 ---
@@ -340,245 +564,154 @@ def test_conversation_reset():
 
 #### File: `tests/e2e/test_all_visualizations.py`
 
-Test all 5 visualization types end-to-end:
+**UPDATED** - Test all 5 visualization types with BoxplotStyleConfig parameters:
 
 ```python
 """End-to-end tests for all visualization types."""
 
-def test_functional_boxplot_e2e():
-    """Generate curves → plot functional boxplot."""
-    pass
+from chatuvisbox.conversation import ConversationSession
+import matplotlib.pyplot as plt
 
-def test_curve_boxplot_e2e():
-    """Generate curves → plot curve boxplot."""
-    pass
 
-def test_probabilistic_marching_squares_e2e():
-    """Generate scalar field → plot PMS."""
-    pass
+def test_functional_boxplot_full_styling_e2e():
+    """Test functional boxplot with all BoxplotStyleConfig parameters."""
+    session = ConversationSession()
 
-def test_uncertainty_lobes_e2e():
-    """Generate vector field → plot lobes."""
-    pass
+    # Request with multiple styling parameters
+    result = session.send(
+        "Generate 20 curves and plot functional boxplot with "
+        "percentiles 25, 50, 75, 90, show outliers, "
+        "median color blue, outliers color black"
+    )
 
-def test_contour_boxplot_e2e():
-    """Generate scalar field → plot contour boxplot."""
-    pass
+    assert result['last_vis_params'] is not None
+    params = result['last_vis_params']
+    assert params['_tool_name'] == 'plot_functional_boxplot'
 
-# 5 tests, ~120 lines, 25-30 API calls
+    # Verify parameters present (values may vary based on LLM interpretation)
+    assert 'median_color' in params
+    assert 'outliers_color' in params
+    assert 'show_outliers' in params
+
+    session.clear()
+    plt.close('all')
+
+
+def test_curve_boxplot_with_workers_e2e():
+    """Test curve boxplot end-to-end with workers parameter."""
+    session = ConversationSession()
+
+    result = session.send(
+        "Generate 15 curves and plot curve boxplot"
+    )
+
+    assert result['last_vis_params'] is not None
+    params = result['last_vis_params']
+
+    # Workers should have default value
+    assert 'workers' in params
+    assert params['workers'] == 12  # Default
+
+    session.clear()
+    plt.close('all')
+
+
+def test_contour_boxplot_full_params_e2e():
+    """Test contour boxplot with all parameters."""
+    session = ConversationSession()
+
+    result = session.send(
+        "Generate 20x20 scalar field with 15 members and "
+        "plot contour boxplot at isovalue 0.5 with "
+        "show median and show outliers"
+    )
+
+    assert result['last_vis_params'] is not None
+    params = result['last_vis_params']
+    assert params['_tool_name'] == 'plot_contour_boxplot'
+    assert 'workers' in params
+    assert 'median_color' in params
+    assert 'outliers_color' in params
+
+    session.clear()
+    plt.close('all')
+
+
+# 5-6 tests covering all visualizations with new parameters
+# ~150 lines, 25-30 API calls
 ```
 
 ---
 
 #### File: `tests/e2e/test_user_workflows.py`
 
-Test common user scenarios:
+**UPDATED** - Test common workflows with styling parameter updates:
 
 ```python
 """End-to-end tests for common user workflows."""
 
-def test_load_csv_and_visualize():
-    """Load CSV → visualize workflow."""
-    pass
+from chatuvisbox.conversation import ConversationSession
+import matplotlib.pyplot as plt
 
-def test_generate_and_modify():
-    """Generate → visualize → modify parameters workflow."""
-    pass
 
-def test_hybrid_control_workflow():
-    """Test quick parameter updates via hybrid control."""
-    pass
+def test_iterative_styling_workflow():
+    """Test workflow of generating data then iteratively adjusting styling."""
+    session = ConversationSession()
 
-def test_session_cleanup_workflow():
-    """Test full session with cleanup."""
-    pass
+    # Generate and visualize
+    result1 = session.send("Generate 20 curves and plot functional boxplot")
+    assert result1['last_vis_params'] is not None
 
-# 4-5 tests, ~100 lines, 20-25 API calls
-```
+    # Update median styling
+    result2 = session.send("median color blue")
+    assert result2['last_vis_params']['median_color'] == 'blue'
 
----
+    # Update outliers
+    result3 = session.send("show outliers")
+    assert result3['last_vis_params']['show_outliers'] == True
 
-### Task 9.5: Create Test Utilities
+    # Update outliers styling
+    result4 = session.send("outliers color black")
+    assert result4['last_vis_params']['outliers_color'] == 'black'
 
-#### File: `tests/utils/run_all_tests.py`
+    # Update outliers alpha
+    result5 = session.send("outliers alpha 1.0")
+    assert result5['last_vis_params']['outliers_alpha'] == 1.0
 
-Improved test runner:
+    session.clear()
+    plt.close('all')
 
-```python
-"""
-Run all tests with proper delays for rate limits.
 
-Usage:
-    python tests/utils/run_all_tests.py               # Run all
-    python tests/utils/run_all_tests.py --unit        # Unit tests only
-    python tests/utils/run_all_tests.py --integration # Integration tests only
-    python tests/utils/run_all_tests.py --e2e         # E2E tests only
-    python tests/utils/run_all_tests.py --quick       # Unit + test_simple.py
-"""
+def test_full_customization_workflow():
+    """Test comprehensive styling customization."""
+    session = ConversationSession()
 
-import subprocess
-import time
-import sys
-import argparse
+    # Start with visualization
+    session.send("Generate 25 curves and show functional boxplot")
 
-UNIT_TESTS = [
-    "tests/unit/test_tools.py",
-    "tests/unit/test_routing.py",
-    "tests/unit/test_command_parser.py",
-    "tests/unit/test_config.py",
-]
+    # Customize median
+    session.send("median color red")
+    session.send("median width 4.0")
+    session.send("median alpha 0.9")
 
-INTEGRATION_TESTS = [
-    "tests/integration/test_graph_workflow.py",
-    "tests/integration/test_conversation.py",
-    "tests/integration/test_hybrid_control.py",
-    "tests/integration/test_error_handling.py",
-    "tests/integration/test_session_management.py",
-]
+    # Customize outliers
+    session.send("show outliers")
+    session.send("outliers color darkgray")
+    session.send("outliers width 2.0")
+    result = session.send("outliers alpha 0.7")
 
-E2E_TESTS = [
-    "tests/e2e/test_all_visualizations.py",
-    "tests/e2e/test_user_workflows.py",
-    "tests/e2e/test_matplotlib.py",
-]
+    # Verify final state
+    params = result['last_vis_params']
+    assert params['median_color'] == 'red'
+    assert params['median_width'] == 4.0
+    assert params['outliers_alpha'] == 0.7
 
-def run_tests(test_files, delay=3):
-    """Run tests with delays between files."""
-    passed = 0
-    failed = 0
+    session.clear()
+    plt.close('all')
 
-    for i, test_file in enumerate(test_files):
-        print(f"\n{'='*70}")
-        print(f"Running: {test_file}")
-        print('='*70)
 
-        result = subprocess.run(
-            ["python", test_file],
-            capture_output=False
-        )
-
-        if result.returncode == 0:
-            passed += 1
-        else:
-            failed += 1
-
-        # Delay between tests
-        if i < len(test_files) - 1:
-            print(f"\n⏳ Pausing {delay}s to respect rate limits...")
-            time.sleep(delay)
-
-    return passed, failed
-
-# ... implementation
-```
-
----
-
-### Task 9.6: Create Documentation
-
-#### File: `tests/README.md`
-
-```markdown
-# ChatUVisBox Test Suite
-
-## Quick Start
-
-```bash
-# Quick sanity check (30 seconds)
-python tests/test_simple.py
-
-# Run all tests with automatic delays (~10 minutes)
-python tests/utils/run_all_tests.py
-
-# Run specific test category
-python tests/utils/run_all_tests.py --unit          # Fast, no API calls
-python tests/utils/run_all_tests.py --integration  # 3-4 minutes
-python tests/utils/run_all_tests.py --e2e          # 4-5 minutes
-```
-
-## Test Categories
-
-### Unit Tests (`tests/unit/`)
-- **Purpose**: Test individual functions and components in isolation
-- **API Calls**: 0 (no LLM calls)
-- **Duration**: < 10 seconds
-- **When to run**: After modifying individual functions
-
-**Files**:
-- `test_tools.py` - Test data_tools and vis_tools functions
-- `test_routing.py` - Test routing logic
-- `test_command_parser.py` - Test hybrid control command parsing
-- `test_config.py` - Test configuration loading
-
-### Integration Tests (`tests/integration/`)
-- **Purpose**: Test component interactions (LangGraph, ConversationSession)
-- **API Calls**: 15-25 per file
-- **Duration**: 2-4 minutes per file
-- **When to run**: After modifying workflows or state management
-
-**Files**:
-- `test_graph_workflow.py` - LangGraph execution workflows
-- `test_conversation.py` - Multi-turn conversation state
-- `test_hybrid_control.py` - Fast parameter updates
-- `test_error_handling.py` - Error recovery and circuit breaker
-- `test_session_management.py` - Session cleanup and stats
-
-### End-to-End Tests (`tests/e2e/`)
-- **Purpose**: Test complete user workflows
-- **API Calls**: 20-30 per file
-- **Duration**: 3-5 minutes per file
-- **When to run**: Before releases or major changes
-
-**Files**:
-- `test_all_visualizations.py` - All 5 visualization types
-- `test_user_workflows.py` - Common user scenarios
-- `test_matplotlib.py` - Matplotlib non-blocking behavior
-
-### Interactive Tests (`tests/interactive/`)
-- **Purpose**: Manual testing and exploration
-- **API Calls**: User-paced
-- **Duration**: User-controlled
-- **When to run**: For manual verification
-
-**Files**:
-- `interactive_test.py` - Menu-driven testing with 24+ scenarios
-
-## Test Coverage
-
-| Component | Unit | Integration | E2E |
-|-----------|------|-------------|-----|
-| Data Tools | ✓ | ✓ | ✓ |
-| Vis Tools | ✓ | ✓ | ✓ |
-| LangGraph | - | ✓ | ✓ |
-| Conversation | - | ✓ | ✓ |
-| Hybrid Control | ✓ | ✓ | ✓ |
-| Error Handling | - | ✓ | ✓ |
-| Session Mgmt | ✓ | ✓ | ✓ |
-
-## Rate Limit Guidelines
-
-**Gemini Free Tier**: 30 requests per minute
-
-- Unit tests: 0 API calls (safe to run repeatedly)
-- Integration tests: Wait 60s between runs
-- E2E tests: Wait 60s between runs
-- Full suite: Automatic delays built-in
-
-## CI/CD Recommendations
-
-```yaml
-# Fast feedback loop (on every commit)
-- Unit tests (< 10s, no API calls)
-- test_simple.py (30s, 1-2 API calls)
-
-# Pull request validation
-- Unit tests
-- Integration tests
-- test_simple.py
-
-# Pre-release validation
-- All tests (unit + integration + e2e)
-```
+# 5-6 tests covering common workflows with styling
+# ~150 lines, 25-30 API calls
 ```
 
 ---
@@ -590,20 +723,20 @@ python tests/utils/run_all_tests.py --e2e          # 4-5 minutes
 mkdir -p tests/unit tests/integration tests/e2e tests/interactive tests/utils
 ```
 
-### Step 2: Create Core Files
+### Step 2: Create Core Files with BoxplotStyleConfig Updates
 1. Create `test_simple.py` (root level)
-2. Create all unit tests
-3. Create all integration tests (consolidate existing)
-4. Create all e2e tests (consolidate existing)
+2. Create all unit tests **with BoxplotStyleConfig parameters**
+3. Create all integration tests **with hybrid control styling tests**
+4. Create all e2e tests **with full parameter coverage**
 5. Create test runner and README
 
-### Step 3: Move and Adapt Existing Tests
+### Step 3: Move and Update Existing Tests
 1. Move `test_routing.py` → `unit/test_routing.py`
 2. Move `test_error_handling.py` → `integration/`
-3. Move `test_hybrid_control.py` → `integration/`
+3. **Update** `test_hybrid_control.py` → `integration/` (**add styling param tests**)
 4. Move `test_session_management.py` → `integration/`
 5. Move `test_matplotlib_behavior.py` → `e2e/test_matplotlib.py`
-6. Move `interactive_test.py` → `interactive/`
+6. **Update** `interactive_test.py` → `interactive/` (**add styling scenarios**)
 
 ### Step 4: Delete Obsolete Tests
 ```bash
@@ -619,7 +752,10 @@ rm tests/simple_test.py
 ```
 
 ### Step 5: Update CLAUDE.md and TESTING.md
-Update documentation to reflect new structure.
+Update documentation to reflect:
+- New test structure
+- **BoxplotStyleConfig parameter testing**
+- **New hybrid control commands for styling**
 
 ---
 
@@ -627,14 +763,54 @@ Update documentation to reflect new structure.
 
 - [ ] test_simple.py works as quick sanity check
 - [ ] All unit tests pass (0 API calls)
+- [ ] **Unit tests cover all BoxplotStyleConfig parameters**
 - [ ] All integration tests pass with delays
+- [ ] **Hybrid control tests cover all new styling commands**
 - [ ] All e2e tests pass with delays
+- [ ] **E2E tests verify full parameter preservation**
 - [ ] Test README clearly explains structure
-- [ ] CLAUDE.md updated with new test structure
+- [ ] CLAUDE.md updated with BoxplotStyleConfig interface
 - [ ] TESTING.md updated with new commands
 - [ ] Old test files deleted
 - [ ] Total line count reduced by ~1000+ lines
 - [ ] New tests are more maintainable and clearer
+- [ ] **No references to deprecated plot_all_curves parameter**
+
+---
+
+## Key Updates for BoxplotStyleConfig
+
+### Parameters to Test:
+
+**Core Parameters:**
+- `percentiles`: List[float]
+- `percentile_colormap`: str
+
+**Median Styling:**
+- `show_median`: bool
+- `median_color`: str
+- `median_width`: float
+- `median_alpha`: float
+
+**Outliers Styling:**
+- `show_outliers`: bool
+- `outliers_color`: str
+- `outliers_width`: float
+- `outliers_alpha`: float
+
+**Performance:**
+- `workers`: int (for curve_boxplot and contour_boxplot)
+
+### Deprecated Parameters:
+- ❌ `plot_all_curves` - REMOVED, do not test
+
+### New Hybrid Commands to Test:
+- `median color <color>`
+- `median width <number>`
+- `median alpha <number>`
+- `outliers color <color>`
+- `outliers width <number>`
+- `outliers alpha <number>`
 
 ---
 
@@ -645,14 +821,17 @@ Update documentation to reflect new structure.
 - Unclear naming (test_phase1.py, test_graph.py)
 - Redundant tests (3 graph tests)
 - Hard to know what to run
+- **Tests don't cover BoxplotStyleConfig parameters**
 
 **After (Phase 9)**:
-- ~14 test files, ~1500-1700 lines
+- ~14 test files, ~1600-1800 lines
 - Clear categories (unit/, integration/, e2e/)
 - One simple sanity check (test_simple.py)
 - Clear documentation (tests/README.md)
 - Consolidated redundant tests
 - Easy to run subset of tests
+- **Comprehensive BoxplotStyleConfig parameter coverage**
+- **All 13 new styling commands tested**
 
 **Benefits**:
 1. ✅ Clear test organization
@@ -661,9 +840,11 @@ Update documentation to reflect new structure.
 4. ✅ Reduced redundancy
 5. ✅ Better maintainability
 6. ✅ Clear documentation
+7. ✅ **Full BoxplotStyleConfig interface coverage**
+8. ✅ **Styling parameter validation**
 
 ---
 
 ## Next Phase
 
-Phase 10 will focus on final documentation, packaging, and distribution preparation.
+Phase 10 will focus on final documentation, packaging, and distribution preparation with updated BoxplotStyleConfig API documentation.
