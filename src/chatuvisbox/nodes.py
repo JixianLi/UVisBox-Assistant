@@ -3,7 +3,7 @@ from typing import Dict
 from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 import os
 
-from chatuvisbox.state import GraphState, update_state_with_data, update_state_with_viz, increment_error_count
+from chatuvisbox.state import GraphState, update_state_with_data, update_state_with_vis, increment_error_count
 from chatuvisbox.model import create_model_with_tools, prepare_messages_for_model
 from chatuvisbox.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
 from chatuvisbox.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
@@ -110,7 +110,7 @@ def call_data_tool(state: GraphState) -> Dict:
         }
 
 
-def call_viz_tool(state: GraphState) -> Dict:
+def call_vis_tool(state: GraphState) -> Dict:
     """
     Node that executes a visualization tool.
 
@@ -124,7 +124,7 @@ def call_viz_tool(state: GraphState) -> Dict:
 
     # Extract tool call
     if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
-        raise ValueError("call_viz_tool invoked but no tool_calls in last message")
+        raise ValueError("call_vis_tool invoked but no tool_calls in last message")
 
     tool_call = last_message.tool_calls[0]
     tool_name = tool_call["name"]
@@ -138,7 +138,7 @@ def call_viz_tool(state: GraphState) -> Dict:
         if tool_name not in VIS_TOOLS:
             result = {
                 "status": "error",
-                "message": f"Unknown viz tool: {tool_name}"
+                "message": f"Unknown vis tool: {tool_name}"
             }
         else:
             tool_func = VIS_TOOLS[tool_name]
@@ -157,7 +157,7 @@ def call_viz_tool(state: GraphState) -> Dict:
 
         if result.get("status") == "success" and "_viz_params" in result:
             # Extract _viz_params from result for state storage
-            state_updates.update(update_state_with_viz(state, result["_viz_params"]))
+            state_updates.update(update_state_with_vis(state, result["_viz_params"]))
         else:
             state_updates.update(increment_error_count(state))
 

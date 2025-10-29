@@ -60,15 +60,15 @@ def update_state_with_data(state: GraphState, data_path: str) -> dict:
     }
 
 
-def update_state_with_viz(state: GraphState, viz_params: dict) -> dict:
+def update_state_with_vis(state: GraphState, vis_params: dict) -> dict:
     """
-    Update state after successful viz tool execution.
+    Update state after successful vis tool execution.
 
     Returns:
         Dict of updates to merge into state
     """
     return {
-        "last_viz_params": viz_params,
+        "last_viz_params": vis_params,
         "error_count": 0  # Reset error count on success
     }
 

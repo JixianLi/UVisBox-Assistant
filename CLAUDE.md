@@ -22,20 +22,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The system uses a **two-tier execution model**:
 
 1. **Full LangGraph Workflow** (for complex/ambiguous requests):
-   - User Input → Model Node → Tool Dispatcher (data or viz) → Model Node → Response
+   - User Input → Model Node → Tool Dispatcher (data or vis) → Model Node → Response
    - Maintains conversation state across multi-turn interactions
    - Handles data loading, transformation, and visualization in sequence
 
 2. **Hybrid Fast Path** (for simple parameter updates):
    - Direct pattern matching (e.g., "colormap plasma", "percentile 80")
    - Bypasses LangGraph for ~10x speed improvement
-   - Updates `last_viz_params` and re-executes visualization directly
+   - Updates `last_vis_params` and re-executes visualization directly
 
 ### Key Components
 
 ```
 graph.py          - ✅ DONE: LangGraph StateGraph definition with conditional routing
-state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_viz_params, session_files
+state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_vis_params, session_files
 nodes.py          - ✅ DONE: Three core nodes: call_model, call_data_tool, call_vis_tool
 routing.py        - ✅ DONE: Conditional logic: route_after_model, route_after_tool
 model.py          - ✅ DONE: ChatGoogleGenerativeAI setup with tool binding (updated with directive prompt)
@@ -62,7 +62,7 @@ START → call_model → [route_after_model]
 **GraphState fields**:
 - `messages`: Full conversation history (List[BaseMessage])
 - `current_data_path`: Path to most recent .npy file
-- `last_viz_params`: Dict with `_tool_name`, `data_path`, and viz parameters
+- `last_vis_params`: Dict with `_tool_name`, `data_path`, and vis parameters
 - `session_files`: List of temp files created (for cleanup)
 - `error_count`: Circuit breaker (max 3 consecutive errors → END)
 
@@ -147,6 +147,9 @@ python test_graph_quick.py
 # No API calls - instant validation
 python test_routing.py
 python test_phase1.py
+
+# Interactive menu-driven testing - user-paced, 24+ scenarios (BEST FOR DEMOS)
+python interactive_test.py
 
 # Full suite with automatic delays - ~5-7 minutes
 python run_tests_with_delays.py
@@ -345,7 +348,7 @@ All expect numpy arrays and return matplotlib axes.
 3. **Don't block on plt.show()** - Always use `block=False`
 4. **Don't skip phase validation** - Each phase has a checklist; complete before moving on
 5. **Don't hardcode file paths** - Use `config.TEMP_DIR` and `config.TEST_DATA_DIR`
-6. **Don't forget _tool_name** - Required in viz params for hybrid control
+6. **Don't forget _tool_name** - Required in vis params for hybrid control
 7. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors
 8. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
 
@@ -361,7 +364,7 @@ from uvisbox.Modules import uncertainty_lobes
 ```
 
 ### Visualization Return Format
-All viz tools MUST include `_viz_params` for hybrid control (Phase 7):
+All vis tools MUST include `_viz_params` for hybrid control (Phase 7):
 ```python
 return {
     "status": "success",
@@ -412,9 +415,9 @@ chatuvisbox/
 ├── test_graph.py            # ✅ DONE Phase 3: Graph compilation tests (5-8 API calls)
 ├── test_graph_quick.py      # ✅ DONE Phase 3: Quick integration test (6-10 API calls) ⭐ RECOMMENDED
 ├── test_graph_integration.py # ✅ DONE Phase 3: Full integration tests (15-20 API calls)
-├── test_happy_path.py       # ✅ DONE Phase 4: End-to-end tests all viz types (25-35 API calls)
+├── test_happy_path.py       # ✅ DONE Phase 4: End-to-end tests all vis types (25-35 API calls)
 ├── test_matplotlib_behavior.py # ✅ DONE Phase 4: Matplotlib non-blocking tests (0 API calls)
-├── interactive_test.py      # ✅ DONE Phase 4: Manual interactive testing (variable API calls)
+├── interactive_test.py      # ✅ DONE Phase 4: Menu-driven testing with 24+ pre-defined scenarios (user-paced)
 ├── run_tests_with_delays.py # ✅ DONE: Automated test runner (respects rate limits)
 ├── TESTING.md               # ✅ DONE: Comprehensive testing guide
 ├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy

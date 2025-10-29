@@ -10,8 +10,8 @@ def is_data_tool(tool_name: str) -> bool:
     return tool_name in DATA_TOOLS
 
 
-def is_viz_tool(tool_name: str) -> bool:
-    """Check if a tool name corresponds to a viz tool."""
+def is_vis_tool(tool_name: str) -> bool:
+    """Check if a tool name corresponds to a vis tool."""
     from chatuvisbox.vis_tools import VIS_TOOLS
     return tool_name in VIS_TOOLS
 
@@ -21,12 +21,12 @@ def get_tool_type(tool_name: str) -> Optional[str]:
     Determine the type of tool.
 
     Returns:
-        "data", "viz", or None if unknown
+        "data", "vis", or None if unknown
     """
     if is_data_tool(tool_name):
         return "data"
-    elif is_viz_tool(tool_name):
-        return "viz"
+    elif is_vis_tool(tool_name):
+        return "vis"
     return None
 
 

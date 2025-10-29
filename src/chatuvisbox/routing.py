@@ -4,21 +4,21 @@ from chatuvisbox.state import GraphState
 from chatuvisbox.utils import get_tool_type
 
 
-def route_after_model(state: GraphState) -> Literal["data_tool", "viz_tool", "end"]:
+def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "end"]:
     """
     Determine the next node after the model has responded.
 
     Logic:
     - If the last message contains tool_calls:
       - Route to "data_tool" if it's a data tool
-      - Route to "viz_tool" if it's a viz tool
+      - Route to "vis_tool" if it's a vis tool
     - Otherwise, route to "end" (conversation response without tool call)
 
     Args:
         state: Current graph state
 
     Returns:
-        Next node name: "data_tool", "viz_tool", or "end"
+        Next node name: "data_tool", "vis_tool", or "end"
     """
     last_message = state["messages"][-1]
 
@@ -36,8 +36,8 @@ def route_after_model(state: GraphState) -> Literal["data_tool", "viz_tool", "en
 
     if tool_type == "data":
         return "data_tool"
-    elif tool_type == "viz":
-        return "viz_tool"
+    elif tool_type == "vis":
+        return "vis_tool"
     else:
         # Unknown tool - end and let user see the error
         print(f"WARNING: Unknown tool type for {tool_name}")

@@ -1,7 +1,7 @@
 """LangGraph workflow definition for ChatUVisBox"""
 from langgraph.graph import StateGraph, END
 from chatuvisbox.state import GraphState
-from chatuvisbox.nodes import call_model, call_data_tool, call_viz_tool
+from chatuvisbox.nodes import call_model, call_data_tool, call_vis_tool
 from chatuvisbox.routing import route_after_model, route_after_tool
 
 
@@ -12,7 +12,7 @@ def create_graph():
     Graph structure:
         START -> model -> [conditional]
                             ├─> data_tool -> model (loop)
-                            ├─> viz_tool -> model (loop)
+                            ├─> vis_tool -> model (loop)
                             └─> END (if no tool call)
 
     Returns:
@@ -24,7 +24,7 @@ def create_graph():
     # Add nodes
     workflow.add_node("model", call_model)
     workflow.add_node("data_tool", call_data_tool)
-    workflow.add_node("viz_tool", call_viz_tool)
+    workflow.add_node("vis_tool", call_vis_tool)
 
     # Set entry point
     workflow.set_entry_point("model")
@@ -35,7 +35,7 @@ def create_graph():
         route_after_model,
         {
             "data_tool": "data_tool",
-            "viz_tool": "viz_tool",
+            "vis_tool": "vis_tool",
             "end": END
         }
     )
@@ -51,7 +51,7 @@ def create_graph():
     )
 
     workflow.add_conditional_edges(
-        "viz_tool",
+        "vis_tool",
         route_after_tool,
         {
             "model": "model",
