@@ -10,18 +10,20 @@ import sys
 
 def main():
     """Main entry point for ChatUVisBox."""
-    print("ChatUVisBox v0.1.0")
-    print("Natural language interface for UVisBox")
-    print()
-    print("This is a placeholder for the main REPL (Phase 8).")
-    print("For now, use the test scripts:")
-    print("  - tests/interactive_test.py")
-    print("  - tests/test_happy_path.py")
-    print()
-    print("To run the interactive test:")
-    print("  python tests/interactive_test.py")
+    try:
+        from .main import main as run_repl
+        return run_repl()
 
-    return 0
+    except Exception as e:
+        print(f"Error starting ChatUVisBox: {e}")
+        print()
+        print("Make sure you have:")
+        print("  1. Set GEMINI_API_KEY environment variable")
+        print("  2. Installed all dependencies: pip install -r requirements.txt")
+        print("  3. Installed UVisBox: pip install uvisbox")
+        print()
+        print("For setup help, see docs/ENVIRONMENT_SETUP.md")
+        return 1
 
 
 if __name__ == "__main__":

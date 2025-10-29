@@ -6,20 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 9 Complete (2025-10-29). Implementing phases sequentially per `plans/` directory.
+**Current Version**: v0.1.0 (Released 2025-01-29)
 
-**Completed Phases**:
-- ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
-- ✅ **Phase 2**: LangGraph state management, model setup, core nodes (2025-10-26)
-- ✅ **Phase 3**: Graph wiring, routing logic, end-to-end workflow (2025-10-26)
-- ✅ **Phase 4**: End-to-end happy path tests, matplotlib verification, interactive testing (2025-10-27)
-- ✅ **Phase 4.5**: Codebase restructure to professional Python package with Poetry (2025-10-27)
-- ✅ **Phase 5**: Error handling, circuit breaker, context awareness, logging (2025-10-28)
-- ✅ **Phase 6**: Multi-turn conversation with ConversationSession, interactive REPL (2025-10-28)
-- ✅ **Phase 7**: Hybrid control for 10-15x faster parameter updates (2025-10-28)
-- ✅ **Phase 8**: Session management, file cleanup, statistics, polished REPL (2025-10-29)
-- ✅ **Phase 9**: Comprehensive test reorganization with BoxplotStyleConfig testing (2025-10-29)
-- ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
+**Key Features**:
+- ✅ Natural language interface for 5 visualization types
+- ✅ BoxplotStyleConfig with 10 styling parameters
+- ✅ Hybrid control system (13+ commands, 10-15x faster updates)
+- ✅ Multi-turn conversation with context preservation
+- ✅ Session management with automatic cleanup
+- ✅ Error handling with circuit breaker
+- ✅ Comprehensive test suite (unit/integration/e2e/interactive)
+- ✅ Complete documentation (User Guide, API Reference, Testing Guide)
 
 ## Architecture
 
@@ -46,14 +43,14 @@ nodes.py          - ✅ DONE: Three core nodes with error handling: call_model, 
 routing.py        - ✅ DONE: Conditional logic with circuit breaker: route_after_model, route_after_tool
 model.py          - ✅ DONE: ChatGoogleGenerativeAI with error recovery prompt and context awareness
 utils.py          - ✅ DONE: Tool type detection and file management utilities
-data_tools.py     - ✅ DONE: Functions: load_csv_to_numpy, generate_ensemble_curves, load_npy, generate_scalar_field_ensemble, generate_vector_field_ensemble
-vis_tools.py      - ✅ DONE: UVisBox wrappers: plot_functional_boxplot, plot_curve_boxplot, probabilistic_marching_squares, plot_uncertainty_lobes, plot_contour_boxplot
+data_tools.py     - ✅ DONE: Data generation and loading functions
+vis_tools.py      - ✅ DONE: UVisBox visualization wrappers with BoxplotStyleConfig
 config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
-logger.py         - ✅ DONE Phase 5: Logging infrastructure with file and console output
-conversation.py   - ✅ DONE Phase 6: ConversationSession class for multi-turn conversations with Phase 7 hybrid control integration
-command_parser.py - ✅ DONE Phase 7: Parse simple commands for hybrid control (127 lines)
-hybrid_control.py - ✅ DONE Phase 7: Execute simple commands directly, 10-15x speedup (86 lines)
-main.py           - Interactive REPL with command handling (/help, /context, /clear, /quit) (TODO: Phase 8)
+logger.py         - ✅ DONE: Logging infrastructure with file and console output
+conversation.py   - ✅ DONE: ConversationSession class for multi-turn conversations with hybrid control
+command_parser.py - ✅ DONE: Parse simple commands for hybrid control (13+ patterns)
+hybrid_control.py - ✅ DONE: Execute simple commands directly, 10-15x speedup
+main.py           - ✅ DONE: Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
 ```
 
 ### LangGraph Flow
@@ -87,7 +84,7 @@ START → call_model → [route_after_model]
 ### Required Environment Variable
 - `GEMINI_API_KEY` must be set in system environment (not in `.env` file)
 - Check with: `echo $GEMINI_API_KEY`
-- See `ENVIRONMENT_SETUP.md` for detailed configuration instructions
+- See `docs/ENVIRONMENT_SETUP.md` for detailed configuration instructions
 
 ### Conda Environment
 ```bash
@@ -106,26 +103,28 @@ pip install -r requirements.txt
 
 ## Development Workflow
 
-### Implementation Phases (Sequential)
+### Project Status
 
-Follow `plans/README.md` for complete guidance. Phases must be completed in order:
+ChatUVisBox v0.1.0 is **feature complete** with all core functionality implemented:
 
-**Milestone 1 (Days 1-5)**: Core Pipeline ✅ COMPLETE
-- ✅ Phase 1: Create data_tools.py, vis_tools.py, config.py with tool schemas
-- ✅ Phase 2: Create state.py, nodes.py, model.py
-- ✅ Phase 3: Create graph.py with routing logic
-- ✅ Phase 4: End-to-end happy path test
-- ✅ Phase 4.5: Professional package structure with Poetry
+**Core Features** ✅ COMPLETE
+- LangGraph workflow with state management
+- 5 visualization types with BoxplotStyleConfig support
+- Data generation and loading tools
+- Error handling with circuit breaker
+- Logging infrastructure
 
-**Milestone 2 (Days 6-8)**: Robustness ✅ COMPLETE
-- ✅ Phase 5: Error handling with circuit breaker (COMPLETE 2025-10-28)
-- ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE 2025-10-28)
-- ✅ Phase 7: Hybrid control with command_parser.py (COMPLETE 2025-10-28)
+**User Experience** ✅ COMPLETE
+- Multi-turn conversation support
+- Hybrid control system (13+ fast commands)
+- Session management with cleanup
+- Interactive REPL with full commands
 
-**Milestone 3 (Days 9-11)**: Polish (2/3 complete)
-- ✅ Phase 8: Session management with clear_session tool (COMPLETE 2025-10-29)
-- ✅ Phase 9: Comprehensive testing with BoxplotStyleConfig coverage (COMPLETE 2025-10-29)
-- ⏭️ Phase 10: Documentation and packaging
+**Quality Assurance** ✅ COMPLETE
+- Comprehensive test suite (unit/integration/e2e/interactive)
+- 45+ unit tests with 0 API calls
+- BoxplotStyleConfig testing coverage
+- Documentation complete (User Guide, API Reference, Testing Guide)
 
 ### Temporary Verification Files
 
@@ -142,7 +141,7 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 
 **Purpose**: Provide detailed verification context for human review, then discard.
 
-### Testing Commands (Phase 9 v2.0)
+### Testing Commands
 
 **⚠️ IMPORTANT: Gemini Free Tier Rate Limits**
 - 30 requests per minute (using gemini-2.0-flash-lite)
@@ -160,7 +159,7 @@ python tests/utils/run_all_tests.py --unit
 python tests/utils/run_all_tests.py
 ```
 
-**Category-Based Testing (Phase 9 Structure):**
+**Category-Based Testing:**
 ```bash
 # Unit tests (0 API calls, < 15 seconds)
 python tests/utils/run_all_tests.py --unit
@@ -189,8 +188,8 @@ python tests/interactive/interactive_test.py
 python tests/utils/run_all_tests.py --quick
 ```
 
-**BoxplotStyleConfig Testing (Phase 9 v2.0):**
-- 17 command parser tests for new styling parameters (median/outliers color/width/alpha)
+**BoxplotStyleConfig Testing:**
+- 17 command parser tests for styling parameters (median/outliers color/width/alpha)
 - 8 config tests for BoxplotStyleConfig defaults
 - 10 tool tests for direct function calls with full styling
 - Total: 45+ unit tests, all 0 API calls, instant execution
@@ -198,7 +197,7 @@ python tests/utils/run_all_tests.py --quick
 ### Running the Application
 
 ```bash
-# Phase 8 COMPLETE - Full REPL with commands
+# Full REPL with commands
 python main.py
 
 # Alternative (using package entry point)
@@ -224,7 +223,7 @@ python -m chatuvisbox
 ### 3. Matplotlib Non-Blocking
 Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction while plots are open.
 
-### 4. Error Handling Pattern (Phase 5)
+### 4. Error Handling Pattern
 - All tool functions return `{"status": "success"|"error", "message": ..., ...}`
 - Tool nodes wrap execution in try-except, always return ToolMessage
 - Graph loops back to model on error for clarification
@@ -238,7 +237,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Temp files: `temp/_temp_*.npy` (auto-generated, gitignored)
 - Clear on session end with `clear_session()` tool
 
-### 6. Hybrid Control Model (Phase 7)
+### 6. Hybrid Control Model
 **Decision**: Two-tier execution - full LangGraph for complex queries, direct execution for simple commands.
 
 **Simple Commands** (Fast Path):
@@ -256,8 +255,8 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - `hybrid_control.py`: Direct execution with parameter validation
 - `conversation.py`: Checks hybrid eligibility before full graph
 
-### 7. Test Organization (Phase 9 v2.0)
-**Decision**: Category-based test structure (unit/integration/e2e/interactive) instead of phase-based.
+### 7. Test Organization
+**Decision**: Category-based test structure (unit/integration/e2e/interactive) for clear separation by API usage.
 
 **Test Categories**:
 - **Unit tests** (`tests/unit/`): 0 API calls, instant execution, 45+ tests
@@ -265,7 +264,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - **E2E tests** (`tests/e2e/`): 20-30 API calls per file, complete scenarios
 - **Interactive tests** (`tests/interactive/`): User-paced, menu-driven exploration
 
-**BoxplotStyleConfig Testing** (v2.0):
+**BoxplotStyleConfig Testing**:
 - 17 command parser tests for styling parameters (median/outliers color/width/alpha)
 - 8 config tests for BoxplotStyleConfig defaults
 - 10 tool tests for direct function calls with full styling
@@ -325,115 +324,100 @@ return {
 
 ## UVisBox Interface Reference
 
-Key matplotlib-based functions for MVP:
+ChatUVisBox uses the following matplotlib-based UVisBox functions:
 
-- `functional_boxplot(data, method='fdb', percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7, plot_all_curves=False)` ⚠️ **Updated 2025-10-26**
-- `curve_boxplot(curves, percentiles=[25, 50, 90, 100], ax=None, colors=None, alpha=0.7)` ⚠️ **Updated 2025-10-26**
-- `probabilistic_marching_squares(F, isovalue, cmap='viridis', ax=None)`
-- `uncertainty_lobes(positions, ensemble_vectors, percentile1=50, percentile2=90, scale=0.2, ax=None)` ⚠️ **Updated 2025-10-28**
-- `contour_boxplot(ensemble_images, isovalue, percentiles=[25, 50, 75, 90], ax=None, colormap='viridis', show_median=True, show_outliers=True, workers=12)` ⚠️ **Added 2025-10-28**
-
-All expect numpy arrays and return matplotlib axes.
-
-### API Changes
-
-**2025-10-28 (Latest)**: Major updates to data generation, visualization tools, and dependencies:
-
-**contour_boxplot** (NEW):
-- Added wrapper for UVisBox's `contour_boxplot` function
-- Creates band depth visualization of binary contours from scalar field ensembles
-- Accepts data with shape (ny, nx, n_ensemble), transposes to (n_ensemble, ny, nx)
-- Parameters: `isovalue`, `percentiles`, `colormap`, `show_median`, `show_outliers`
-- Automatically extracts binary contours and computes band depths
-
-**generate_vector_field_ensemble** (NEW):
-- Added new function for generating 2D vector field ensembles
-- Parameters: `x_res`, `y_res`, `n_instances`, `initial_direction`, `initial_magnitude`
-- Direction variation increases with x, magnitude variation increases with y
-- Returns both `positions_path` and `vectors_path`
-
-**generate_scalar_field_ensemble** (UPDATED):
-- Changed from random Gaussian centers to fixed center at (nx/2, ny/2)
-- Standard deviation now varies systematically: σx = nx + ensemble_index, σy = ny
-- Rescales to [0,1], adds uniform noise [0, 0.1), then rescales again
-- More predictable variation for testing
-
-**uncertainty_lobes** (UPDATED):
-- Parameter `percentil1` → `percentile1` (fixed typo, added 'e')
-- Parameter `percentil2` → `percentile2` (fixed typo, added 'e')
-- Parameter `positions` is now **required** (was optional in brief experimental version)
-- Default values: `percentile1=90`, `percentile2=50` (note: percentile1 should be > percentile2)
-- Range changed from [0,1] to [0,100] for percentiles
-
-**File Naming Convention**:
-- All `vis_tools.py` → `vis_tools.py`
-- All `VIS_TOOLS` → `VIS_TOOLS`
-- All `VIS_TOOL_SCHEMAS` → `VIS_TOOL_SCHEMAS`
-- All `DEFAULT_VIS_PARAMS` → `DEFAULT_VIS_PARAMS`
-
-**Model Prompt** (UPDATED):
-- More directive: "IMMEDIATELY use visualization tools" without asking for confirmation
-- Emphasizes automatic progression from data generation to visualization
-
-**Python Version** (UPDATED):
-- Minimum: Python 3.10
-- Maximum: Python 3.13 (excludes 3.14+)
-- Default: Python 3.13 in conda environment
-- Linting tools (black, ruff) target Python 3.13
-
-**Dependencies** (UPDATED):
-- langchain: 0.1.0 → 0.3.27
-- langchain-google-genai: 2.0.4 → 2.1.12
-- langgraph: 0.2.53 → 0.2.76
-- **google-generativeai: REMOVED** (was causing dependency conflict, not directly used)
-- numpy: 1.26.0 → 1.26.4
-- pandas: 2.2.0 → 2.3.3
-- matplotlib: 3.8.0 → 3.10.7
-- langsmith: 0.1.0 → 0.4.38
-- Poetry lock file now generated successfully with caret (^) version notation
-
-**2025-10-26**: `functional_boxplot` added `plot_all_curves` parameter:
-- Added `plot_all_curves` parameter (boolean, default False)
-- When True, plots all individual curves in addition to the boxplot bands
-- Useful for showing raw data alongside statistical summary
-
-**2025-10-26 (Earlier)**: Both `functional_boxplot` and `curve_boxplot` updated to support multiple percentile bands:
+### Boxplot Functions (with BoxplotStyleConfig)
 
 **functional_boxplot**:
-- Parameter `curves` → `data`
-- Parameter `percentil` (float) → `percentiles` (list of floats)
-- Parameter `band_alpha` (float) → `alpha` (float)
-- Added `method` parameter ('fdb' or 'mfdb', default 'fdb')
-- Added `colors` parameter (list of strings, optional)
-- Removed `show_median` parameter (always shows median)
-- Removed `curves_depths` parameter (auto-computed)
-- Default `alpha` changed from 0.5 → 0.7
-- Now supports multiple percentile bands instead of single band
+```python
+functional_boxplot(data, method='fdb', boxplot_style=None, ax=None)
+```
+- `data`: NumPy array of shape (n_curves, n_points)
+- `method`: Band depth method ('fdb' or 'mfdb', default: 'fdb')
+- `boxplot_style`: BoxplotStyleConfig instance (optional)
+- `ax`: Matplotlib axes (optional)
 
 **curve_boxplot**:
-- Parameter `percentile` (float) → `percentiles` (list of floats)
-- Parameter `color_map` (str) → `colors` (list of strings, optional)
-- Default `alpha` changed from 1.0 → 0.7
-- Now supports multiple percentile bands instead of single band
+```python
+curve_boxplot(curves, boxplot_style=None, ax=None, workers=12)
+```
+- `curves`: NumPy array of shape (n_curves, n_points)
+- `boxplot_style`: BoxplotStyleConfig instance (optional)
+- `ax`: Matplotlib axes (optional)
+- `workers`: Number of parallel workers for band depth (default: 12)
+
+**contour_boxplot**:
+```python
+contour_boxplot(ensemble_images, isovalue, boxplot_style=None, ax=None, workers=12)
+```
+- `ensemble_images`: NumPy array of shape (n_ensemble, ny, nx)
+- `isovalue`: Float threshold for binary contour extraction (required)
+- `boxplot_style`: BoxplotStyleConfig instance (optional)
+- `ax`: Matplotlib axes (optional)
+- `workers`: Number of parallel workers (default: 12)
+
+### BoxplotStyleConfig
+
+The `BoxplotStyleConfig` dataclass controls boxplot styling:
+
+```python
+from uvisbox.Modules import BoxplotStyleConfig
+
+BoxplotStyleConfig(
+    percentiles=[25, 50, 90, 100],      # List of percentile values
+    percentile_colormap='viridis',       # Colormap for bands
+    show_median=True,                    # Show median curve
+    median_color='red',                  # Median color
+    median_width=3.0,                    # Median line width
+    median_alpha=1.0,                    # Median transparency (0.0-1.0)
+    show_outliers=False,                 # Show outlier curves
+    outliers_color='gray',               # Outliers color
+    outliers_width=1.0,                  # Outliers line width
+    outliers_alpha=0.5                   # Outliers transparency (0.0-1.0)
+)
+```
+
+### Other Visualization Functions
+
+**probabilistic_marching_squares**:
+```python
+probabilistic_marching_squares(F, isovalue, cmap='viridis', ax=None)
+```
+- `F`: NumPy array of shape (ny, nx, n_ensemble)
+- `isovalue`: Float threshold for contour extraction (required)
+- `cmap`: Matplotlib colormap name (default: 'viridis')
+- `ax`: Matplotlib axes (optional)
+
+**uncertainty_lobes**:
+```python
+uncertainty_lobes(positions, ensemble_vectors, percentile1=90, percentile2=50, scale=0.2, ax=None)
+```
+- `positions`: NumPy array of shape (n_points, 2)
+- `ensemble_vectors`: NumPy array of shape (n_points, 2, n_ensemble)
+- `percentile1`: Outer percentile (0-100, default: 90)
+- `percentile2`: Inner percentile (0-100, default: 50)
+- `scale`: Glyph scale factor (default: 0.2)
+- `ax`: Matplotlib axes (optional)
+
+**Note**: All functions expect numpy arrays and return matplotlib axes.
 
 ## Common Pitfalls to Avoid
 
 1. **Don't create .env files** - Use system environment variable `GEMINI_API_KEY`
-2. **Don't forget langchain-google-genai** - Critical missing dependency in original plan
+2. **Don't forget langchain-google-genai** - Critical dependency for Gemini integration
 3. **Don't block on plt.show()** - Always use `block=False`
-4. **Don't skip phase validation** - Each phase has a checklist; complete before moving on
-5. **Don't hardcode file paths** - Use `config.TEMP_DIR` and `config.TEST_DATA_DIR`
-6. **Don't forget _tool_name** - Required in vis params for hybrid control
-7. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors (Phase 5)
-8. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
-9. **Check logs for debugging** - All tool calls logged to `logs/chatuvisbox.log` (Phase 5)
-10. **Error count resets on success** - Don't manually reset error_count (Phase 5)
-11. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development (Phase 9)
-12. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params` (Phase 9)
+4. **Don't hardcode file paths** - Use `config.TEMP_DIR` and `config.TEST_DATA_DIR`
+5. **Don't forget _tool_name** - Required in vis params for hybrid control
+6. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors
+7. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
+8. **Check logs for debugging** - All tool calls logged to `logs/chatuvisbox.log`
+9. **Error count resets on success** - Don't manually reset error_count
+10. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development
+11. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params`
 
 ## Implementation-Specific Notes
 
-### UVisBox BoxplotStyleConfig Interface (Updated 2025-01-29)
+### UVisBox BoxplotStyleConfig Interface
 
 The UVisBox library now uses a `BoxplotStyleConfig` dataclass for boxplot styling:
 
@@ -468,10 +452,10 @@ contour_boxplot(ensemble_images, isovalue, boxplot_style=None, ax=None, workers=
 - outliers_width: float
 - outliers_alpha: float
 
-**Important Changes**:
-- ❌ `plot_all_curves` parameter removed (use `show_outliers` instead)
-- Parameter name is `boxplot_style` not `style_config`
-- Workers parameter added for parallel band depth computation
+**Important Notes**:
+- Parameter name is `boxplot_style` (not `style_config`)
+- Use `show_outliers` to control outlier curve display
+- `workers` parameter enables parallel band depth computation
 
 ### Visualization Return Format
 
@@ -520,9 +504,7 @@ The command parser supports 13+ patterns including BoxplotStyleConfig styling:
 "outliers alpha <number>" → outliers_alpha
 ```
 
-## Implementation-Specific Notes (From Phase 5)
-
-### Error Handling Architecture
+## Error Handling Architecture
 
 **Circuit Breaker** (`src/chatuvisbox/routing.py:64-71`):
 ```python
@@ -557,7 +539,7 @@ if config.TEST_DATA_DIR.exists():
 - Functions: `log_tool_call()`, `log_tool_result()`, `log_error()`, `log_state_update()`
 - Integrated in `nodes.py` for all tool executions
 
-### Phase 5 Error Handling Patterns
+### Error Handling Patterns
 
 **Pattern 1: File Not Found**
 - Tool returns `{"status": "error", "message": "File not found: <path>"}`
@@ -579,9 +561,7 @@ if config.TEST_DATA_DIR.exists():
 - Conversation state maintained across turns
 - Error count persists but resets on success
 
-## Implementation-Specific Notes (From Phase 6)
-
-### Multi-Turn Conversation Architecture
+## Multi-Turn Conversation Architecture
 
 **ConversationSession Class** (`src/chatuvisbox/conversation.py`):
 ```python
@@ -618,7 +598,7 @@ Turn 2: user input → append to state["messages"] → graph_app.invoke() → up
 Turn N: user input → append to state["messages"] → graph_app.invoke() → updated state
 ```
 
-### Phase 6 Conversation Patterns
+### Conversation Patterns
 
 **Pattern 1: Sequential Workflow**
 ```
@@ -699,108 +679,87 @@ You: /quit
 👋 Goodbye!
 ```
 
-## File Structure (Current Implementation Status)
+## File Structure
 
 ```
 chatuvisbox/
-├── pyproject.toml           # ✅ DONE Phase 4.5: Poetry configuration
-├── requirements.txt         # ✅ DONE: Python dependencies (legacy)
-├── README.md                # ✅ DONE Phase 4.5: Package documentation
-├── CLAUDE.md                # ✅ DONE: AI agent guidance (this file)
-├── ENVIRONMENT_SETUP.md     # ✅ DONE: API key configuration guide
-├── TESTING.md               # ✅ DONE: Comprehensive testing guide
-├── RATE_LIMIT_FRIENDLY_TESTING.md # ✅ DONE: Rate limit strategy
-├── .gitignore               # ✅ DONE Phase 1
+├── pyproject.toml           # Poetry configuration
+├── requirements.txt         # Python dependencies
+├── README.md                # Package documentation
+├── CLAUDE.md                # AI agent guidance (this file)
+├── TESTING.md               # Comprehensive testing guide
+├── CHANGELOG.md             # Version history
+├── CONTRIBUTING.md          # Contribution guidelines
+├── LICENSE                  # MIT License
+├── .gitignore               # Git ignore patterns
 │
-├── src/chatuvisbox/         # ✅ DONE Phase 4.5: Package source (src layout)
-│   ├── __init__.py          # ✅ Package exports (updated Phase 6: ConversationSession)
-│   ├── __main__.py          # ✅ Entry point (placeholder for Phase 8)
-│   ├── graph.py             # ✅ DONE Phase 3: LangGraph workflow
-│   ├── state.py             # ✅ DONE Phase 2: GraphState with error_count
-│   ├── nodes.py             # ✅ DONE Phase 5: Nodes with error handling (189 lines)
-│   ├── routing.py           # ✅ DONE Phase 5: Routing with circuit breaker (86 lines)
-│   ├── model.py             # ✅ DONE Phase 5: Model with error recovery prompt (109 lines)
-│   ├── logger.py            # ✅ DONE Phase 5: Logging infrastructure (42 lines)
-│   ├── conversation.py      # ✅ DONE Phase 6+7+8: ConversationSession with session management (166 lines)
-│   ├── command_parser.py    # ✅ DONE Phase 7: Parse simple commands (127 lines)
-│   ├── hybrid_control.py    # ✅ DONE Phase 7: Fast path execution (86 lines)
-│   ├── utils.py             # ✅ DONE Phase 2: Utility functions
-│   ├── data_tools.py        # ✅ DONE Phase 1+8: Data tools with clear_session (~470 lines)
-│   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
-│   └── config.py            # ✅ DONE Phase 1: Configuration
+├── src/chatuvisbox/         # Package source (src layout)
+│   ├── __init__.py          # Package exports
+│   ├── __main__.py          # Entry point for python -m chatuvisbox
+│   ├── graph.py             # LangGraph workflow
+│   ├── state.py             # GraphState with error tracking
+│   ├── nodes.py             # Graph nodes with error handling
+│   ├── routing.py           # Routing with circuit breaker
+│   ├── model.py             # Gemini model with error recovery
+│   ├── logger.py            # Logging infrastructure
+│   ├── conversation.py      # ConversationSession with hybrid control
+│   ├── command_parser.py    # Command parsing (13+ patterns)
+│   ├── hybrid_control.py    # Fast path execution
+│   ├── utils.py             # Utility functions
+│   ├── data_tools.py        # Data generation and loading
+│   ├── vis_tools.py         # Visualization wrappers with BoxplotStyleConfig
+│   └── config.py            # Configuration and defaults
 │
-├── tests/                   # ✅ DONE Phase 9: Reorganized test suite (v2.0)
-│   ├── __init__.py          # ✅ Test package marker
-│   ├── conftest.py          # ✅ Pytest fixtures
-│   ├── README.md            # ✅ Phase 9: Test structure documentation
-│   ├── test_simple.py       # ✅ Phase 9: Quick sanity check (30s, 1-2 API calls)
+├── tests/                   # Comprehensive test suite
+│   ├── __init__.py          # Test package marker
+│   ├── conftest.py          # Pytest fixtures
+│   ├── README.md            # Test structure documentation
+│   ├── test_simple.py       # Quick sanity check (30s, 1-2 API calls)
 │   │
-│   ├── unit/                # ✅ Phase 9: Unit tests (0 API calls, < 15s)
-│   │   ├── __init__.py
-│   │   ├── test_command_parser.py  # ✅ 17 tests: BoxplotStyleConfig commands
-│   │   ├── test_config.py          # ✅ 8 tests: Configuration validation
-│   │   ├── test_routing.py         # ✅ Routing logic tests
-│   │   └── test_tools.py           # ✅ 10 tests: Direct tool function calls
+│   ├── unit/                # Unit tests (0 API calls, instant)
+│   │   ├── test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
+│   │   ├── test_config.py          # 8 tests: Configuration validation
+│   │   ├── test_routing.py         # Routing logic tests
+│   │   └── test_tools.py           # 10 tests: Direct tool function calls
 │   │
-│   ├── integration/         # ✅ Phase 9: Integration tests (15-25 API calls per file)
-│   │   ├── __init__.py
-│   │   ├── test_hybrid_control.py      # ✅ Fast parameter updates
-│   │   ├── test_error_handling.py      # ✅ Error recovery & circuit breaker
-│   │   └── test_session_management.py  # ✅ Session cleanup & stats
+│   ├── integration/         # Integration tests (15-25 API calls per file)
+│   │   ├── test_hybrid_control.py      # Fast parameter updates
+│   │   ├── test_error_handling.py      # Error recovery & circuit breaker
+│   │   └── test_session_management.py  # Session cleanup & stats
 │   │
-│   ├── e2e/                 # ✅ Phase 9: End-to-end tests (20-30 API calls per file)
-│   │   ├── __init__.py
-│   │   └── test_matplotlib_behavior.py # ✅ Matplotlib non-blocking
+│   ├── e2e/                 # End-to-end tests (20-30 API calls per file)
+│   │   └── test_matplotlib_behavior.py # Matplotlib non-blocking
 │   │
-│   ├── interactive/         # ✅ Phase 9: Interactive tests (user-paced)
-│   │   ├── __init__.py
-│   │   └── interactive_test.py  # ✅ Menu-driven testing (24+ scenarios)
+│   ├── interactive/         # Interactive tests (user-paced)
+│   │   └── interactive_test.py         # Menu-driven testing (24+ scenarios)
 │   │
-│   └── utils/               # ✅ Phase 9: Test utilities
-│       ├── __init__.py
-│       └── run_all_tests.py     # ✅ Category-based test runner
+│   └── utils/               # Test utilities
+│       └── run_all_tests.py            # Category-based test runner
 │
-├── test_data/               # ✅ DONE Phase 1: Sample data files
+├── test_data/               # Sample data files
 │   ├── sample_curves.csv
 │   ├── sample_scalar_field.npy
 │   └── README.md
 │
-├── temp/                    # ✅ DONE Phase 1: Generated files (gitignored)
-├── logs/                    # ✅ DONE Phase 5: Log files (gitignored)
+├── temp/                    # Generated files (gitignored)
+├── logs/                    # Log files (gitignored)
 │   └── chatuvisbox.log
 │
-├── main.py                  # ✅ DONE Phase 8: Production REPL with full commands (169 lines)
-├── repl.py                  # ✅ DONE Phase 6: Interactive REPL for multi-turn testing (79 lines)
-├── validate_phase6.py       # ✅ DONE Phase 6: Validation script (117 lines)
+├── docs/                    # Documentation
+│   ├── USER_GUIDE.md        # Detailed user guide with examples
+│   ├── API.md               # Complete API reference
+│   └── ENVIRONMENT_SETUP.md # Environment setup guide
 │
-├── reports/                 # Temporary: Phase completion reports (gitignored)
-│   ├── PHASE_2_COMPLETION_REPORT.md
-│   ├── PHASE_3_COMPLETION_REPORT.md
-│   ├── PHASE_4_COMPLETION_REPORT.md
-│   ├── PHASE_4.5_COMPLETION_REPORT.md
-│   ├── PHASE_5_COMPLETION_REPORT.md
-│   ├── PHASE_6_COMPLETION_REPORT.md
-│   ├── PHASE_7_COMPLETION_REPORT.md
-│   ├── PHASE_8_COMPLETION_REPORT.md  # ✅ NEW
-│   ├── VIZ_TO_VIS_MIGRATION_SUMMARY.md
-│   └── UPDATE_*.md
-│
-└── plans/                   # ✅ DONE: Implementation phase guides
-    ├── README.md
-    ├── phase_01_*.md        # ✅ Phase 1 complete
-    ├── phase_02_*.md        # ✅ Phase 2 complete
-    ├── phase_03_*.md        # ✅ Phase 3 complete
-    ├── phase_04_*.md        # ✅ Phase 4 complete
-    ├── phase_05_*.md        # ✅ Phase 5 complete
-    ├── phase_06_*.md        # ✅ Phase 6 complete
-    ├── phase_07_*.md        # ✅ Phase 7 complete
-    ├── phase_08_*.md        # ✅ Phase 8 complete
-    └── phase_09_*.md        # ✅ Phase 9 complete (updated for BoxplotStyleConfig)
+├── main.py                  # Production REPL with full commands
+├── setup_env.sh             # Environment setup script
+└── create_test_data.py      # Test data generation script
 ```
 
 ## Reference Documentation
 
-- **Implementation Plans**: `plans/README.md` - Start here for step-by-step guidance
-- **Project Modifications**: `plans/00_project_modifications.md` - Key decisions and rationale
-- **Environment Setup**: `ENVIRONMENT_SETUP.md` - API key configuration
-- **Original Plan**: `ten_phase_plan.md` - High-level overview
+- **User Guide**: `docs/USER_GUIDE.md` - Detailed usage examples and workflows
+- **API Reference**: `docs/API.md` - Complete API documentation
+- **Environment Setup**: `docs/ENVIRONMENT_SETUP.md` - API key configuration and setup
+- **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
+- **Contributing**: `CONTRIBUTING.md` - Contribution guidelines
+- **Changelog**: `CHANGELOG.md` - Version history

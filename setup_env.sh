@@ -37,25 +37,29 @@ fi
 
 print_success "Conda is available"
 
-# Check if agent environment exists
-if conda env list | grep -q "^agent "; then
-    print_success "Conda 'agent' environment exists"
+# Default environment name
+ENV_NAME="${1:-chatuvisbox}"
+
+# Check if environment exists
+if conda env list | grep -q "^${ENV_NAME} "; then
+    print_success "Conda '${ENV_NAME}' environment exists"
 else
-    print_error "Conda 'agent' environment not found"
-    echo "Create it with: conda create -n agent python=3.10"
+    print_warning "Conda '${ENV_NAME}' environment not found"
+    echo "Create it with: conda create -n ${ENV_NAME} python=3.13"
+    echo "Or specify existing environment: ./setup_env.sh your_env_name"
     exit 1
 fi
 
-# Activate agent environment
+# Activate environment
 echo ""
-echo "Activating 'agent' environment..."
+echo "Activating '${ENV_NAME}' environment..."
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate agent
+conda activate "${ENV_NAME}"
 
-if [ "$CONDA_DEFAULT_ENV" = "agent" ]; then
-    print_success "Activated 'agent' environment"
+if [ "$CONDA_DEFAULT_ENV" = "${ENV_NAME}" ]; then
+    print_success "Activated '${ENV_NAME}' environment"
 else
-    print_error "Failed to activate 'agent' environment"
+    print_error "Failed to activate '${ENV_NAME}' environment"
     exit 1
 fi
 
@@ -63,11 +67,23 @@ fi
 PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 print_success "Python version: $PYTHON_VERSION"
 
+# Verify Python version is 3.10+
+PYTHON_MAJOR=$(python -c 'import sys; print(sys.version_info.major)')
+PYTHON_MINOR=$(python -c 'import sys; print(sys.version_info.minor)')
+
+if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 10 ] && [ "$PYTHON_MINOR" -lt 14 ]; then
+    print_success "Python version compatible (3.10-3.13)"
+else
+    print_warning "Python $PYTHON_VERSION may not be compatible"
+    echo "  Recommended: Python 3.10-3.13"
+fi
+
 # Check GEMINI_API_KEY
 if [ -z "$GEMINI_API_KEY" ]; then
     print_warning "GEMINI_API_KEY not set in environment"
     echo "  Set it with: export GEMINI_API_KEY='your_key_here'"
     echo "  Add to ~/.bashrc or ~/.zshrc for persistence"
+    echo "  See docs/ENVIRONMENT_SETUP.md for details"
 else
     print_success "GEMINI_API_KEY is set"
 fi
@@ -76,8 +92,8 @@ fi
 echo ""
 echo "Checking UVisBox installation..."
 if python -c "import uvisbox" 2>/dev/null; then
-    UVISBOX_VERSION=$(python -c "import uvisbox; print(uvisbox.__version__)")
-    print_success "UVisBox $UVISBOX_VERSION is installed"
+    UVISBOX_VERSION=$(python -c "import uvisbox; print(uvisbox.__version__)" 2>/dev/null || echo "unknown")
+    print_success "UVisBox ${UVISBOX_VERSION} is installed"
 else
     print_error "UVisBox not found"
     echo "Install with: pip install uvisbox"
@@ -104,11 +120,11 @@ try:
     import langgraph
     import langchain
     import langchain_google_genai
-    import google.generativeai
     import numpy
     import pandas
     import matplotlib
     import uvisbox
+    import langsmith
     print('SUCCESS')
 except ImportError as e:
     print(f'FAILED: {e}')
@@ -126,34 +142,32 @@ fi
 echo ""
 echo "Installed package versions:"
 python -c "
-import langgraph, langchain, numpy, pandas, matplotlib, uvisbox
 import importlib.metadata
 
 packages = [
-    ('langgraph', langgraph),
-    ('langchain', langchain),
-    ('numpy', numpy),
-    ('pandas', pandas),
-    ('matplotlib', matplotlib),
-    ('uvisbox', uvisbox),
+    'langgraph',
+    'langchain',
+    'langchain-google-genai',
+    'langsmith',
+    'numpy',
+    'pandas',
+    'matplotlib',
+    'uvisbox',
 ]
 
-for pkg_name, module in packages:
+for pkg_name in packages:
     try:
-        version = module.__version__
+        version = importlib.metadata.version(pkg_name)
     except:
-        try:
-            version = importlib.metadata.version(pkg_name)
-        except:
-            version = 'unknown'
+        version = 'unknown'
     print(f'  {pkg_name:25} {version}')
 "
 
 # Create directories
 echo ""
 echo "Creating project directories..."
-mkdir -p test_data temp
-print_success "Directories created: test_data/, temp/"
+mkdir -p test_data temp logs
+print_success "Directories created: test_data/, temp/, logs/"
 
 # Summary
 echo ""
@@ -161,12 +175,19 @@ echo "=========================================="
 echo "Setup Complete!"
 echo "=========================================="
 echo ""
-echo "Environment is ready for Phase 1 implementation."
+echo "ChatUVisBox v0.1.0 environment is ready."
 echo ""
 echo "Next steps:"
-echo "  1. Review plans/README.md"
-echo "  2. Read plans/phase_01_schemas_and_dispatchers.md"
-echo "  3. Start implementing Phase 1"
+echo "  1. Review README.md for project overview"
+echo "  2. Check docs/USER_GUIDE.md for usage examples"
+echo "  3. Run quick test: python tests/test_simple.py"
+echo "  4. Start the REPL: python main.py"
 echo ""
-echo "Run 'conda activate agent' in new terminals to use this environment."
+echo "Documentation:"
+echo "  - User Guide: docs/USER_GUIDE.md"
+echo "  - API Reference: docs/API.md"
+echo "  - Testing Guide: TESTING.md"
+echo "  - Contributing: CONTRIBUTING.md"
+echo ""
+echo "Run 'conda activate ${ENV_NAME}' in new terminals to use this environment."
 echo ""
