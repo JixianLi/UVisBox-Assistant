@@ -1,98 +1,35 @@
 # Test Data
 
-This directory contains sample datasets for testing ChatUVisBox visualization tools.
+This directory contains sample datasets for testing ChatUVisBox.
 
 ## Files
 
-- `sample_curves.csv`: 50 sinusoidal curves with 100 points each
-  - Used for: `plot_functional_boxplot`, `plot_curve_boxplot`
-  - Shape: (50, 100) - 50 curves with 100 points each
-
-- `sample_scalar_field.npy`: 2D scalar field ensemble
-  - Used for: `plot_probabilistic_marching_squares`, `plot_contour_boxplot`
-  - Shape: (30, 30, 20) - 30x30 grid with 20 ensemble members
-  - Value range: [0, 1]
+- `sample_curves.csv`: 50 sinusoidal curves with 100 points each (for functional_boxplot, curve_boxplot)
+- `sample_scalar_field.npy`: 2D scalar field ensemble (30x30 grid, 20 members) for probabilistic_marching_squares and contour_boxplot
+- `sample_vector_positions.npy`: Grid positions (100, 2) for uncertainty_lobes
+- `sample_vector_field.npy`: Vector field ensemble (100, 20, 2) for uncertainty_lobes
 
 ## Generating New Data
 
-Use the data generation tools from `chatuvisbox.data_tools`:
+Use the data tools:
+- `generate_ensemble_curves()`: Create synthetic curve ensembles
+- `generate_scalar_field_ensemble()`: Create synthetic scalar field ensembles
+- `generate_vector_field_ensemble()`: Create synthetic vector field ensembles
+- `load_csv_to_numpy()`: Load CSV files for visualization
 
-### Curve Ensembles
-```python
-from chatuvisbox.data_tools import generate_ensemble_curves
+## Data Formats
 
-result = generate_ensemble_curves(
-    n_curves=50,      # Number of curves
-    n_points=100,     # Points per curve
-    n_ensemble=30     # Ensemble members (currently unused, reserved)
-)
-# Output: .npy file with shape (n_curves, n_points)
-```
+### Curves (2D)
+- Shape: (n_points, n_curves) for CSV
+- Shape: (n_curves, n_points) for numpy arrays
+- Used by: functional_boxplot, curve_boxplot
 
-### Scalar Field Ensembles
-```python
-from chatuvisbox.data_tools import generate_scalar_field_ensemble
+### Scalar Fields (3D)
+- Shape: (nx, ny, n_ensemble) or (ny, nx, n_ensemble)
+- Values: Float arrays typically in [0, 1]
+- Used by: probabilistic_marching_squares, contour_boxplot
 
-result = generate_scalar_field_ensemble(
-    nx=50,            # Grid size in x
-    ny=50,            # Grid size in y
-    n_ensemble=30     # Number of ensemble members
-)
-# Output: .npy file with shape (ny, nx, n_ensemble)
-# Algorithm: Fixed Gaussian center at (nx/2, ny/2), varying σ
-```
-
-### Vector Field Ensembles
-```python
-from chatuvisbox.data_tools import generate_vector_field_ensemble
-
-result = generate_vector_field_ensemble(
-    x_res=30,                        # Grid resolution in x
-    y_res=30,                        # Grid resolution in y
-    n_instances=30,                  # Number of ensemble members
-    initial_direction=0.0,           # Base direction in radians
-    initial_magnitude=1.0,           # Base magnitude
-    direction_variation_factor=0.3,  # Direction uncertainty (increases with x)
-    magnitude_variation_factor=0.3   # Magnitude uncertainty (increases with y)
-)
-# Output: Two .npy files
-#   - positions: shape (n, 2) where n = x_res * y_res
-#   - vectors: shape (n, n_instances, 2)
-```
-
-### CSV to NumPy
-```python
-from chatuvisbox.data_tools import load_csv_to_numpy
-
-result = load_csv_to_numpy(
-    filepath="path/to/data.csv",
-    output_path="path/to/output.npy"  # Optional
-)
-# Output: .npy file with same shape as CSV data
-```
-
-## Data Shapes Reference
-
-| Tool | Expected Input Shape | Description |
-|------|---------------------|-------------|
-| `plot_functional_boxplot` | `(n_curves, n_points)` | 2D array of curves |
-| `plot_curve_boxplot` | `(n_curves, n_steps, n_dims)` | 3D array of trajectories |
-| `plot_probabilistic_marching_squares` | `(ny, nx, n_ensemble)` | 3D scalar field ensemble |
-| `plot_contour_boxplot` | `(ny, nx, n_ensemble)` | 3D scalar field ensemble |
-| `plot_uncertainty_lobes` | positions: `(n, 2)`, vectors: `(n, m, 2)` | Positions and vector ensemble |
-
-## Temporary Files
-
-Generated data is saved to `temp/` directory with prefix `_temp_*`. These files are:
-- Automatically created during LangGraph workflows
-- Gitignored (not tracked)
-- Cleaned up with `/clear` command in REPL (Phase 8)
-
-## Regenerating Sample Data
-
-```python
-# Run the test data generation script
-python create_test_data.py
-```
-
-This will regenerate all sample datasets in this directory.
+### Vector Fields
+- Positions: (n_positions, 2) - [x, y] coordinates
+- Vectors: (n_positions, n_ensemble, 2) - [vx, vy] components
+- Used by: uncertainty_lobes
