@@ -8,6 +8,7 @@ from chatuvisbox.model import create_model_with_tools, prepare_messages_for_mode
 from chatuvisbox.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
 from chatuvisbox.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
 from chatuvisbox import config
+from chatuvisbox.logger import log_tool_call, log_tool_result, log_error
 
 
 # Create model with all tools
@@ -62,6 +63,7 @@ def call_data_tool(state: GraphState) -> Dict:
     tool_call_id = tool_call["id"]
 
     print(f"[DATA TOOL] Calling {tool_name} with args: {tool_args}")
+    log_tool_call(tool_name, tool_args)
 
     # Execute tool with error handling
     try:
@@ -75,6 +77,7 @@ def call_data_tool(state: GraphState) -> Dict:
             result = tool_func(**tool_args)
 
         print(f"[DATA TOOL] Result: {result}")
+        log_tool_result(tool_name, result)
 
         # Create tool message
         tool_message = ToolMessage(
@@ -94,6 +97,7 @@ def call_data_tool(state: GraphState) -> Dict:
 
     except Exception as e:
         print(f"[DATA TOOL] Exception: {e}")
+        log_error(f"Exception in {tool_name}: {str(e)}")
         error_result = {
             "status": "error",
             "message": f"Exception in {tool_name}: {str(e)}"
@@ -132,6 +136,7 @@ def call_vis_tool(state: GraphState) -> Dict:
     tool_call_id = tool_call["id"]
 
     print(f"[VIS TOOL] Calling {tool_name} with args: {tool_args}")
+    log_tool_call(tool_name, tool_args)
 
     # Execute tool
     try:
@@ -145,6 +150,7 @@ def call_vis_tool(state: GraphState) -> Dict:
             result = tool_func(**tool_args)
 
         print(f"[VIS TOOL] Result: {result}")
+        log_tool_result(tool_name, result)
 
         # Create tool message
         tool_message = ToolMessage(
@@ -165,6 +171,7 @@ def call_vis_tool(state: GraphState) -> Dict:
 
     except Exception as e:
         print(f"[VIS TOOL] Exception: {e}")
+        log_error(f"Exception in {tool_name}: {str(e)}")
         error_result = {
             "status": "error",
             "message": f"Exception in {tool_name}: {str(e)}"
