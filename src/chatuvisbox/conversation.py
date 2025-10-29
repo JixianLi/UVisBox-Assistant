@@ -135,3 +135,31 @@ class ConversationSession:
             Current GraphState or None if no conversation started
         """
         return self.state
+
+    def clear(self):
+        """Clear session data and temporary files."""
+        from chatuvisbox.data_tools import clear_session
+
+        # Clear temp files
+        result = clear_session()
+        print(f"🧹 {result['message']}")
+
+        # Reset state
+        self.reset()
+
+    def get_session_files(self) -> list:
+        """Get list of session files."""
+        if not self.state:
+            return []
+        return self.state.get("session_files", [])
+
+    def get_stats(self) -> dict:
+        """Get session statistics."""
+        ctx = self.get_context_summary()
+        return {
+            "turns": ctx["turn_count"],
+            "messages": ctx["message_count"],
+            "files_created": len(ctx.get("session_files", [])),
+            "current_data": ctx.get("current_data") is not None,
+            "current_vis": ctx.get("last_vis") is not None,
+        }

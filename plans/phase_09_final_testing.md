@@ -81,7 +81,7 @@ class TestDataTools:
         assert data.ndim == 3
 
 
-class TestVizTools:
+class TestVisTools:
     """Test all visualization tools."""
 
     def test_functional_boxplot(self):

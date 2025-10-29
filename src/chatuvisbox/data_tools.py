@@ -337,6 +337,47 @@ def generate_vector_field_ensemble(
         }
 
 
+def clear_session() -> Dict[str, str]:
+    """
+    Clear all temporary session files.
+
+    Removes all .npy files in temp directory with TEMP_FILE_PREFIX.
+
+    Returns:
+        Dict with status and count of files removed
+    """
+    try:
+        if not config.TEMP_DIR.exists():
+            return {
+                "status": "success",
+                "message": "No temp directory found",
+                "files_removed": 0
+            }
+
+        files_removed = []
+        pattern = f"{config.TEMP_FILE_PREFIX}*{config.TEMP_FILE_EXTENSION}"
+
+        for file_path in config.TEMP_DIR.glob(pattern):
+            try:
+                file_path.unlink()
+                files_removed.append(str(file_path.name))
+            except Exception as e:
+                print(f"Warning: Could not remove {file_path}: {e}")
+
+        return {
+            "status": "success",
+            "message": f"Removed {len(files_removed)} temporary files",
+            "files_removed": len(files_removed),
+            "files": files_removed
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error clearing session: {str(e)}"
+        }
+
+
 # Tool registry for LangGraph
 DATA_TOOLS = {
     "load_csv_to_numpy": load_csv_to_numpy,
@@ -344,6 +385,7 @@ DATA_TOOLS = {
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
     "generate_vector_field_ensemble": generate_vector_field_ensemble,
     "load_npy": load_npy,
+    "clear_session": clear_session,
 }
 
 
@@ -447,6 +489,14 @@ DATA_TOOL_SCHEMAS = [
                 }
             },
             "required": ["filepath"]
+        }
+    },
+    {
+        "name": "clear_session",
+        "description": "Clear all temporary session files to start fresh",
+        "parameters": {
+            "type": "object",
+            "properties": {}
         }
     }
 ]

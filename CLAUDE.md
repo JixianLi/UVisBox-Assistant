@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current State**: Phase 7 Complete (2025-10-28). Implementing phases sequentially per `plans/` directory.
+**Current State**: Phase 8 Complete (2025-10-29). Implementing phases sequentially per `plans/` directory.
 
 **Completed Phases**:
 - ✅ **Phase 1**: Tool definitions, schemas, data/vis tools with UVisBox wrappers (2025-10-26)
@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ **Phase 5**: Error handling, circuit breaker, context awareness, logging (2025-10-28)
 - ✅ **Phase 6**: Multi-turn conversation with ConversationSession, interactive REPL (2025-10-28)
 - ✅ **Phase 7**: Hybrid control for 10-15x faster parameter updates (2025-10-28)
+- ✅ **Phase 8**: Session management, file cleanup, statistics, polished REPL (2025-10-29)
 - ✅ **Enhancements**: Vector field generation, API updates, dependency updates (2025-10-28)
 
 ## Architecture
@@ -120,8 +121,8 @@ Follow `plans/README.md` for complete guidance. Phases must be completed in orde
 - ✅ Phase 6: Multi-turn conversation with ConversationSession (COMPLETE 2025-10-28)
 - ✅ Phase 7: Hybrid control with command_parser.py (COMPLETE 2025-10-28)
 
-**Milestone 3 (Days 9-11)**: Polish (0/3 complete)
-- ⏭️ Phase 8: Session management with clear_session tool
+**Milestone 3 (Days 9-11)**: Polish (1/3 complete)
+- ✅ Phase 8: Session management with clear_session tool (COMPLETE 2025-10-29)
 - ⏭️ Phase 9: Comprehensive testing (pytest + manual)
 - ⏭️ Phase 10: Documentation and packaging
 
@@ -173,6 +174,7 @@ python tests/test_graph_integration.py # Phase 3: 15-20 API calls (will hit limi
 python tests/test_error_handling.py   # Phase 5: 15-20 API calls, 6 tests with delays
 python tests/test_multiturn.py        # Phase 6: 50-60 API calls, 5 multi-turn tests
 python tests/test_hybrid_control.py   # Phase 7: 50-60 API calls, 4 hybrid tests with speedup demo
+python tests/test_session_management.py # Phase 8: 15-20 API calls, 3 session management tests
 python validate_phase6.py             # Phase 6: 0 API calls, quick validation
 python src/chatuvisbox/command_parser.py  # Phase 7: 0 API calls, command parser test
 ```
@@ -185,13 +187,11 @@ python repl.py                        # Phase 6: Interactive multi-turn REPL (us
 ### Running the Application
 
 ```bash
-# After Phase 8 implementation (REPL)
+# Phase 8 COMPLETE - Full REPL with commands
+python main.py
+
+# Alternative (using package entry point)
 python -m chatuvisbox
-
-# Or via entry point (if configured)
-chatuvisbox
-
-# Current status: Entry point placeholder exists but REPL not yet implemented
 ```
 
 ## Key Design Decisions
@@ -625,11 +625,11 @@ chatuvisbox/
 │   ├── routing.py           # ✅ DONE Phase 5: Routing with circuit breaker (86 lines)
 │   ├── model.py             # ✅ DONE Phase 5: Model with error recovery prompt (109 lines)
 │   ├── logger.py            # ✅ DONE Phase 5: Logging infrastructure (42 lines)
-│   ├── conversation.py      # ✅ DONE Phase 6+7: ConversationSession with hybrid control (145 lines)
+│   ├── conversation.py      # ✅ DONE Phase 6+7+8: ConversationSession with session management (166 lines)
 │   ├── command_parser.py    # ✅ DONE Phase 7: Parse simple commands (127 lines)
 │   ├── hybrid_control.py    # ✅ DONE Phase 7: Fast path execution (86 lines)
 │   ├── utils.py             # ✅ DONE Phase 2: Utility functions
-│   ├── data_tools.py        # ✅ DONE Phase 1: Data tools (~420 lines)
+│   ├── data_tools.py        # ✅ DONE Phase 1+8: Data tools with clear_session (~470 lines)
 │   ├── vis_tools.py         # ✅ DONE Phase 1: Visualization tools (570 lines)
 │   └── config.py            # ✅ DONE Phase 1: Configuration
 │
@@ -647,6 +647,7 @@ chatuvisbox/
 │   ├── test_error_handling.py # ✅ Phase 5: 6 tests (15-20 API calls)
 │   ├── test_multiturn.py    # ✅ Phase 6: 5 multi-turn tests (50-60 API calls)
 │   ├── test_hybrid_control.py # ✅ Phase 7: 4 hybrid tests (50-60 API calls, speedup demo)
+│   ├── test_session_management.py # ✅ Phase 8: 3 session tests (15-20 API calls)
 │   ├── interactive_test.py  # ✅ Phase 4: Interactive menu testing
 │   ├── run_tests_with_delays.py # ✅ Automated test runner
 │   └── simple_test.py       # ✅ Simple validation
@@ -660,6 +661,7 @@ chatuvisbox/
 ├── logs/                    # ✅ DONE Phase 5: Log files (gitignored)
 │   └── chatuvisbox.log
 │
+├── main.py                  # ✅ DONE Phase 8: Production REPL with full commands (169 lines)
 ├── repl.py                  # ✅ DONE Phase 6: Interactive REPL for multi-turn testing (79 lines)
 ├── validate_phase6.py       # ✅ DONE Phase 6: Validation script (117 lines)
 │
@@ -670,7 +672,8 @@ chatuvisbox/
 │   ├── PHASE_4.5_COMPLETION_REPORT.md
 │   ├── PHASE_5_COMPLETION_REPORT.md
 │   ├── PHASE_6_COMPLETION_REPORT.md
-│   ├── PHASE_7_COMPLETION_REPORT.md  # ✅ NEW
+│   ├── PHASE_7_COMPLETION_REPORT.md
+│   ├── PHASE_8_COMPLETION_REPORT.md  # ✅ NEW
 │   ├── VIZ_TO_VIS_MIGRATION_SUMMARY.md
 │   └── UPDATE_*.md
 │
