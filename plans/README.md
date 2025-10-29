@@ -39,7 +39,7 @@ These plans provide step-by-step guidance for building a natural language interf
 | Phase | Document | Focus | Duration |
 |-------|----------|-------|----------|
 | **Phase 8** | [Session Management](phase_08_session_management.md) | File cleanup and REPL polish | 0.5 day |
-| **Phase 9** | [Final Testing](phase_09_final_testing.md) | Comprehensive test coverage | 1 day |
+| **Phase 9** | [Comprehensive Testing](phase_09_comprehensive_testing.md) | Test reorganization and coverage | 1 day |
 | **Phase 10** | [Documentation & Packaging](phase_10_documentation_and_packaging.md) | Docs and release prep | 0.5-1 day |
 
 **Milestone 3 Output**: Production-ready MVP with full documentation

@@ -74,6 +74,40 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
         value = float(match.group(1))
         return SimpleCommand('alpha', value)
 
+    # Pattern 8: "median color <color>"
+    match = re.match(r'median\s+color\s+(\w+)', text)
+    if match:
+        return SimpleCommand('median_color', match.group(1))
+
+    # Pattern 9: "median width <number>"
+    match = re.match(r'median\s+width\s+(\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('median_width', value)
+
+    # Pattern 10: "median alpha <number>"
+    match = re.match(r'median\s+alpha\s+(\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('median_alpha', value)
+
+    # Pattern 11: "outliers color <color>"
+    match = re.match(r'outliers\s+color\s+(\w+)', text)
+    if match:
+        return SimpleCommand('outliers_color', match.group(1))
+
+    # Pattern 12: "outliers width <number>"
+    match = re.match(r'outliers\s+width\s+(\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('outliers_width', value)
+
+    # Pattern 13: "outliers alpha <number>"
+    match = re.match(r'outliers\s+alpha\s+(\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('outliers_alpha', value)
+
     # Not a simple command
     return None
 
@@ -92,18 +126,33 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
     updated = current_params.copy()
 
     # Map command param names to vis tool param names
+    # Note: 'colormap' can map to either 'colormap' (for probabilistic_marching_squares)
+    # or 'percentile_colormap' (for boxplot functions)
+    # The hybrid_control.py will filter based on function signature
     param_mapping = {
-        'colormap': 'colormap',
+        'colormap': ['colormap', 'percentile_colormap'],  # Try both
         'percentiles': 'percentiles',
         'isovalue': 'isovalue',
         'show_median': 'show_median',
+        'median_color': 'median_color',
+        'median_width': 'median_width',
+        'median_alpha': 'median_alpha',
         'show_outliers': 'show_outliers',
+        'outliers_color': 'outliers_color',
+        'outliers_width': 'outliers_width',
+        'outliers_alpha': 'outliers_alpha',
         'scale': 'scale',
         'alpha': 'alpha',
     }
 
-    param_name = param_mapping.get(command.param_name, command.param_name)
-    updated[param_name] = command.value
+    mapping = param_mapping.get(command.param_name, command.param_name)
+
+    # If mapping is a list, try all possibilities
+    if isinstance(mapping, list):
+        for param_name in mapping:
+            updated[param_name] = command.value
+    else:
+        updated[mapping] = command.value
 
     return updated
 
@@ -118,6 +167,12 @@ if __name__ == "__main__":
         "hide outliers",
         "scale 0.5",
         "alpha 0.7",
+        "median color blue",
+        "median width 2.5",
+        "median alpha 0.8",
+        "outliers color black",
+        "outliers width 1.5",
+        "outliers alpha 1.0",
         "generate some curves",  # Should return None
     ]
 

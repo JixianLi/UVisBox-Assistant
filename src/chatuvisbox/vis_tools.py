@@ -7,7 +7,14 @@ from chatuvisbox import config
 
 # Import UVisBox modules
 try:
-    from uvisbox.Modules import functional_boxplot, curve_boxplot, probabilistic_marching_squares, uncertainty_lobes, contour_boxplot
+    from uvisbox.Modules import (
+        functional_boxplot,
+        curve_boxplot,
+        probabilistic_marching_squares,
+        uncertainty_lobes,
+        contour_boxplot,
+        BoxplotStyleConfig
+    )
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
     print("Make sure UVisBox is installed in the 'agent' conda environment")
@@ -16,17 +23,31 @@ except ImportError as e:
 def plot_functional_boxplot(
     data_path: str,
     percentiles: Optional[List[float]] = None,
-    colors: Optional[List[str]] = None,
-    plot_all_curves: bool = False
+    percentile_colormap: str = "viridis",
+    show_median: bool = True,
+    median_color: str = "red",
+    median_width: float = 3.0,
+    median_alpha: float = 1.0,
+    show_outliers: bool = False,
+    outliers_color: str = "gray",
+    outliers_width: float = 1.0,
+    outliers_alpha: float = 0.5
 ) -> Dict[str, str]:
     """
     Create a functional boxplot from curve data with multiple percentile bands.
 
     Args:
         data_path: Path to .npy file with shape (n_curves, n_points)
-        percentiles: List of percentiles for bands to be plotted (default: [25, 50, 90, 100])
-        colors: List of colors for each percentile band (default: None, uses default color scheme)
-        plot_all_curves: Whether to plot all individual curves in addition to the boxplot (default: False)
+        percentiles: List of percentiles for bands (default: [25, 50, 90, 100])
+        percentile_colormap: Colormap for percentile bands (default: "viridis")
+        show_median: Whether to show median curve (default: True)
+        median_color: Color of median curve (default: "red")
+        median_width: Width of median curve (default: 3.0)
+        median_alpha: Alpha of median curve (default: 1.0)
+        show_outliers: Whether to show outlier curves (default: False)
+        outliers_color: Color of outlier curves (default: "gray")
+        outliers_width: Width of outlier curves (default: 1.0)
+        outliers_alpha: Alpha of outlier curves (default: 0.5)
 
     Returns:
         Dict with status and message
@@ -49,6 +70,20 @@ def plot_functional_boxplot(
         if percentiles is None:
             percentiles = [25, 50, 90, 100]
 
+        # Create BoxplotStyleConfig
+        style_config = BoxplotStyleConfig(
+            percentiles=percentiles,
+            percentile_colormap=percentile_colormap,
+            show_median=show_median,
+            median_color=median_color,
+            median_width=median_width,
+            median_alpha=median_alpha,
+            show_outliers=show_outliers,
+            outliers_color=outliers_color,
+            outliers_width=outliers_width,
+            outliers_alpha=outliers_alpha
+        )
+
         # Create figure with Tier-2 defaults
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
@@ -59,11 +94,8 @@ def plot_functional_boxplot(
         functional_boxplot(
             data=curves,
             method='fdb',
-            percentiles=percentiles,
-            ax=ax,
-            colors=colors,
-            alpha=0.7,  # Use UVisBox default
-            plot_all_curves=plot_all_curves
+            boxplot_style=style_config,
+            ax=ax
         )
 
         ax.set_title("Functional Boxplot")
@@ -81,8 +113,15 @@ def plot_functional_boxplot(
                 "_tool_name": "plot_functional_boxplot",
                 "data_path": data_path,
                 "percentiles": percentiles,
-                "colors": colors,
-                "plot_all_curves": plot_all_curves
+                "percentile_colormap": percentile_colormap,
+                "show_median": show_median,
+                "median_color": median_color,
+                "median_width": median_width,
+                "median_alpha": median_alpha,
+                "show_outliers": show_outliers,
+                "outliers_color": outliers_color,
+                "outliers_width": outliers_width,
+                "outliers_alpha": outliers_alpha
             }
         }
 
@@ -96,15 +135,33 @@ def plot_functional_boxplot(
 def plot_curve_boxplot(
     data_path: str,
     percentiles: Optional[List[float]] = None,
-    colors: Optional[List[str]] = None
+    percentile_colormap: str = "viridis",
+    show_median: bool = True,
+    median_color: str = "red",
+    median_width: float = 3.0,
+    median_alpha: float = 1.0,
+    show_outliers: bool = False,
+    outliers_color: str = "gray",
+    outliers_width: float = 1.0,
+    outliers_alpha: float = 0.5,
+    workers: int = 12
 ) -> Dict[str, str]:
     """
     Create a curve boxplot from 3D curve ensemble data with multiple percentile bands.
 
     Args:
         data_path: Path to .npy with shape (n_curves, n_steps, n_dims)
-        percentiles: List of percentiles for bands to be plotted (default: [25, 50, 90, 100])
-        colors: List of colors for each percentile band (default: None, uses default color scheme)
+        percentiles: List of percentiles for bands (default: [25, 50, 90, 100])
+        percentile_colormap: Colormap for percentile bands (default: "viridis")
+        show_median: Whether to show median curve (default: True)
+        median_color: Color of median curve (default: "red")
+        median_width: Width of median curve (default: 3.0)
+        median_alpha: Alpha of median curve (default: 1.0)
+        show_outliers: Whether to show outlier curves (default: False)
+        outliers_color: Color of outlier curves (default: "gray")
+        outliers_width: Width of outlier curves (default: 1.0)
+        outliers_alpha: Alpha of outlier curves (default: 0.5)
+        workers: Number of parallel workers for band depth computation (default: 12)
 
     Returns:
         Dict with status and message
@@ -137,6 +194,20 @@ def plot_curve_boxplot(
         if percentiles is None:
             percentiles = [25, 50, 90, 100]
 
+        # Create BoxplotStyleConfig
+        style_config = BoxplotStyleConfig(
+            percentiles=percentiles,
+            percentile_colormap=percentile_colormap,
+            show_median=show_median,
+            median_color=median_color,
+            median_width=median_width,
+            median_alpha=median_alpha,
+            show_outliers=show_outliers,
+            outliers_color=outliers_color,
+            outliers_width=outliers_width,
+            outliers_alpha=outliers_alpha
+        )
+
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
             dpi=config.DEFAULT_VIS_PARAMS["dpi"]
@@ -144,10 +215,9 @@ def plot_curve_boxplot(
 
         curve_boxplot(
             curves=curves,
-            percentiles=percentiles,
+            boxplot_style=style_config,
             ax=ax,
-            colors=colors,
-            alpha=0.7  # Use UVisBox default
+            workers=workers
         )
 
         ax.set_title("Curve Boxplot")
@@ -161,7 +231,16 @@ def plot_curve_boxplot(
                 "_tool_name": "plot_curve_boxplot",
                 "data_path": data_path,
                 "percentiles": percentiles,
-                "colors": colors
+                "percentile_colormap": percentile_colormap,
+                "show_median": show_median,
+                "median_color": median_color,
+                "median_width": median_width,
+                "median_alpha": median_alpha,
+                "show_outliers": show_outliers,
+                "outliers_color": outliers_color,
+                "outliers_width": outliers_width,
+                "outliers_alpha": outliers_alpha,
+                "workers": workers
             }
         }
 
@@ -321,9 +400,16 @@ def plot_contour_boxplot(
     data_path: str,
     isovalue: float,
     percentiles: Optional[List[float]] = None,
-    colormap: str = "viridis",
+    percentile_colormap: str = "viridis",
     show_median: bool = True,
-    show_outliers: bool = True
+    median_color: str = "red",
+    median_width: float = 3.0,
+    median_alpha: float = 1.0,
+    show_outliers: bool = False,
+    outliers_color: str = "gray",
+    outliers_width: float = 1.0,
+    outliers_alpha: float = 0.5,
+    workers: int = 12
 ) -> Dict[str, str]:
     """
     Create a contour boxplot visualization from ensemble scalar fields.
@@ -335,9 +421,16 @@ def plot_contour_boxplot(
         data_path: Path to .npy file with shape (ny, nx, n_ensemble)
         isovalue: Threshold value for creating binary images
         percentiles: List of percentiles (0-100) for band envelopes (default: [25, 50, 75, 90])
-        colormap: Matplotlib colormap name (default: "viridis")
-        show_median: Whether to overlay median contour in red (default: True)
-        show_outliers: Whether to overlay outlier contours in gray (default: True)
+        percentile_colormap: Colormap for percentile bands (default: "viridis")
+        show_median: Whether to show median contour (default: True)
+        median_color: Color of median contour (default: "red")
+        median_width: Width of median contour (default: 3.0)
+        median_alpha: Alpha of median contour (default: 1.0)
+        show_outliers: Whether to show outlier contours (default: False)
+        outliers_color: Color of outlier contours (default: "gray")
+        outliers_width: Width of outlier contours (default: 1.0)
+        outliers_alpha: Alpha of outlier contours (default: 0.5)
+        workers: Number of parallel workers for band depth computation (default: 12)
 
     Returns:
         Dict with status and message
@@ -362,6 +455,20 @@ def plot_contour_boxplot(
         if percentiles is None:
             percentiles = [25, 50, 75, 90]
 
+        # Create BoxplotStyleConfig
+        style_config = BoxplotStyleConfig(
+            percentiles=percentiles,
+            percentile_colormap=percentile_colormap,
+            show_median=show_median,
+            median_color=median_color,
+            median_width=median_width,
+            median_alpha=median_alpha,
+            show_outliers=show_outliers,
+            outliers_color=outliers_color,
+            outliers_width=outliers_width,
+            outliers_alpha=outliers_alpha
+        )
+
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
             dpi=config.DEFAULT_VIS_PARAMS["dpi"]
@@ -371,12 +478,9 @@ def plot_contour_boxplot(
         contour_boxplot(
             ensemble_images=ensemble_images,
             isovalue=isovalue,
-            percentiles=percentiles,
+            boxplot_style=style_config,
             ax=ax,
-            colormap=colormap,
-            show_median=show_median,
-            show_outliers=show_outliers,
-            workers=12
+            workers=workers
         )
 
         ax.set_title(f"Contour Boxplot (isovalue={isovalue})")
@@ -391,9 +495,16 @@ def plot_contour_boxplot(
                 "data_path": data_path,
                 "isovalue": isovalue,
                 "percentiles": percentiles,
-                "colormap": colormap,
+                "percentile_colormap": percentile_colormap,
                 "show_median": show_median,
-                "show_outliers": show_outliers
+                "median_color": median_color,
+                "median_width": median_width,
+                "median_alpha": median_alpha,
+                "show_outliers": show_outliers,
+                "outliers_color": outliers_color,
+                "outliers_width": outliers_width,
+                "outliers_alpha": outliers_alpha,
+                "workers": workers
             }
         }
 
@@ -432,15 +543,50 @@ VIS_TOOL_SCHEMAS = [
                     "description": "List of percentiles for bands to be plotted (e.g., [25, 50, 90, 100])",
                     "default": [25, 50, 90, 100]
                 },
-                "colors": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of colors for each percentile band (optional, uses default if not provided)"
+                "percentile_colormap": {
+                    "type": "string",
+                    "description": "Colormap for percentile bands (e.g., 'viridis', 'plasma', 'inferno')",
+                    "default": "viridis"
                 },
-                "plot_all_curves": {
+                "show_median": {
                     "type": "boolean",
-                    "description": "Whether to plot all individual curves in addition to the boxplot bands (default: False)",
+                    "description": "Whether to show median curve (default: True)",
+                    "default": True
+                },
+                "median_color": {
+                    "type": "string",
+                    "description": "Color of median curve (default: 'red')",
+                    "default": "red"
+                },
+                "median_width": {
+                    "type": "number",
+                    "description": "Width of median curve (default: 3.0)",
+                    "default": 3.0
+                },
+                "median_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of median curve (default: 1.0)",
+                    "default": 1.0
+                },
+                "show_outliers": {
+                    "type": "boolean",
+                    "description": "Whether to show outlier curves (default: False)",
                     "default": False
+                },
+                "outliers_color": {
+                    "type": "string",
+                    "description": "Color of outlier curves (default: 'gray')",
+                    "default": "gray"
+                },
+                "outliers_width": {
+                    "type": "number",
+                    "description": "Width of outlier curves (default: 1.0)",
+                    "default": 1.0
+                },
+                "outliers_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of outlier curves (default: 0.5)",
+                    "default": 0.5
                 }
             },
             "required": ["data_path"]
@@ -462,10 +608,55 @@ VIS_TOOL_SCHEMAS = [
                     "description": "List of percentiles for bands to be plotted (e.g., [25, 50, 90, 100])",
                     "default": [25, 50, 90, 100]
                 },
-                "colors": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of colors for each percentile band (optional, uses default if not provided)"
+                "percentile_colormap": {
+                    "type": "string",
+                    "description": "Colormap for percentile bands (e.g., 'viridis', 'plasma', 'inferno')",
+                    "default": "viridis"
+                },
+                "show_median": {
+                    "type": "boolean",
+                    "description": "Whether to show median curve (default: True)",
+                    "default": True
+                },
+                "median_color": {
+                    "type": "string",
+                    "description": "Color of median curve (default: 'red')",
+                    "default": "red"
+                },
+                "median_width": {
+                    "type": "number",
+                    "description": "Width of median curve (default: 3.0)",
+                    "default": 3.0
+                },
+                "median_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of median curve (default: 1.0)",
+                    "default": 1.0
+                },
+                "show_outliers": {
+                    "type": "boolean",
+                    "description": "Whether to show outlier curves (default: False)",
+                    "default": False
+                },
+                "outliers_color": {
+                    "type": "string",
+                    "description": "Color of outlier curves (default: 'gray')",
+                    "default": "gray"
+                },
+                "outliers_width": {
+                    "type": "number",
+                    "description": "Width of outlier curves (default: 1.0)",
+                    "default": 1.0
+                },
+                "outliers_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of outlier curves (default: 0.5)",
+                    "default": 0.5
+                },
+                "workers": {
+                    "type": "integer",
+                    "description": "Number of parallel workers for band depth computation (default: 12)",
+                    "default": 12
                 }
             },
             "required": ["data_path"]
@@ -548,20 +739,55 @@ VIS_TOOL_SCHEMAS = [
                     "description": "List of percentiles (0-100) for band envelope visualization",
                     "default": [25, 50, 75, 90]
                 },
-                "colormap": {
+                "percentile_colormap": {
                     "type": "string",
-                    "description": "Matplotlib colormap name for band visualization",
+                    "description": "Colormap for percentile bands (e.g., 'viridis', 'plasma', 'inferno')",
                     "default": "viridis"
                 },
                 "show_median": {
                     "type": "boolean",
-                    "description": "Whether to overlay median contour in red",
+                    "description": "Whether to show median contour (default: True)",
                     "default": True
+                },
+                "median_color": {
+                    "type": "string",
+                    "description": "Color of median contour (default: 'red')",
+                    "default": "red"
+                },
+                "median_width": {
+                    "type": "number",
+                    "description": "Width of median contour (default: 3.0)",
+                    "default": 3.0
+                },
+                "median_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of median contour (default: 1.0)",
+                    "default": 1.0
                 },
                 "show_outliers": {
                     "type": "boolean",
-                    "description": "Whether to overlay outlier contours in gray",
-                    "default": True
+                    "description": "Whether to show outlier contours (default: False)",
+                    "default": False
+                },
+                "outliers_color": {
+                    "type": "string",
+                    "description": "Color of outlier contours (default: 'gray')",
+                    "default": "gray"
+                },
+                "outliers_width": {
+                    "type": "number",
+                    "description": "Width of outlier contours (default: 1.0)",
+                    "default": 1.0
+                },
+                "outliers_alpha": {
+                    "type": "number",
+                    "description": "Alpha transparency of outlier contours (default: 0.5)",
+                    "default": 0.5
+                },
+                "workers": {
+                    "type": "integer",
+                    "description": "Number of parallel workers for band depth computation (default: 12)",
+                    "default": 12
                 }
             },
             "required": ["data_path", "isovalue"]

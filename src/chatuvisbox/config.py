@@ -34,25 +34,30 @@ DEFAULT_VIS_PARAMS = {
     "figsize": (10, 8),
     "dpi": 100,
 
-    # Functional boxplot / curve boxplot
-    "percentiles": [25, 50, 90, 100],  # List of percentiles for band visualization
-    "colors": None,                     # Color scheme (None = use defaults)
-    "plot_all_curves": False,           # Whether to show all individual curves
+    # BoxplotStyleConfig defaults (for functional_boxplot, curve_boxplot, contour_boxplot)
+    "percentiles": [25, 50, 90, 100],       # List of percentiles for band visualization
+    "percentile_colormap": "viridis",       # Colormap for percentile bands
+    "show_median": True,                    # Whether to show median curve/contour
+    "median_color": "red",                  # Color of median curve/contour
+    "median_width": 3.0,                    # Width of median curve/contour
+    "median_alpha": 1.0,                    # Alpha of median curve/contour
+    "show_outliers": False,                 # Whether to show outlier curves/contours
+    "outliers_color": "gray",               # Color of outlier curves/contours
+    "outliers_width": 1.0,                  # Width of outlier curves/contours
+    "outliers_alpha": 0.5,                  # Alpha of outlier curves/contours
 
-    # Contour boxplot
+    # Contour boxplot specific
     "contour_percentiles": [25, 50, 75, 90],  # Percentiles for contour bands
 
-    # Probabilistic marching squares / contour boxplot
-    "isovalue": 0.5,                    # Threshold for contour extraction
-    "colormap": "viridis",              # Colormap for scalar field visualization
+    # Parallel computation
+    "workers": 12,                          # Number of parallel workers for band depth
+
+    # Probabilistic marching squares
+    "isovalue": 0.5,                        # Threshold for contour extraction
+    "colormap": "viridis",                  # Colormap for scalar field visualization
 
     # Uncertainty lobes
-    "percentile1": 90,                  # First percentile for depth filtering
-    "percentile2": 50,                  # Second percentile for depth filtering
-    "scale": 0.2,                       # Scale factor for glyphs
-
-    # Display options
-    "show_median": True,                # Show median contour/curve
-    "show_outliers": True,              # Show outlier contours/curves
-    "alpha": 0.5,                       # Transparency for overlays
+    "percentile1": 90,                      # First percentile for depth filtering
+    "percentile2": 50,                      # Second percentile for depth filtering
+    "scale": 0.2,                           # Scale factor for glyphs
 }

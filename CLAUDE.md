@@ -607,7 +607,6 @@ You: /quit
 ```
 chatuvisbox/
 ├── pyproject.toml           # ✅ DONE Phase 4.5: Poetry configuration
-├── environment.yml          # ✅ DONE Phase 4.5: Conda environment
 ├── requirements.txt         # ✅ DONE: Python dependencies (legacy)
 ├── README.md                # ✅ DONE Phase 4.5: Package documentation
 ├── CLAUDE.md                # ✅ DONE: AI agent guidance (this file)

@@ -33,10 +33,18 @@ Natural language interface for the [UVisBox](https://github.com/VCCRI/UVisBox) u
 export GEMINI_API_KEY="your-api-key-here"
 ```
 
-### 2. Create conda environment
+### 2. Create Python environment
+
+**Option A: Using Conda (recommended)**
 ```bash
-conda env create -f environment.yml
+conda create -n chatuvisbox python=3.13
 conda activate chatuvisbox
+```
+
+**Option B: Using venv**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 ### 3. Install dependencies
