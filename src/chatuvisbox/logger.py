@@ -1,17 +1,13 @@
 """Logging utilities for debugging."""
 import logging
-from pathlib import Path
+from chatuvisbox import config
 
-# Create logs directory
-LOGS_DIR = Path(__file__).parent.parent.parent / "logs"
-LOGS_DIR.mkdir(exist_ok=True)
-
-# Configure logging
+# Configure logging (LOG_DIR already created in config.py)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(LOGS_DIR / "chatuvisbox.log"),
+        logging.FileHandler(config.LOG_DIR / "chatuvisbox.log"),
         logging.StreamHandler()
     ]
 )
