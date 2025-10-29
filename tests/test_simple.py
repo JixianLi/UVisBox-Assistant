@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from chatuvisbox.graph import create_graph
+from chatuvisbox.state import create_initial_state
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
@@ -40,10 +41,9 @@ def test_simple_end_to_end():
     print(f"\nPrompt: {prompt}")
     print("\n🔹 Processing...")
 
-    # Run the graph
-    result = graph.invoke({
-        "messages": [{"role": "user", "content": prompt}]
-    })
+    # Run the graph with proper state initialization
+    initial_state = create_initial_state(prompt)
+    result = graph.invoke(initial_state)
 
     # Verify success
     assert result is not None, "Result should not be None"

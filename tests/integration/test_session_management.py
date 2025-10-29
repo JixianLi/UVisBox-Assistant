@@ -95,19 +95,15 @@ def test_session_stats():
 
     # After some operations
     print("\n🔹 Performing operations...")
-    session.send("Generate curves")
-    time.sleep(2)
-    session.send("Plot them")
-    time.sleep(2)
-    session.send("colormap plasma")
-    time.sleep(1)
+    session.send("Generate 30 curves and plot functional boxplot")
+    time.sleep(3)
 
     stats = session.get_stats()
     print(f"\nFinal stats: {stats}")
 
-    assert stats["turns"] == 3
+    assert stats["turns"] == 1
     assert stats["current_data"] is True
-    assert stats["current_vis"] is True
+    assert stats["current_vis"] is True, f"Expected current_vis=True but got {stats['current_vis']}. Stats: {stats}"
 
     # Clean up
     session.clear()

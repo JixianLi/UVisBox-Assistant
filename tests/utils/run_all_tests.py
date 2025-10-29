@@ -38,6 +38,7 @@ def run_tests(test_files, delay=3):
     """Run tests with delays between files."""
     passed = 0
     failed = 0
+    failed_tests = []
 
     for i, test_file in enumerate(test_files):
         print(f"\n{'='*70}")
@@ -54,6 +55,7 @@ def run_tests(test_files, delay=3):
             print(f"✅ {test_file} PASSED")
         else:
             failed += 1
+            failed_tests.append(test_file)
             print(f"❌ {test_file} FAILED")
 
         # Delay between tests
@@ -61,7 +63,7 @@ def run_tests(test_files, delay=3):
             print(f"\n⏳ Pausing {delay}s to respect rate limits...")
             time.sleep(delay)
 
-    return passed, failed
+    return passed, failed, failed_tests
 
 
 def main():
@@ -114,7 +116,7 @@ def main():
 
     print(f"\n📊 Will run {len(existing_tests)} test files")
 
-    passed, failed = run_tests(existing_tests, delay)
+    passed, failed, failed_tests = run_tests(existing_tests, delay)
 
     # Summary
     print("\n" + "="*70)
@@ -129,6 +131,9 @@ def main():
         return 0
     else:
         print(f"\n⚠️  {failed} test(s) failed")
+        print("\n❌ Failed tests:")
+        for test_file in failed_tests:
+            print(f"  - {test_file}")
         return 1
 
 
