@@ -1,158 +1,202 @@
 # ChatUVisBox
 
-Natural language interface for the [UVisBox](https://github.com/VCCRI/UVisBox) uncertainty visualization library. ChatUVisBox uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
+Natural language interface for the [UVisBox](https://github.com/VCCRI/UVisBox) uncertainty visualization library.
 
-**Status**: Phase 4 Complete + Enhancements (2025-10-28)
+## Overview
+
+ChatUVisBox allows you to create uncertainty visualizations using natural language commands. Powered by Google Gemini and LangGraph, it provides an interactive conversational interface for exploring and visualizing uncertainty in scientific data.
 
 ## Features
 
-### Visualization Tools (5 total)
-- **Functional Boxplot**: Band depth visualization for 1D curve ensembles
-- **Curve Boxplot**: Depth-colored curves with multiple percentile bands
-- **Probabilistic Marching Squares**: Uncertainty visualization for 2D scalar fields
-- **Contour Boxplot**: Band depth of binary contours from scalar field ensembles
-- **Uncertainty Lobes**: Directional uncertainty glyphs for vector ensembles
+- **Natural Language Interface**: Describe what you want in plain English
+- **Conversational**: Multi-turn conversations with context preservation
+- **Fast Parameter Updates**: Quick visualization adjustments without reprocessing
+- **Fine-Grained Control**: Control all BoxplotStyleConfig styling parameters
+- **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, and uncertainty lobes
+- **Session Management**: Clean file management and session control
 
-### Data Generation Tools
-- **Curve Ensembles**: Synthetic sinusoidal curves with controlled variation
-- **Scalar Field Ensembles**: 2D Gaussian fields with systematic uncertainty
-- **Vector Field Ensembles**: 2D vector fields with directional and magnitude variation
-- **CSV to NumPy**: Load and convert CSV data to .npy format
+## Quick Start
 
-## Requirements
+### Example: Styling Control
 
-- **Python**: 3.10-3.13 (tested on 3.13)
-- **Conda**: For environment management (UVisBox requires conda)
-- **GEMINI_API_KEY**: Google Gemini API key (set in system environment)
+```
+You: Generate 30 curves and plot functional boxplot
+Assistant: [displays plot]
+You: median color blue
+Assistant: [updates median to blue]
+You: median width 2.5
+Assistant: [updates median width]
+You: show outliers
+Assistant: [shows outliers]
+You: outliers color black
+Assistant: [updates outliers to black]
+You: outliers alpha 1.0
+Assistant: [updates outliers transparency]
+```
+
+## Available Visualizations
+
+### 1. Functional Boxplot
+Visualizes band depth for multiple 1D curves with full styling control.
+
+**Example**: `Generate 40 curves and show functional boxplot with median color blue`
+
+**BoxplotStyleConfig Parameters**:
+- **Percentiles**: `percentiles` (list), `percentile_colormap` (str)
+- **Median Styling**: `show_median` (bool), `median_color` (str), `median_width` (float), `median_alpha` (float)
+- **Outliers Styling**: `show_outliers` (bool), `outliers_color` (str), `outliers_width` (float), `outliers_alpha` (float)
+
+### 2. Curve Boxplot
+Ensemble curves with depth-based coloring and parallel band depth computation.
+
+**Example**: `Plot curve boxplot with median color red and 8 workers`
+
+**Parameters**: Same as Functional Boxplot + `workers` (int, default: 12)
+
+### 3. Contour Boxplot
+Band depth visualization of binary contours from scalar field ensembles.
+
+**Example**: `Show contour boxplot at isovalue 0.5 with median color blue`
+
+**Parameters**: Same as Functional Boxplot + `isovalue` (float) + `workers` (int)
+
+### 4. Probabilistic Marching Squares
+2D scalar field uncertainty visualization.
+
+**Example**: `Generate scalar field 40x40 and show marching squares at isovalue 0.6`
+
+**Parameters**: `isovalue`, `colormap`
+
+### 5. Uncertainty Lobes
+Directional uncertainty visualization for vector fields.
+
+**Example**: `Show uncertainty lobes with percentile1 90 and percentile2 50`
+
+**Parameters**: `percentile1` (0-100), `percentile2` (0-100), `scale`
+
+## Quick Commands (Hybrid Control)
+
+For fast parameter updates without full reprocessing:
+
+### Basic Parameters
+- `colormap <name>` - Change colormap (e.g., `colormap plasma`)
+- `percentile <value>` - Update percentile
+- `isovalue <value>` - Update isovalue
+- `show median` / `hide median` - Toggle median display
+- `show outliers` / `hide outliers` - Toggle outliers
+
+### Median Styling
+- `median color <color>` - Set median color (e.g., `median color blue`)
+- `median width <number>` - Set median line width (e.g., `median width 2.5`)
+- `median alpha <number>` - Set median transparency (e.g., `median alpha 0.8`)
+
+### Outliers Styling
+- `outliers color <color>` - Set outliers color (e.g., `outliers color black`)
+- `outliers width <number>` - Set outliers line width (e.g., `outliers width 1.5`)
+- `outliers alpha <number>` - Set outliers transparency (e.g., `outliers alpha 1.0`)
+
+### Other
+- `scale <value>` - Update glyph scale
+- `alpha <value>` - Update general transparency
 
 ## Installation
 
-### 1. Set up environment variable
+### Prerequisites
+- Python 3.10-3.13
+- Conda environment (recommended for UVisBox)
+- Google Gemini API key
+
+### Setup
+
+1. **Set environment variable**:
 ```bash
-# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
 export GEMINI_API_KEY="your-api-key-here"
 ```
 
-### 2. Create Python environment
-
-**Option A: Using Conda (recommended)**
+2. **Create and activate environment**:
 ```bash
 conda create -n chatuvisbox python=3.13
 conda activate chatuvisbox
 ```
 
-**Option B: Using venv**
+3. **Install dependencies**:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-### 3. Install dependencies
-```bash
-# Using Poetry (recommended)
-poetry install
-
-# Or using pip
 pip install -r requirements.txt
-```
-
-### 4. Install UVisBox
-```bash
-# UVisBox must be installed separately in the conda environment
 pip install uvisbox
 ```
 
-## Usage
-
-### Quick Start
-```python
-from chatuvisbox.graph import create_graph
-
-# Create the LangGraph workflow
-graph = create_graph()
-
-# Run a natural language query
-result = graph.invoke({
-    "messages": [{"role": "user", "content": "Generate 30 curves and show a functional boxplot"}]
-})
-```
-
-### Example Queries
-```python
-# Curve visualization
-"Generate 50 curves with 100 points each and create a functional boxplot"
-
-# Scalar field uncertainty
-"Generate a 50x50 scalar field ensemble and show probabilistic contours at isovalue 0.5"
-
-# Contour boxplot
-"Create a contour boxplot from a scalar field with isovalue 0.6"
-
-# Vector field uncertainty
-"Generate a 10x10 vector field and plot uncertainty lobes"
-```
-
-### Direct Tool Usage
-```python
-from chatuvisbox.data_tools import generate_ensemble_curves, generate_scalar_field_ensemble
-from chatuvisbox.vis_tools import plot_functional_boxplot, plot_contour_boxplot
-
-# Generate data
-curves_result = generate_ensemble_curves(n_curves=50, n_points=100)
-field_result = generate_scalar_field_ensemble(nx=50, ny=50, n_ensemble=30)
-
-# Create visualizations
-plot_functional_boxplot(data_path=curves_result['output_path'], percentiles=[25, 50, 90, 100])
-plot_contour_boxplot(data_path=field_result['output_path'], isovalue=0.5)
-```
-
-## Testing
-
+4. **Run the application**:
 ```bash
-# Quick test (recommended, ~5 seconds, 9 API calls)
-python test_graph_quick.py
-
-# No API calls - instant validation
-python test_phase1.py
-python test_routing.py
-
-# Full test suite with automatic delays (~5-7 minutes)
-python run_tests_with_delays.py
+python main.py
 ```
-
-See `TESTING.md` and `RATE_LIMIT_FRIENDLY_TESTING.md` for details on handling Gemini API rate limits.
 
 ## Project Structure
 
 ```
 chatuvisbox/
-├── src/chatuvisbox/       # Main package
-│   ├── graph.py          # LangGraph workflow definition
-│   ├── state.py          # GraphState schema
-│   ├── nodes.py          # Graph nodes (model, tools)
-│   ├── routing.py        # Conditional routing logic
-│   ├── model.py          # Gemini model setup
-│   ├── data_tools.py     # Data generation functions
-│   ├── vis_tools.py      # UVisBox visualization wrappers
-│   └── config.py         # Configuration
-├── test_data/            # Sample datasets
-├── temp/                 # Temporary .npy files (gitignored)
-├── plans/                # Implementation phase guides
-└── tests/                # Test suite
+├── src/chatuvisbox/
+│   ├── main.py                 # Main REPL entry point
+│   ├── graph.py                # LangGraph workflow
+│   ├── state.py                # State definitions
+│   ├── nodes.py                # Graph nodes
+│   ├── routing.py              # Routing logic
+│   ├── model.py                # LLM setup
+│   ├── data_tools.py           # Data loading/generation tools
+│   ├── vis_tools.py            # Visualization wrappers (BoxplotStyleConfig)
+│   ├── hybrid_control.py       # Fast parameter updates
+│   ├── command_parser.py       # Command parsing (13 patterns)
+│   ├── conversation.py         # Session management
+│   ├── config.py               # Configuration
+│   └── utils.py                # Utilities
+├── test_data/                  # Sample datasets
+├── temp/                       # Temporary files (auto-generated)
+├── tests/                      # Test suites
+├── requirements.txt            # Dependencies
+└── pyproject.toml              # Poetry configuration
 ```
+
+## Requirements
+
+See `requirements.txt`:
+
+- `langgraph>=0.2.76`
+- `langchain>=0.3.27`
+- `langchain-google-genai>=2.1.12`
+- `uvisbox` (installed separately)
+- `numpy>=2.0`
+- `pandas>=2.3.3`
+- `matplotlib>=3.10.7`
+- `langsmith>=0.4.38`
 
 ## Development
 
-- **Implementation Guide**: See `CLAUDE.md` for detailed development guidelines
-- **Phase Plans**: Follow `plans/README.md` for sequential implementation phases
-- **API Reference**: UVisBox function signatures documented in `CLAUDE.md`
+### Running Tests
 
-## Current Limitations
+```bash
+# Quick sanity check
+python tests/test_simple.py
 
-- **Gemini Free Tier**: 30 requests per minute (using gemini-2.0-flash-lite)
-- **2D Only**: 3D/PyVista visualizations excluded from MVP
-- **No Persistence**: Conversation state not saved between sessions (Phase 6)
-- **No Fast Path**: Hybrid control for parameter updates not yet implemented (Phase 7)
+# Unit tests (0 API calls, fast)
+python tests/utils/run_all_tests.py --unit
+
+# Integration tests (includes BoxplotStyleConfig params)
+python tests/utils/run_all_tests.py --integration
+
+# E2E tests (full styling coverage)
+python tests/utils/run_all_tests.py --e2e
+
+# All tests
+python tests/utils/run_all_tests.py
+```
+
+See `TESTING.md` for comprehensive testing guide.
+
+## Documentation
+
+- **User Guide**: `docs/USER_GUIDE.md` - Detailed styling control examples
+- **API Reference**: `docs/API.md` - Complete BoxplotStyleConfig documentation
+- **Developer Guide**: `CLAUDE.md` - Implementation details and architecture
+- **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
 
 ## License
 
@@ -160,7 +204,8 @@ MIT
 
 ## Citation
 
-If you use UVisBox in your research, please cite:
-```
-[UVisBox citation - see UVisBox repository]
-```
+If you use UVisBox in your research, please cite the original UVisBox paper. See the [UVisBox repository](https://github.com/ouermijudicael/UVisBox) for citation details.
+
+---
+
+Made with ❤️ for uncertainty visualization

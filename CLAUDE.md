@@ -431,30 +431,93 @@ All expect numpy arrays and return matplotlib axes.
 11. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development (Phase 9)
 12. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params` (Phase 9)
 
-## Implementation-Specific Notes (From Phase 1)
+## Implementation-Specific Notes
 
-### UVisBox Import Path Issue
-The correct import path for UVisBox functions is:
+### UVisBox BoxplotStyleConfig Interface (Updated 2025-01-29)
+
+The UVisBox library now uses a `BoxplotStyleConfig` dataclass for boxplot styling:
+
+**Correct import path**:
 ```python
-from uvisbox.Modules import functional_boxplot
-from uvisbox.Modules import curve_boxplot  
-from uvisbox.Modules import probabilistic_marching_squares
-from uvisbox.Modules import uncertainty_lobes
+from uvisbox.Modules import (
+    functional_boxplot,
+    curve_boxplot,
+    contour_boxplot,
+    probabilistic_marching_squares,
+    uncertainty_lobes,
+    BoxplotStyleConfig  # NEW
+)
 ```
 
+**Function signatures**:
+```python
+functional_boxplot(data, method='fdb', boxplot_style=None, ax=None)
+curve_boxplot(curves, boxplot_style=None, ax=None, workers=12)
+contour_boxplot(ensemble_images, isovalue, boxplot_style=None, ax=None, workers=12)
+```
+
+**BoxplotStyleConfig fields** (all have defaults):
+- percentiles: List[float]
+- percentile_colormap: str
+- show_median: bool
+- median_color: str
+- median_width: float
+- median_alpha: float
+- show_outliers: bool
+- outliers_color: str
+- outliers_width: float
+- outliers_alpha: float
+
+**Important Changes**:
+- ❌ `plot_all_curves` parameter removed (use `show_outliers` instead)
+- Parameter name is `boxplot_style` not `style_config`
+- Workers parameter added for parallel band depth computation
+
 ### Visualization Return Format
-All vis tools MUST include `_vis_params` for hybrid control (Phase 7):
+
+All vis tools MUST include all BoxplotStyleConfig parameters in `_vis_params`:
+
 ```python
 return {
     "status": "success",
-    "message": "Displayed functional boxplot for 30 curves",
+    "message": "Displayed functional boxplot",
     "_vis_params": {
         "_tool_name": "plot_functional_boxplot",
         "data_path": data_path,
-        "percentile": percentile,
-        "show_median": show_median
+        "percentiles": percentiles,
+        "percentile_colormap": percentile_colormap,
+        "show_median": show_median,
+        "median_color": median_color,
+        "median_width": median_width,
+        "median_alpha": median_alpha,
+        "show_outliers": show_outliers,
+        "outliers_color": outliers_color,
+        "outliers_width": outliers_width,
+        "outliers_alpha": outliers_alpha
     }
 }
+```
+
+### Command Parser Patterns
+
+The command parser supports 13+ patterns including BoxplotStyleConfig styling:
+
+```python
+# Basic
+"colormap <name>" → colormap/percentile_colormap
+"percentile <number>" → percentiles
+"show median" → show_median=True
+"hide outliers" → show_outliers=False
+
+# Median styling
+"median color <color>" → median_color
+"median width <number>" → median_width
+"median alpha <number>" → median_alpha
+
+# Outliers styling
+"outliers color <color>" → outliers_color
+"outliers width <number>" → outliers_width
+"outliers alpha <number>" → outliers_alpha
 ```
 
 ## Implementation-Specific Notes (From Phase 5)
