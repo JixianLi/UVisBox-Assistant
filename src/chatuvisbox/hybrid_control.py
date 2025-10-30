@@ -3,6 +3,7 @@
 from typing import Optional, Dict, Tuple
 from chatuvisbox.command_parser import parse_simple_command, apply_command_to_params
 from chatuvisbox.vis_tools import VIS_TOOLS
+from chatuvisbox.output_control import vprint
 
 
 def execute_simple_command(
@@ -50,7 +51,7 @@ def execute_simple_command(
     if not vis_func:
         return False, None, f"Unknown vis tool: {vis_tool_name}"
 
-    print(f"[HYBRID] Executing {vis_tool_name} with updated params")
+    vprint(f"[HYBRID] Executing {vis_tool_name} with updated params")
 
     # Remove internal fields before calling tool
     call_params = {k: v for k, v in updated_params.items() if not k.startswith('_')}

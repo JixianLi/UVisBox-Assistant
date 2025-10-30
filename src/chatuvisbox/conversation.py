@@ -1,9 +1,13 @@
 """Conversation management for multi-turn interactions."""
 
-from typing import Optional
+from typing import Optional, Dict, List
+from datetime import datetime
 from chatuvisbox.state import GraphState, create_initial_state
 from chatuvisbox.graph import graph_app
 from chatuvisbox.hybrid_control import execute_simple_command, is_hybrid_eligible
+from chatuvisbox.error_tracking import ErrorRecord
+from chatuvisbox.output_control import set_session, vprint
+from chatuvisbox.error_interpretation import interpret_uvisbox_error, format_error_with_hint
 from langchain_core.messages import HumanMessage, AIMessage
 
 
@@ -24,6 +28,21 @@ class ConversationSession:
         """Initialize a new conversation session."""
         self.state: Optional[GraphState] = None
         self.turn_count = 0
+
+        # Debug and verbose mode flags
+        self.debug_mode: bool = False      # Verbose error output with tracebacks
+        self.verbose_mode: bool = False    # Show internal state messages
+
+        # Error tracking
+        self.error_history: List[ErrorRecord] = []
+        self.max_error_history: int = 20
+        self._next_error_id: int = 1
+
+        # Auto-fix tracking
+        self.auto_fixed_errors: set = set()  # IDs of auto-fixed errors
+
+        # Register this session for verbose mode checks
+        set_session(self)
 
     def send(self, user_message: str) -> GraphState:
         """
@@ -56,7 +75,7 @@ class ConversationSession:
                 self.state["messages"].append(HumanMessage(content=user_message))
                 self.state["messages"].append(AIMessage(content=message))
 
-                print(f"[HYBRID] Fast path executed: {message}")
+                vprint(f"[HYBRID] Fast path executed: {message}")
                 return self.state
 
         # Fall back to full graph execution
@@ -70,7 +89,71 @@ class ConversationSession:
         # Run graph with current state
         self.state = graph_app.invoke(self.state)
 
+        # Check for auto-fix markers in state
+        if "_auto_fixed_error_id" in self.state:
+            error_id = self.state["_auto_fixed_error_id"]
+            self.mark_error_auto_fixed(error_id)
+            # Clean up marker
+            del self.state["_auto_fixed_error_id"]
+
+        # Process tool messages to record errors
+        self._process_tool_errors()
+
         return self.state
+
+    def _process_tool_errors(self):
+        """Process tool messages to detect and record errors."""
+        if not self.state:
+            return
+
+        from langchain_core.messages import ToolMessage
+
+        for message in self.state["messages"]:
+            if isinstance(message, ToolMessage):
+                try:
+                    import json
+                    # Try to parse message content as JSON
+                    if isinstance(message.content, str):
+                        try:
+                            content = json.loads(message.content)
+                        except json.JSONDecodeError:
+                            # Content might be dict-like string representation
+                            import ast
+                            try:
+                                content = ast.literal_eval(message.content)
+                            except (ValueError, SyntaxError):
+                                continue
+                    else:
+                        content = message.content
+
+                    # Check if this is an error message
+                    if isinstance(content, dict) and content.get("status") == "error":
+                        # Check if we have error details
+                        if "_error_details" in content:
+                            error_details = content["_error_details"]
+                            error = error_details.get("exception")
+                            traceback_str = error_details.get("traceback", "")
+
+                            # Only record if we haven't already recorded this error
+                            # (avoid duplicates on multiple send() calls with same state)
+                            tool_name = getattr(message, 'name', 'unknown_tool')
+
+                            # Record error with interpretation
+                            if error:
+                                error_record = self.record_error(
+                                    tool_name=tool_name,
+                                    error=error,
+                                    traceback_str=traceback_str,
+                                    user_message=content.get("message", str(error)),
+                                    auto_fixed=False
+                                )
+
+                                # Store error ID in state for auto-fix detection
+                                self.state["_pending_error_id"] = error_record.error_id
+
+                except Exception:
+                    # Silently skip malformed messages
+                    pass
 
     def get_last_response(self) -> str:
         """
@@ -163,3 +246,103 @@ class ConversationSession:
             "current_data": ctx.get("current_data") is not None,
             "current_vis": ctx.get("last_vis") is not None,
         }
+
+    def record_error(
+        self,
+        tool_name: str,
+        error: Exception,
+        traceback_str: str,
+        user_message: str,
+        auto_fixed: bool = False,
+        context: Optional[Dict] = None
+    ) -> ErrorRecord:
+        """
+        Record an error in history with enhanced interpretation.
+
+        Args:
+            tool_name: Name of the tool that failed
+            error: The exception object
+            traceback_str: Full traceback string from traceback.format_exc()
+            user_message: User-friendly error message
+            auto_fixed: Whether this error was automatically fixed
+            context: Optional context dict (e.g., state snapshot)
+
+        Returns:
+            ErrorRecord object
+        """
+        # Interpret error with debug mode context
+        interpreted_msg, debug_hint = interpret_uvisbox_error(
+            error,
+            traceback_str,
+            debug_mode=self.debug_mode
+        )
+
+        # Format message with hint if available
+        enhanced_msg = format_error_with_hint(interpreted_msg, debug_hint)
+
+        record = ErrorRecord(
+            error_id=self._next_error_id,
+            timestamp=datetime.now(),
+            tool_name=tool_name,
+            error_type=type(error).__name__,
+            error_message=str(error),
+            full_traceback=traceback_str,
+            user_facing_message=enhanced_msg,  # Use enhanced message
+            auto_fixed=auto_fixed,
+            context=context
+        )
+
+        self.error_history.append(record)
+        self._next_error_id += 1
+
+        # Keep only last N errors
+        if len(self.error_history) > self.max_error_history:
+            self.error_history.pop(0)
+
+        return record
+
+    def get_error(self, error_id: int) -> Optional[ErrorRecord]:
+        """
+        Get error by ID.
+
+        Args:
+            error_id: ID of error to retrieve
+
+        Returns:
+            ErrorRecord or None if not found
+        """
+        for err in self.error_history:
+            if err.error_id == error_id:
+                return err
+        return None
+
+    def get_last_error(self) -> Optional[ErrorRecord]:
+        """
+        Get most recent error.
+
+        Returns:
+            ErrorRecord or None if no errors
+        """
+        return self.error_history[-1] if self.error_history else None
+
+    def mark_error_auto_fixed(self, error_id: int):
+        """
+        Mark an error as auto-fixed.
+
+        Args:
+            error_id: ID of the error to mark
+        """
+        self.auto_fixed_errors.add(error_id)
+        vprint(f"[AUTO-FIX] Marked error {error_id} as auto-fixed")
+
+    def is_error_auto_fixed(self, error_id: int) -> bool:
+        """
+        Check if error was auto-fixed.
+
+        Args:
+            error_id: ID of error to check
+
+        Returns:
+            True if error was auto-fixed, False otherwise
+        """
+        return error_id in self.auto_fixed_errors

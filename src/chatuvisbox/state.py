@@ -1,5 +1,5 @@
 """State definition for the LangGraph workflow"""
-from typing import TypedDict, List, Optional, Annotated
+from typing import TypedDict, List, Optional, Annotated, Dict
 from langchain_core.messages import BaseMessage
 import operator
 
@@ -14,6 +14,9 @@ class GraphState(TypedDict):
         last_vis_params: Parameters used in the last visualization call (for hybrid control)
         session_files: List of temporary files created during this session
         error_count: Number of consecutive errors (for circuit breaking)
+        tool_execution_sequence: List of tool execution records for auto-fix detection
+        last_error_tool: Name of tool that last failed (for auto-fix detection)
+        last_error_id: ID of last error (for auto-fix detection)
     """
     # Messages list - appended to over time
     messages: Annotated[List[BaseMessage], operator.add]
@@ -23,6 +26,11 @@ class GraphState(TypedDict):
     last_vis_params: Optional[dict]
     session_files: List[str]
     error_count: int
+
+    # Auto-fix detection fields
+    tool_execution_sequence: List[Dict]
+    last_error_tool: Optional[str]
+    last_error_id: Optional[int]
 
 
 def create_initial_state(user_message: str) -> GraphState:
@@ -42,7 +50,10 @@ def create_initial_state(user_message: str) -> GraphState:
         current_data_path=None,
         last_vis_params=None,
         session_files=[],
-        error_count=0
+        error_count=0,
+        tool_execution_sequence=[],
+        last_error_tool=None,
+        last_error_id=None
     )
 
 

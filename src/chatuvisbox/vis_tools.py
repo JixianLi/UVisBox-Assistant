@@ -1,6 +1,7 @@
 """Visualization tools wrapping UVisBox functions"""
 import numpy as np
 import matplotlib.pyplot as plt
+import traceback
 from pathlib import Path
 from typing import Dict, Optional, List
 from chatuvisbox import config
@@ -130,9 +131,20 @@ def plot_functional_boxplot(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating functional boxplot: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating functional boxplot: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -249,9 +261,20 @@ def plot_curve_boxplot(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating curve boxplot: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating curve boxplot: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -311,9 +334,20 @@ def plot_probabilistic_marching_squares(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating probabilistic marching squares: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating probabilistic marching squares: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -398,9 +432,20 @@ def plot_uncertainty_lobes(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating uncertainty lobes: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating uncertainty lobes: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -481,9 +526,20 @@ def plot_squid_glyph_2D(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating squid glyphs: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating squid glyphs: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -600,9 +656,20 @@ def plot_contour_boxplot(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating contour boxplot: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error creating contour boxplot: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 

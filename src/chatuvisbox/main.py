@@ -5,6 +5,7 @@ This is the primary user interface for ChatUVisBox.
 """
 
 from .conversation import ConversationSession
+from .output_control import vprint
 import matplotlib.pyplot as plt
 import sys
 
@@ -25,12 +26,15 @@ def print_welcome():
     print("  • colormap plasma")
     print("  • median color blue")
     print("\nCommands:")
-    print("  /help     - Show help (all 6 visualizations, 16 commands)")
-    print("  /context  - Show current context")
-    print("  /stats    - Show session statistics")
-    print("  /clear    - Clear session and temp files")
-    print("  /reset    - Reset conversation (keep files)")
-    print("  /quit     - Exit")
+    print("  /help       - Show help (all 6 visualizations, 16 commands)")
+    print("  /context    - Show current context")
+    print("  /stats      - Show session statistics")
+    print("  /debug on   - Enable debug mode (full error tracebacks)")
+    print("  /verbose on - Show internal state messages")
+    print("  /errors     - List recent errors")
+    print("  /clear      - Clear session and temp files")
+    print("  /reset      - Reset conversation (keep files)")
+    print("  /quit       - Exit")
     print("="*70 + "\n")
 
 
@@ -74,18 +78,28 @@ def print_help():
     print("    • outliers alpha <value> - Set outliers alpha (e.g., outliers alpha 0.7)")
 
     print("\n🎮 REPL Commands:")
-    print("  • /help     - Show this help message")
-    print("  • /context  - Show current conversation context")
-    print("  • /stats    - Show session statistics")
-    print("  • /clear    - Clear session and temp files")
-    print("  • /reset    - Reset conversation (keep files)")
-    print("  • /quit     - Exit ChatUVisBox")
+    print("  • /help         - Show this help message")
+    print("  • /context      - Show current conversation context")
+    print("  • /stats        - Show session statistics")
+    print("  • /clear        - Clear session and temp files")
+    print("  • /reset        - Reset conversation (keep files)")
+    print("  • /quit         - Exit ChatUVisBox")
+
+    print("\n🔍 Debug Commands:")
+    print("  • /debug on     - Enable debug mode (full error tracebacks)")
+    print("  • /debug off    - Disable debug mode")
+    print("  • /verbose on   - Show internal state messages ([HYBRID], [TOOL], etc.)")
+    print("  • /verbose off  - Hide internal state messages")
+    print("  • /errors       - List recent errors with IDs")
+    print("  • /trace <id>   - Show full traceback for error ID")
 
     print("\n💡 Tips:")
     print("  • Use conversational language")
     print("  • Reference previous operations: 'plot that', 'change it'")
     print("  • Chain operations: 'Load X and plot as Y'")
     print("  • Hybrid commands are 10-15x faster than full requests")
+    print("  • Enable /debug mode to see detailed error information")
+    print("  • Enable /verbose mode to see internal execution flow")
 
     print("="*70 + "\n")
 
@@ -132,6 +146,9 @@ def main():
                     print(f"\n📊 Context:")
                     for key, value in ctx.items():
                         print(f"  {key}: {value}")
+                    print(f"\n🔧 Modes:")
+                    print(f"  debug_mode: {session.debug_mode}")
+                    print(f"  verbose_mode: {session.verbose_mode}")
                     print()
                     continue
 
@@ -145,6 +162,77 @@ def main():
 
                 elif command == "/help":
                     print_help()
+                    continue
+
+                elif command.startswith("/debug"):
+                    parts = user_input.split()
+                    if len(parts) == 1 or parts[1].lower() not in ["on", "off"]:
+                        print("Usage: /debug on|off")
+                        continue
+
+                    if parts[1].lower() == "on":
+                        session.debug_mode = True
+                        print("🔍 Debug mode: ON (full tracebacks on errors)")
+                    else:
+                        session.debug_mode = False
+                        print("🔍 Debug mode: OFF")
+                    continue
+
+                elif command.startswith("/verbose"):
+                    parts = user_input.split()
+                    if len(parts) == 1 or parts[1].lower() not in ["on", "off"]:
+                        print("Usage: /verbose on|off")
+                        continue
+
+                    if parts[1].lower() == "on":
+                        session.verbose_mode = True
+                        print("📢 Verbose mode: ON (show internal messages)")
+                        print("   Internal messages like [DATA TOOL], [VIS TOOL], [HYBRID] will now be shown")
+                        vprint("[VERBOSE] Test message - if you see this, verbose mode is working!")
+                    else:
+                        session.verbose_mode = False
+                        print("📢 Verbose mode: OFF")
+                        print("   Internal messages will be hidden")
+                    continue
+
+                elif command == "/errors":
+                    if not session.error_history:
+                        print("\n✅ No errors in this session\n")
+                    else:
+                        print(f"\n🚨 Error History ({len(session.error_history)} errors):")
+                        for err in session.error_history:
+                            # Check if auto-fixed
+                            is_auto_fixed = session.is_error_auto_fixed(err.error_id)
+                            status = "auto-fixed ✓" if is_auto_fixed else "failed"
+                            time_str = err.timestamp.strftime('%H:%M:%S')
+                            print(f"  [{err.error_id}] {time_str} - {err.tool_name}: {err.error_type} ({status})")
+                        print("\nUse /trace <id> to see full details\n")
+                    continue
+
+                elif command.startswith("/trace"):
+                    parts = user_input.split()
+                    if len(parts) != 2:
+                        print("Usage: /trace <error_id>")
+                        print("Use /errors to see list of error IDs")
+                        continue
+
+                    try:
+                        error_id = int(parts[1])
+                        err = session.get_error(error_id)
+                        if err:
+                            # Show detailed error
+                            print(f"\n{err.detailed()}")
+                            # Add auto-fix status if it was fixed after recording
+                            if session.is_error_auto_fixed(error_id):
+                                print("\n✓ This error was automatically fixed by the agent\n")
+                            else:
+                                print()
+                        else:
+                            print(f"\n❌ Error ID {error_id} not found")
+                            print("Use /errors to see available error IDs\n")
+                    except ValueError:
+                        print("❌ Error ID must be a number")
+                        print("Use /errors to see list of error IDs")
                     continue
 
                 else:

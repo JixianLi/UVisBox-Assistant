@@ -1,6 +1,7 @@
 """Data loading and transformation tools"""
 import numpy as np
 import pandas as pd
+import traceback
 from pathlib import Path
 from typing import Dict, Optional
 from chatuvisbox import config
@@ -48,9 +49,20 @@ def load_csv_to_numpy(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error loading CSV: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error loading CSV: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -108,9 +120,20 @@ def generate_ensemble_curves(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating curves: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error generating curves: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -199,9 +222,20 @@ def generate_scalar_field_ensemble(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating scalar field: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error generating scalar field: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -233,9 +267,20 @@ def load_npy(filepath: str) -> Dict[str, str]:
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error loading .npy file: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error loading .npy file: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -331,9 +376,20 @@ def generate_vector_field_ensemble(
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating vector field ensemble: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error generating vector field ensemble: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 
@@ -372,9 +428,20 @@ def clear_session() -> Dict[str, str]:
         }
 
     except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error clearing session: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
         return {
             "status": "error",
-            "message": f"Error clearing session: {str(e)}"
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
         }
 
 

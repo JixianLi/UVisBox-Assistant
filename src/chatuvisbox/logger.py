@@ -3,12 +3,12 @@ import logging
 from chatuvisbox import config
 
 # Configure logging (LOG_DIR already created in config.py)
+# Only log to file - console output is controlled by vprint() and verbose mode
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(config.LOG_DIR / "chatuvisbox.log"),
-        logging.StreamHandler()
+        logging.FileHandler(config.LOG_DIR / "chatuvisbox.log")
     ]
 )
 
