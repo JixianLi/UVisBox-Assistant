@@ -108,6 +108,11 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
         value = float(match.group(1))
         return SimpleCommand('outliers_alpha', value)
 
+    # Pattern 14: "method <fdb|mfdb>"
+    match = re.match(r'method\s+(fdb|mfdb)', text)
+    if match:
+        return SimpleCommand('method', match.group(1))
+
     # Not a simple command
     return None
 
@@ -143,6 +148,7 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
         'outliers_alpha': 'outliers_alpha',
         'scale': 'scale',
         'alpha': 'alpha',
+        'method': 'method',
     }
 
     mapping = param_mapping.get(command.param_name, command.param_name)
@@ -173,6 +179,8 @@ if __name__ == "__main__":
         "outliers color black",
         "outliers width 1.5",
         "outliers alpha 1.0",
+        "method fdb",
+        "method mfdb",
         "generate some curves",  # Should return None
     ]
 

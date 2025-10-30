@@ -36,6 +36,9 @@ def test_boxplot_style_config_defaults():
     assert params["outliers_width"] == 1.0
     assert params["outliers_alpha"] == 0.5
 
+    # Functional boxplot method
+    assert params["method"] == "fdb"
+
     # Parallel computation
     assert params["workers"] == 12
 
@@ -59,6 +62,7 @@ def test_uncertainty_lobes_defaults():
     assert params["percentile1"] == 90
     assert params["percentile2"] == 50
     assert params["scale"] == 0.2
+    assert params["lobes_workers"] is None
 
 
 def test_figure_defaults():

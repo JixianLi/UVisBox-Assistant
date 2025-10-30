@@ -46,11 +46,15 @@ DEFAULT_VIS_PARAMS = {
     "outliers_width": 1.0,                  # Width of outlier curves/contours
     "outliers_alpha": 0.5,                  # Alpha of outlier curves/contours
 
+    # Functional boxplot specific
+    "method": "fdb",                        # Band depth method: 'fdb' (functional band depth) or 'mfdb' (modified functional band depth)
+
     # Contour boxplot specific
     "contour_percentiles": [25, 50, 75, 90],  # Percentiles for contour bands
 
     # Parallel computation
-    "workers": 12,                          # Number of parallel workers for band depth
+    "workers": 12,                          # Number of parallel workers for band depth (curve_boxplot, contour_boxplot)
+    "lobes_workers": None,                  # Number of parallel workers for uncertainty_lobes (None = optimized for large data only)
 
     # Probabilistic marching squares
     "isovalue": 0.5,                        # Threshold for contour extraction

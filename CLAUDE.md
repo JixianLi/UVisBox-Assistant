@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Key Features**:
 - ✅ Natural language interface for 5 visualization types
 - ✅ BoxplotStyleConfig with 10 styling parameters
-- ✅ Hybrid control system (13+ commands, 10-15x faster updates)
+- ✅ Hybrid control system (16 commands, 10-15x faster updates)
 - ✅ Multi-turn conversation with context preservation
 - ✅ Session management with automatic cleanup
 - ✅ Error handling with circuit breaker
@@ -48,7 +48,7 @@ vis_tools.py      - ✅ DONE: UVisBox visualization wrappers with BoxplotStyleCo
 config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
 logger.py         - ✅ DONE: Logging infrastructure with file and console output
 conversation.py   - ✅ DONE: ConversationSession class for multi-turn conversations with hybrid control
-command_parser.py - ✅ DONE: Parse simple commands for hybrid control (13+ patterns)
+command_parser.py - ✅ DONE: Parse simple commands for hybrid control (16 patterns)
 hybrid_control.py - ✅ DONE: Execute simple commands directly, 10-15x speedup
 main.py           - ✅ DONE: Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
 ```
@@ -116,7 +116,7 @@ ChatUVisBox v0.1.0 is **feature complete** with all core functionality implement
 
 **User Experience** ✅ COMPLETE
 - Multi-turn conversation support
-- Hybrid control system (13+ fast commands)
+- Hybrid control system (16 fast commands)
 - Session management with cleanup
 - Interactive REPL with full commands
 
@@ -251,7 +251,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Maintains flexibility for ambiguous requests
 
 **Implementation**:
-- `command_parser.py`: Pattern matching for 13+ simple command types (includes BoxplotStyleConfig)
+- `command_parser.py`: Pattern matching for 16 simple command types (includes BoxplotStyleConfig)
 - `hybrid_control.py`: Direct execution with parameter validation
 - `conversation.py`: Checks hybrid eligibility before full graph
 
@@ -268,7 +268,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - 17 command parser tests for styling parameters (median/outliers color/width/alpha)
 - 8 config tests for BoxplotStyleConfig defaults
 - 10 tool tests for direct function calls with full styling
-- All 13+ hybrid control commands tested
+- All 16 hybrid control commands tested
 
 **Benefits**:
 - Clear separation by API usage (unit tests = 0 calls, safe to run repeatedly)
@@ -333,7 +333,7 @@ ChatUVisBox uses the following matplotlib-based UVisBox functions:
 functional_boxplot(data, method='fdb', boxplot_style=None, ax=None)
 ```
 - `data`: NumPy array of shape (n_curves, n_points)
-- `method`: Band depth method ('fdb' or 'mfdb', default: 'fdb')
+- `method`: Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
 - `boxplot_style`: BoxplotStyleConfig instance (optional)
 - `ax`: Matplotlib axes (optional)
 
@@ -390,7 +390,7 @@ probabilistic_marching_squares(F, isovalue, cmap='viridis', ax=None)
 
 **uncertainty_lobes**:
 ```python
-uncertainty_lobes(positions, ensemble_vectors, percentile1=90, percentile2=50, scale=0.2, ax=None)
+uncertainty_lobes(positions, ensemble_vectors, percentile1=90, percentile2=50, scale=0.2, ax=None, workers=None)
 ```
 - `positions`: NumPy array of shape (n_points, 2)
 - `ensemble_vectors`: NumPy array of shape (n_points, 2, n_ensemble)
@@ -398,6 +398,7 @@ uncertainty_lobes(positions, ensemble_vectors, percentile1=90, percentile2=50, s
 - `percentile2`: Inner percentile (0-100, default: 50)
 - `scale`: Glyph scale factor (default: 0.2)
 - `ax`: Matplotlib axes (optional)
+- `workers`: Number of parallel workers for band depth computation (default: None, optimized for large data only)
 
 **Note**: All functions expect numpy arrays and return matplotlib axes.
 
@@ -484,7 +485,7 @@ return {
 
 ### Command Parser Patterns
 
-The command parser supports 13+ patterns including BoxplotStyleConfig styling:
+The command parser supports 16 patterns including BoxplotStyleConfig styling:
 
 ```python
 # Basic
@@ -492,6 +493,7 @@ The command parser supports 13+ patterns including BoxplotStyleConfig styling:
 "percentile <number>" → percentiles
 "show median" → show_median=True
 "hide outliers" → show_outliers=False
+"method <fdb|mfdb>" → method (functional band depth method)
 
 # Median styling
 "median color <color>" → median_color
@@ -703,7 +705,7 @@ chatuvisbox/
 │   ├── model.py             # Gemini model with error recovery
 │   ├── logger.py            # Logging infrastructure
 │   ├── conversation.py      # ConversationSession with hybrid control
-│   ├── command_parser.py    # Command parsing (13+ patterns)
+│   ├── command_parser.py    # Command parsing (16 patterns)
 │   ├── hybrid_control.py    # Fast path execution
 │   ├── utils.py             # Utility functions
 │   ├── data_tools.py        # Data generation and loading

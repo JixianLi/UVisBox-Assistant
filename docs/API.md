@@ -26,7 +26,8 @@ plot_functional_boxplot(
     show_outliers: bool = False,
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
-    outliers_alpha: float = 0.5
+    outliers_alpha: float = 0.5,
+    method: str = "fdb"
 ) -> Dict[str, Any]
 ```
 
@@ -42,6 +43,7 @@ plot_functional_boxplot(
 - `outliers_color` (str): Color of outlier curves (default: "gray")
 - `outliers_width` (float): Width of outlier curves (default: 1.0)
 - `outliers_alpha` (float): Alpha transparency of outliers (default: 0.5, range: 0.0-1.0)
+- `method` (str): Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
 
 **Returns**: Dict with:
 - `status` (str): "success" or "error"
@@ -209,7 +211,8 @@ plot_uncertainty_lobes(
     vectors_path: str,
     percentile1: int = 90,
     percentile2: int = 50,
-    scale: float = 0.2
+    scale: float = 0.2,
+    workers: Optional[int] = None
 ) -> Dict[str, Any]
 ```
 
@@ -219,6 +222,7 @@ plot_uncertainty_lobes(
 - `percentile1` (int): Outer percentile for lobe extent (default: 90, range: 0-100)
 - `percentile2` (int): Inner percentile for lobe extent (default: 50, range: 0-100)
 - `scale` (float): Scaling factor for glyph size (default: 0.2)
+- `workers` (Optional[int]): Number of parallel workers for band depth computation (default: None, optimized for large data only)
 
 **Note**: percentile1 should be > percentile2 for meaningful visualization
 
@@ -394,7 +398,7 @@ result = load_npy("temp/my_data.npy")
 
 ### Supported Hybrid Commands
 
-The command parser recognizes 13+ fast-path commands for instant parameter updates:
+The command parser recognizes 16 fast-path commands for instant parameter updates:
 
 #### Basic Parameters
 1. `colormap <name>` → Updates colormap/percentile_colormap
@@ -418,6 +422,7 @@ The command parser recognizes 13+ fast-path commands for instant parameter updat
 #### Other
 14. `scale <number>` → Updates scale (for uncertainty_lobes)
 15. `alpha <number>` → Updates general alpha
+16. `method <fdb|mfdb>` → Updates method (for functional_boxplot: 'fdb' = functional band depth, 'mfdb' = modified functional band depth)
 
 ### Usage
 

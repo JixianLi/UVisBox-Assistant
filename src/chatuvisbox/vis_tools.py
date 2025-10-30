@@ -31,7 +31,8 @@ def plot_functional_boxplot(
     show_outliers: bool = False,
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
-    outliers_alpha: float = 0.5
+    outliers_alpha: float = 0.5,
+    method: str = "fdb"
 ) -> Dict[str, str]:
     """
     Create a functional boxplot from curve data with multiple percentile bands.
@@ -48,6 +49,7 @@ def plot_functional_boxplot(
         outliers_color: Color of outlier curves (default: "gray")
         outliers_width: Width of outlier curves (default: 1.0)
         outliers_alpha: Alpha of outlier curves (default: 0.5)
+        method: Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
 
     Returns:
         Dict with status and message
@@ -90,10 +92,10 @@ def plot_functional_boxplot(
             dpi=config.DEFAULT_VIS_PARAMS["dpi"]
         )
 
-        # Call UVisBox function (using 'fdb' method by default)
+        # Call UVisBox function
         functional_boxplot(
             data=curves,
-            method='fdb',
+            method=method,
             boxplot_style=style_config,
             ax=ax
         )
@@ -108,7 +110,7 @@ def plot_functional_boxplot(
 
         return {
             "status": "success",
-            "message": f"Displayed functional boxplot for {curves.shape[0]} curves with percentiles {percentiles}",
+            "message": f"Displayed functional boxplot for {curves.shape[0]} curves with percentiles {percentiles} using method '{method}'",
             "_vis_params": {
                 "_tool_name": "plot_functional_boxplot",
                 "data_path": data_path,
@@ -121,7 +123,8 @@ def plot_functional_boxplot(
                 "show_outliers": show_outliers,
                 "outliers_color": outliers_color,
                 "outliers_width": outliers_width,
-                "outliers_alpha": outliers_alpha
+                "outliers_alpha": outliers_alpha,
+                "method": method
             }
         }
 
@@ -318,7 +321,8 @@ def plot_uncertainty_lobes(
     positions_path: str,
     percentile1: float = 90,
     percentile2: float = 50,
-    scale: float = 0.2
+    scale: float = 0.2,
+    workers: Optional[int] = None
 ) -> Dict[str, str]:
     """
     Create uncertainty lobe glyphs.
@@ -329,6 +333,7 @@ def plot_uncertainty_lobes(
         percentile1: First percentile for depth filtering, 0-100 (default: 90)
         percentile2: Second percentile for depth filtering, 0-100 (default: 50)
         scale: Scale factor for glyphs
+        workers: Number of parallel workers for band depth computation (default: None, optimized for large data only)
 
     Returns:
         Dict with status and message
@@ -355,7 +360,8 @@ def plot_uncertainty_lobes(
             percentile1=percentile1,
             percentile2=percentile2,
             scale=scale,
-            ax=ax
+            ax=ax,
+            workers=workers
         )
 
         n_positions = positions.shape[0]
@@ -385,7 +391,8 @@ def plot_uncertainty_lobes(
                 "vectors_path": vectors_path,
                 "percentile1": percentile1,
                 "percentile2": percentile2,
-                "scale": scale
+                "scale": scale,
+                "workers": workers
             }
         }
 
@@ -587,6 +594,12 @@ VIS_TOOL_SCHEMAS = [
                     "type": "number",
                     "description": "Alpha transparency of outlier curves (default: 0.5)",
                     "default": 0.5
+                },
+                "method": {
+                    "type": "string",
+                    "description": "Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')",
+                    "default": "fdb",
+                    "enum": ["fdb", "mfdb"]
                 }
             },
             "required": ["data_path"]
@@ -714,6 +727,10 @@ VIS_TOOL_SCHEMAS = [
                     "type": "number",
                     "description": "Scale factor for glyph size",
                     "default": 0.2
+                },
+                "workers": {
+                    "type": "integer",
+                    "description": "Number of parallel workers for band depth computation (default: None, optimized for large data only)"
                 }
             },
             "required": ["vectors_path", "positions_path"]
