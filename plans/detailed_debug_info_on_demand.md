@@ -769,3 +769,27 @@ This plan provides a comprehensive, user-friendly debug system that:
 - ✅ Extensible for future enhancements
 
 **Recommended start**: Phase 1 + Phase 1.5 + Phase 2 (Weeks 1-2) for immediate value.
+
+---
+
+## Implementation Phases
+
+This plan has been broken down into detailed phase documents:
+
+📂 **See `plans/debug_feature/` for detailed phase-by-phase implementation plans:**
+
+- **Phase 1**: Core Infrastructure - ErrorRecord, error history, tool updates
+- **Phase 2**: Verbose Mode Control - vprint utility, output control
+- **Phase 3**: User Commands - /debug, /verbose, /errors, /trace commands
+- **Phase 4**: Enhanced Error Messages - Error interpretation, hints
+- **Phase 5**: Auto-Fix Detection (Optional) - Retry tracking, auto-fix marking
+- **Phase 6**: Testing - Unit, integration, E2E, manual tests
+- **Phase 7**: Documentation & Version - Docs update, v0.1.2 release
+
+Each phase document includes:
+- Detailed implementation steps with code examples
+- Testing requirements and acceptance criteria
+- Manual testing scenarios and checklists
+- Dependencies and timeline estimates
+
+👉 **Start here**: `plans/debug_feature/README.md`

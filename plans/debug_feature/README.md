@@ -84,13 +84,29 @@ This feature adds comprehensive debugging capabilities to ChatUVisBox with two i
 
 **Files**: `phase_06_testing.md`
 
+### Phase 7: Documentation & Version (Priority: HIGH) - Week 4
+- Update all documentation (USER_GUIDE, API, CLAUDE, TESTING)
+- Update CHANGELOG with v0.1.2 features
+- Increment version numbers (pyproject.toml, __init__.py)
+- Create release notes
+
+**Files**: `phase_07_documentation.md`
+
 ## Implementation Timeline
 
 ```
 Week 1: Phase 1 + Phase 2 (Core Infrastructure + Verbose Mode)
 Week 2: Phase 3 (User Commands)
 Week 3: Phase 4 + Phase 6 (Enhanced Errors + Testing)
-Week 4: Phase 5 + Documentation (Auto-Fix + Docs)
+Week 4: Phase 5 (Optional) + Phase 6 (Testing) + Phase 7 (Documentation & v0.1.2)
+```
+
+**Recommended Path** (Skip Phase 5 for MVP):
+```
+Week 1: Phase 1 + Phase 2
+Week 2: Phase 3
+Week 3: Phase 4 + Phase 6 (start)
+Week 4: Phase 6 (finish) + Phase 7
 ```
 
 ## Success Criteria
@@ -121,14 +137,20 @@ For immediate value, implement **Phase 1 + Phase 2 + Phase 3** (Weeks 1-2):
 
 This provides 80% of the value with minimal complexity.
 
+For **complete release**, add Phase 6 + Phase 7 (Week 3-4):
+- Comprehensive testing
+- Documentation updates
+- Version 0.1.2 release
+
 ## Files
 
 - `phase_01_core_infrastructure.md` - ErrorRecord, error history, tool updates
 - `phase_02_verbose_mode.md` - vprint utility, print statement updates
 - `phase_03_user_commands.md` - Command handlers, help text
 - `phase_04_enhanced_errors.md` - Error interpretation, hints
-- `phase_05_auto_fix_detection.md` - Retry tracking, auto-fix marking
+- `phase_05_auto_fix_detection.md` - Retry tracking, auto-fix marking (OPTIONAL)
 - `phase_06_testing.md` - Unit, integration, manual tests
+- `phase_07_documentation.md` - Documentation updates, v0.1.2 release
 
 ## Related Documents
 
