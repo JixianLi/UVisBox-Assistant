@@ -5,7 +5,7 @@ A LangGraph-based conversational agent that translates natural language requests
 into data processing and visualization operations using the UVisBox library.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Expose main API
 from chatuvisbox.graph import run_graph, stream_graph, graph_app

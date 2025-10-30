@@ -567,6 +567,238 @@ LOGS_DIR        # Directory for log files (default: "logs/")
 
 ---
 
+## Error Tracking Module
+
+### ErrorRecord
+
+**File**: `src/chatuvisbox/error_tracking.py`
+
+Dataclass for storing error information with full traceback.
+
+**Class Definition:**
+```python
+@dataclass
+class ErrorRecord:
+    error_id: int
+    timestamp: datetime
+    tool_name: str
+    error_type: str
+    error_message: str
+    full_traceback: str
+    user_facing_message: str
+    auto_fixed: bool
+    context: Optional[Dict] = None
+```
+
+**Methods:**
+
+- **`summary() -> str`**
+
+  Returns a one-line summary suitable for error list display.
+
+  **Example Output:**
+  ```
+  [3] 10:23:45 - plot_functional_boxplot: ValueError (failed)
+  ```
+
+- **`detailed() -> str`**
+
+  Returns a detailed multi-line description with full traceback.
+
+  **Example Output:**
+  ```
+  Error ID: 3
+  Timestamp: 2025-01-30T10:23:45.123456
+  Tool: plot_functional_boxplot
+  Type: ValueError
+  Message: Invalid colormap name 'Reds'
+  ...
+  Full Traceback:
+  [full traceback here]
+  ```
+
+### ConversationSession - Error Tracking Methods
+
+**File**: `src/chatuvisbox/conversation.py`
+
+**New Attributes:**
+
+- **`debug_mode: bool`** - Whether debug mode is enabled (default: False)
+- **`verbose_mode: bool`** - Whether verbose mode is enabled (default: False)
+- **`error_history: List[ErrorRecord]`** - List of recorded errors (max 20)
+- **`max_error_history: int`** - Maximum errors to keep (default: 20)
+
+**New Methods:**
+
+- **`record_error(tool_name: str, error: Exception, traceback_str: str, user_message: str, auto_fixed: bool = False, context: Optional[Dict] = None) -> ErrorRecord`**
+
+  Record an error in the error history.
+
+  **Parameters:**
+  - `tool_name`: Name of the tool that failed
+  - `error`: The exception object
+  - `traceback_str`: Full traceback from `traceback.format_exc()`
+  - `user_message`: User-friendly error message
+  - `auto_fixed`: Whether error was automatically fixed
+  - `context`: Optional context dictionary
+
+  **Returns:** ErrorRecord object
+
+  **Example:**
+  ```python
+  record = session.record_error(
+      tool_name="plot_functional_boxplot",
+      error=ValueError("Invalid colormap"),
+      traceback_str=traceback.format_exc(),
+      user_message="Colormap error: Invalid colormap 'Reds'"
+  )
+  ```
+
+- **`get_error(error_id: int) -> Optional[ErrorRecord]`**
+
+  Retrieve error by ID.
+
+  **Parameters:**
+  - `error_id`: ID of error to retrieve
+
+  **Returns:** ErrorRecord or None if not found
+
+- **`get_last_error() -> Optional[ErrorRecord]`**
+
+  Get the most recent error.
+
+  **Returns:** ErrorRecord or None if no errors
+
+- **`mark_error_auto_fixed(error_id: int) -> None`**
+
+  Mark an error as automatically fixed by the agent.
+
+  **Parameters:**
+  - `error_id`: ID of error to mark as auto-fixed
+
+- **`is_error_auto_fixed(error_id: int) -> bool`**
+
+  Check if an error was automatically fixed.
+
+  **Parameters:**
+  - `error_id`: ID of error to check
+
+  **Returns:** True if error was auto-fixed, False otherwise
+
+## Output Control Module
+
+### Output Control Functions
+
+**File**: `src/chatuvisbox/output_control.py`
+
+Functions for controlling verbose output based on session settings.
+
+**Functions:**
+
+- **`set_session(session: ConversationSession) -> None`**
+
+  Register the current session for verbose mode checks.
+
+  **Note:** Automatically called by ConversationSession.__init__()
+
+- **`vprint(message: str, force: bool = False) -> None`**
+
+  Print message only if verbose mode is enabled.
+
+  **Parameters:**
+  - `message`: Message to print
+  - `force`: If True, always print regardless of verbose mode
+
+  **Example:**
+  ```python
+  vprint("[DATA TOOL] Calling generate_curves")  # Only if verbose
+  vprint("✅ Success!", force=True)  # Always print
+  ```
+
+- **`is_verbose() -> bool`**
+
+  Check if verbose mode is enabled.
+
+  **Returns:** True if verbose mode is on, False otherwise
+
+## Error Interpretation Module
+
+### Error Interpretation Functions
+
+**File**: `src/chatuvisbox/error_interpretation.py`
+
+Functions for interpreting and enhancing error messages.
+
+**Functions:**
+
+- **`interpret_uvisbox_error(error: Exception, traceback_str: str, debug_mode: bool = False) -> Tuple[str, Optional[str]]`**
+
+  Interpret UVisBox errors and provide helpful context.
+
+  **Parameters:**
+  - `error`: The exception object
+  - `traceback_str`: Full traceback string
+  - `debug_mode`: Whether debug mode is enabled
+
+  **Returns:** Tuple of (user_message, debug_hint)
+  - `debug_hint` is None if debug mode is OFF
+
+  **Supported Error Patterns:**
+  - Colormap errors (e.g., "Invalid colormap 'Reds'")
+  - Method validation errors (e.g., "Unknown method 'fbd'")
+  - Shape mismatch errors
+  - File not found errors
+  - Import errors (UVisBox not installed)
+
+  **Example:**
+  ```python
+  error = ValueError("Invalid colormap name 'Reds'")
+  traceback = "...matplotlib..."
+
+  msg, hint = interpret_uvisbox_error(error, traceback, debug_mode=True)
+  # msg: "Colormap error: Invalid colormap name 'Reds'"
+  # hint: "The colormap 'Reds' may be valid in matplotlib..."
+  ```
+
+- **`format_error_with_hint(user_message: str, hint: Optional[str]) -> str`**
+
+  Format error message with optional debug hint.
+
+  **Parameters:**
+  - `user_message`: Main error message
+  - `hint`: Optional debug hint
+
+  **Returns:** Formatted error message
+
+  **Example:**
+  ```python
+  formatted = format_error_with_hint("Error occurred", "This is a hint")
+  # Returns: "Error occurred\n💡 Debug hint: This is a hint"
+  ```
+
+## Command Reference
+
+### Debug and Verbose Commands
+
+**New commands added in v0.1.2:**
+
+| Command | Description | Default State |
+|---------|-------------|---------------|
+| `/debug on` | Enable verbose error output with full tracebacks | OFF |
+| `/debug off` | Disable verbose error output | OFF |
+| `/verbose on` | Show internal state messages ([HYBRID], [TOOL]) | OFF |
+| `/verbose off` | Hide internal state messages | OFF |
+| `/errors` | List recent errors with IDs | N/A |
+| `/trace <id>` | Show full stack trace for specific error ID | N/A |
+| `/trace last` | Show stack trace for most recent error | N/A |
+
+**Updated commands:**
+
+- **`/context`** - Now shows debug and verbose mode states
+- **`/help`** - Updated with debug/verbose command documentation
+
+---
+
 ## Complete Function Reference
 
 ### Visualization Functions

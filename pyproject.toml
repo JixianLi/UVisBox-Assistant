@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chatuvisbox"
-version = "0.1.1"
+version = "0.1.2"
 description = "Natural language interface for UVisBox uncertainty visualization"
 authors = ["Jixian Li <jixianli@sci.utah.edu>"]
 readme = "README.md"

@@ -232,6 +232,9 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Error recovery: error_count resets to 0 on successful tool execution
 - Context awareness: file list injected in system prompt for helpful suggestions
 - Logging: all tool calls, results, and errors logged to `logs/chatuvisbox.log`
+- **Error Tracking (v0.1.2)**: Full traceback capture with `_error_details` dict
+- **Error Interpretation (v0.1.2)**: Context-aware hints when debug mode enabled
+- **Auto-Fix Detection (v0.1.2)**: Tracks error → retry → success patterns
 
 ### 5. File Naming Convention
 - Test data: `test_data/sample_curves.csv`, `test_data/sample_scalar_field.npy`
@@ -438,6 +441,9 @@ squid_glyph_2D(positions, ensemble_vectors, percentile=95, scale=0.2, ax=None, w
 9. **Error count resets on success** - Don't manually reset error_count
 10. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development
 11. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params`
+12. **Use vprint for internal messages** (v0.1.2) - All internal state messages must use `vprint()` from `output_control.py`, not regular `print()`
+13. **Record errors with full traceback** (v0.1.2) - Always capture `traceback.format_exc()` in tool error handling with `_error_details` dict
+14. **Check debug mode for hints** (v0.1.2) - Error interpretation should only show hints when debug mode is enabled
 
 ## Implementation-Specific Notes
 
@@ -703,6 +709,141 @@ You: /context
 You: /quit
 👋 Goodbye!
 ```
+
+## Debug and Verbose Mode (v0.1.2)
+
+ChatUVisBox provides two independent debugging modes for enhanced troubleshooting.
+
+### Debug Mode (`/debug on/off`)
+
+**Purpose**: Verbose error output with full stack traces and helpful hints
+
+**Implementation Pattern**:
+```python
+# In tools - capture full traceback
+import traceback
+
+except Exception as e:
+    tb_str = traceback.format_exc()
+    return {
+        "status": "error",
+        "message": "User-friendly message",
+        "_error_details": {
+            "exception": e,
+            "traceback": tb_str
+        }
+    }
+
+# In conversation.py - interpret with debug mode context
+from chatuvisbox.error_interpretation import interpret_uvisbox_error, format_error_with_hint
+
+user_msg, hint = interpret_uvisbox_error(error, traceback, debug_mode=self.debug_mode)
+enhanced_msg = format_error_with_hint(user_msg, hint)
+```
+
+**Key Points**:
+- Full tracebacks stored in ErrorRecord
+- Debug hints only shown when debug mode is ON
+- Error history persists across conversation (max 20)
+- Auto-fix detection tracks error → retry → success patterns
+
+### Verbose Mode (`/verbose on/off`)
+
+**Purpose**: Show/hide internal state messages
+
+**Implementation Pattern**:
+```python
+from chatuvisbox.output_control import vprint, set_session
+
+# In ConversationSession.__init__
+set_session(self)  # Register for verbose checks
+
+# In nodes.py, hybrid_control.py, etc.
+vprint("[DATA TOOL] Calling generate_curves")  # Hidden by default
+vprint("[HYBRID] Fast path executed")         # Hidden by default
+
+# User-facing messages always shown
+print("Generated 30 curves")  # Always shown
+```
+
+**Internal Messages** (controlled by verbose mode):
+- `[DATA TOOL]` - Data tool execution
+- `[VIS TOOL]` - Visualization tool execution
+- `[HYBRID]` - Hybrid fast path execution
+- `[AUTO-FIX]` - Auto-fix detection
+
+**User-Facing Messages** (always shown):
+- Success confirmations
+- File cleanup notifications
+- Error messages (concise or detailed based on debug mode)
+
+### Error Tracking Architecture
+
+**ErrorRecord** (`src/chatuvisbox/error_tracking.py`):
+- Stores full error details with traceback
+- Provides `summary()` and `detailed()` methods
+- Immutable dataclass
+
+**ConversationSession** fields:
+- `debug_mode: bool` (default: False)
+- `verbose_mode: bool` (default: False)
+- `error_history: List[ErrorRecord]` (max 20)
+- `auto_fixed_errors: set` - IDs of auto-fixed errors
+
+**Error Recording Flow**:
+1. Tool catches exception
+2. Tool returns error with `_error_details`
+3. `conversation.py` records error via `record_error()`
+4. Error interpretation applied if debug mode ON
+5. Error stored in `error_history`
+6. User can retrieve via `/errors` or `/trace`
+
+**Auto-Fix Detection Flow**:
+1. Tool fails → Error recorded (ID=1)
+2. State stores: `last_error_tool`, `last_error_id`
+3. Model retries with corrections
+4. Same tool succeeds → Auto-fix detected!
+5. `nodes.py` sets `_auto_fixed_error_id` in state
+6. `conversation.py` marks error as auto-fixed
+7. `/errors` shows `(auto-fixed ✓)` status
+
+### Output Control Pattern
+
+**DO**:
+```python
+from chatuvisbox.output_control import vprint
+
+# Internal messages
+vprint("[DATA TOOL] Calling function")
+vprint("[HYBRID] Executing fast path")
+
+# User-facing messages
+print("Generated 30 curves")
+print("✅ Success!")
+```
+
+**DON'T**:
+```python
+# Don't use print for internal messages
+print("[DATA TOOL] Calling function")  # ❌ Wrong
+
+# Don't use vprint for user messages
+vprint("Generated 30 curves")  # ❌ Wrong
+```
+
+### Testing Notes
+
+**Unit Tests** (0 API calls):
+- `tests/unit/test_error_tracking.py` - 17 tests
+- `tests/unit/test_output_control.py` - 5 tests
+- `tests/unit/test_error_interpretation.py` - 14 tests
+
+**Total: 36+ debug feature tests, all 0 API calls**
+
+**Performance Requirements**:
+- vprint overhead < 5% when verbose mode OFF
+- Error recording < 1ms per error
+- No noticeable conversation slowdown
 
 ## File Structure
 

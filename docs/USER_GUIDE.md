@@ -9,7 +9,8 @@
 5. [Performance Tuning](#performance-tuning)
 6. [Tips for Styling](#tips-for-styling)
 7. [Common Workflows](#common-workflows)
-8. [Troubleshooting](#troubleshooting)
+8. [Debugging and Troubleshooting](#debugging-and-troubleshooting)
+9. [General Troubleshooting](#general-troubleshooting)
 
 ## Getting Started
 
@@ -281,7 +282,7 @@ Systematically testing different styles:
 4. Choose best configuration for your needs
 ```
 
-## Troubleshooting
+## General Troubleshooting
 
 ### Issue: Styling commands not working
 
@@ -398,6 +399,198 @@ You: Generate 30 curves
 You: Plot them         # "them" refers to the curves just generated
 You: Make it blue      # "it" refers to the current plot
 You: Show outliers     # implicitly updates current plot
+```
+
+## Debugging and Troubleshooting
+
+ChatUVisBox provides powerful debugging features to help you investigate errors and understand execution flow.
+
+### Debug Mode
+
+Debug mode provides verbose error output with full stack traces and helpful hints.
+
+**Enable/Disable:**
+```bash
+You: /debug on
+🐛 Debug mode: ON (full tracebacks on errors)
+
+You: /debug off
+🔍 Debug mode: OFF
+```
+
+**Example Usage:**
+
+Without debug mode (default):
+```
+You: plot with colormap Reds
+Assistant: Error: Invalid colormap name 'Reds'
+```
+
+With debug mode:
+```
+You: /debug on
+You: plot with colormap Reds
+Assistant: Colormap error: Invalid colormap name 'Reds'
+💡 Debug hint: The colormap 'Reds' may be valid in matplotlib but UVisBox might not
+be passing it correctly. This could be a UVisBox bug. Try 'viridis', 'plasma',
+or 'inferno' which are known to work.
+
+[Full stack trace shown]
+```
+
+### Verbose Mode
+
+Verbose mode shows internal state messages to help you understand what's happening behind the scenes.
+
+**Enable/Disable:**
+```bash
+You: /verbose on
+📢 Verbose mode: ON (show internal messages)
+
+You: /verbose off
+📢 Verbose mode: OFF
+```
+
+**Example Usage:**
+
+Without verbose mode (default - clean output):
+```
+You: generate 30 curves
+Assistant: Generated 30 curves and saved to temp/_temp_ensemble_curves.npy
+
+You: plot functional boxplot
+Assistant: Displayed functional boxplot for 30 curves
+```
+
+With verbose mode (see execution flow):
+```
+You: /verbose on
+You: generate 30 curves
+[DATA TOOL] Calling generate_curves with args: {'n_curves': 30}
+[DATA TOOL] Result: {'status': 'success', ...}
+Assistant: Generated 30 curves and saved to temp/_temp_ensemble_curves.npy
+
+You: colormap plasma
+[HYBRID] Executing plot_functional_boxplot with updated params
+[HYBRID] Fast path executed: Updated functional boxplot with colormap plasma
+Assistant: Updated functional boxplot with colormap plasma
+```
+
+### Error Tracking Commands
+
+Track and inspect errors that occur during your session.
+
+**List Error History:**
+```bash
+You: /errors
+🚨 Error History (3 errors):
+
+[1] 10:23:45 - plot_functional_boxplot: ValueError (failed)
+[2] 10:25:30 - generate_curves: TypeError (failed)
+[3] 10:27:15 - plot_contour_boxplot: KeyError (auto-fixed ✓)
+
+Use /trace <id> or /trace last to see full details
+```
+
+**View Full Stack Trace:**
+```bash
+You: /trace 1
+======================================================================
+Error ID: 1
+Timestamp: 2025-01-30T10:23:45.123456
+Tool: plot_functional_boxplot
+Type: ValueError
+Message: Invalid colormap name 'Reds'
+Auto-fixed: False
+User-facing message: Colormap error: Invalid colormap name 'Reds'
+
+Full Traceback:
+Traceback (most recent call last):
+  File "/path/to/vis_tools.py", line 97, in plot_functional_boxplot
+    functional_boxplot(data=curves, ...)
+  [... full stack trace ...]
+ValueError: Invalid colormap name 'Reds'
+======================================================================
+
+You: /trace last
+[Shows most recent error]
+```
+
+### Mode Combinations
+
+Debug and verbose modes are **independent** and can be combined:
+
+| Modes | Effect |
+|-------|--------|
+| Both OFF (default) | Clean conversation, concise errors |
+| Debug ON, Verbose OFF | Detailed errors, clean output |
+| Debug OFF, Verbose ON | Concise errors, see execution flow |
+| Both ON | Maximum debugging (detailed errors + execution flow) |
+
+### Updated /context Command
+
+The `/context` command now shows mode states:
+
+```bash
+You: /context
+
+📊 Context:
+  turn_count: 5
+  message_count: 12
+  current_data: temp/_temp_ensemble_curves.npy
+  last_vis: {'_tool_name': 'plot_functional_boxplot', ...}
+  error_count: 0
+  message_count: 12
+
+🔧 Modes:
+  debug_mode: True
+  verbose_mode: True
+
+```
+
+### Debugging Workflow Recommendations
+
+**1. Normal Development (Default)**
+- Both modes OFF
+- Clean conversation experience
+- Errors are concise but sufficient
+
+**2. Investigating Errors**
+- Enable debug mode: `/debug on`
+- Reproduce the error to see full traceback
+- Use `/trace last` to review details
+- Check debug hints for solutions
+
+**3. Understanding Execution Flow**
+- Enable verbose mode: `/verbose on`
+- Watch internal tool calls
+- See hybrid fast path execution
+- Useful for understanding multi-step operations
+
+**4. Deep Debugging**
+- Enable both modes
+- Maximum visibility into errors and execution
+- Best for complex issues or bug reports
+
+### Common Error Patterns
+
+**Colormap Errors:**
+```
+Error: Invalid colormap name 'Reds'
+💡 Hint: This may be a UVisBox bug. Try 'viridis', 'plasma', or 'inferno'.
+```
+
+**Method Validation Errors:**
+```
+Error: Unknown method 'fbd'. Choose 'fdb' or 'mfbd'.
+💡 Hint: UVisBox expects 'fdb' (not 'fbd'). This may be a typo in UVisBox.
+```
+
+**Shape Mismatch Errors:**
+```
+Error: Expected 2D array, got shape (100, 50, 3)
+💡 Hint: Data has wrong dimensions. Check if you're using the right data
+for this visualization type.
 ```
 
 ---

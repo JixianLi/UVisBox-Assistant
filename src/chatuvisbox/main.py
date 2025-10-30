@@ -92,6 +92,7 @@ def print_help():
     print("  • /verbose off  - Hide internal state messages")
     print("  • /errors       - List recent errors with IDs")
     print("  • /trace <id>   - Show full traceback for error ID")
+    print("  • /trace last   - Show traceback for most recent error")
 
     print("\n💡 Tips:")
     print("  • Use conversational language")
@@ -206,16 +207,32 @@ def main():
                             status = "auto-fixed ✓" if is_auto_fixed else "failed"
                             time_str = err.timestamp.strftime('%H:%M:%S')
                             print(f"  [{err.error_id}] {time_str} - {err.tool_name}: {err.error_type} ({status})")
-                        print("\nUse /trace <id> to see full details\n")
+                        print("\nUse /trace <id> or /trace last to see full details\n")
                     continue
 
                 elif command.startswith("/trace"):
                     parts = user_input.split()
                     if len(parts) != 2:
-                        print("Usage: /trace <error_id>")
-                        print("Use /errors to see list of error IDs")
+                        print("Usage: /trace <error_id> or /trace last")
+                        print("\nExamples:")
+                        print("  /trace 3      - Show full trace for error ID 3")
+                        print("  /trace last   - Show trace for most recent error")
                         continue
 
+                    # Handle /trace last
+                    if parts[1].lower() == "last":
+                        err = session.get_last_error()
+                        if err:
+                            print(f"\n{err.detailed()}")
+                            if session.is_error_auto_fixed(err.error_id):
+                                print("\n✓ This error was automatically fixed by the agent\n")
+                            else:
+                                print()
+                        else:
+                            print("\n✅ No errors recorded yet\n")
+                        continue
+
+                    # Handle /trace <id>
                     try:
                         error_id = int(parts[1])
                         err = session.get_error(error_id)
@@ -231,7 +248,7 @@ def main():
                             print(f"\n❌ Error ID {error_id} not found")
                             print("Use /errors to see available error IDs\n")
                     except ValueError:
-                        print("❌ Error ID must be a number")
+                        print(f"❌ Error ID must be a number or 'last', got: '{parts[1]}'")
                         print("Use /errors to see list of error IDs")
                     continue
 
