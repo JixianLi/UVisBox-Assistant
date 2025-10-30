@@ -108,8 +108,8 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
         value = float(match.group(1))
         return SimpleCommand('outliers_alpha', value)
 
-    # Pattern 14: "method <fdb|mfdb>"
-    match = re.match(r'method\s+(fdb|mfdb)', text)
+    # Pattern 14: "method <fbd|mfbd>"
+    match = re.match(r'method\s+(fbd|mfbd)', text)
     if match:
         return SimpleCommand('method', match.group(1))
 
@@ -184,8 +184,8 @@ if __name__ == "__main__":
         "outliers color black",
         "outliers width 1.5",
         "outliers alpha 1.0",
-        "method fdb",
-        "method mfdb",
+        "method fbd",
+        "method mfbd",
         "generate some curves",  # Should return None
     ]
 

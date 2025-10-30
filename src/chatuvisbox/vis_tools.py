@@ -33,7 +33,7 @@ def plot_functional_boxplot(
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
     outliers_alpha: float = 0.5,
-    method: str = "fdb"
+    method: str = "fbd"
 ) -> Dict[str, str]:
     """
     Create a functional boxplot from curve data with multiple percentile bands.
@@ -50,7 +50,7 @@ def plot_functional_boxplot(
         outliers_color: Color of outlier curves (default: "gray")
         outliers_width: Width of outlier curves (default: 1.0)
         outliers_alpha: Alpha of outlier curves (default: 0.5)
-        method: Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
+        method: Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')
 
     Returns:
         Dict with status and message
@@ -682,9 +682,9 @@ VIS_TOOL_SCHEMAS = [
                 },
                 "method": {
                     "type": "string",
-                    "description": "Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')",
-                    "default": "fdb",
-                    "enum": ["fdb", "mfdb"]
+                    "description": "Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')",
+                    "default": "fbd",
+                    "enum": ["fbd", "mfbd"]
                 }
             },
             "required": ["data_path"]

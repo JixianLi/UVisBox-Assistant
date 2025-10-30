@@ -342,10 +342,10 @@ ChatUVisBox uses the following matplotlib-based UVisBox functions:
 
 **functional_boxplot**:
 ```python
-functional_boxplot(data, method='fdb', boxplot_style=None, ax=None)
+functional_boxplot(data, method='fbd', boxplot_style=None, ax=None)
 ```
 - `data`: NumPy array of shape (n_curves, n_points)
-- `method`: Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
+- `method`: Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')
 - `boxplot_style`: BoxplotStyleConfig instance (optional)
 - `ax`: Matplotlib axes (optional)
 
@@ -459,7 +459,7 @@ from uvisbox.Modules import (
 
 **Function signatures**:
 ```python
-functional_boxplot(data, method='fdb', boxplot_style=None, ax=None)
+functional_boxplot(data, method='fbd', boxplot_style=None, ax=None)
 curve_boxplot(curves, boxplot_style=None, ax=None, workers=12)
 contour_boxplot(ensemble_images, isovalue, boxplot_style=None, ax=None, workers=12)
 ```
@@ -516,7 +516,7 @@ The command parser supports 16 patterns including BoxplotStyleConfig styling:
 "percentile <number>" → percentiles
 "show median" → show_median=True
 "hide outliers" → show_outliers=False
-"method <fdb|mfdb>" → method (functional band depth method)
+"method <fbd|mfbd>" → method (functional band depth method)
 
 # Median styling
 "median color <color>" → median_color

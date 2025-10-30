@@ -27,7 +27,7 @@ plot_functional_boxplot(
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
     outliers_alpha: float = 0.5,
-    method: str = "fdb"
+    method: str = "fbd"
 ) -> Dict[str, Any]
 ```
 
@@ -43,7 +43,7 @@ plot_functional_boxplot(
 - `outliers_color` (str): Color of outlier curves (default: "gray")
 - `outliers_width` (float): Width of outlier curves (default: 1.0)
 - `outliers_alpha` (float): Alpha transparency of outliers (default: 0.5, range: 0.0-1.0)
-- `method` (str): Band depth method - 'fdb' (functional band depth) or 'mfdb' (modified functional band depth) (default: 'fdb')
+- `method` (str): Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')
 
 **Returns**: Dict with:
 - `status` (str): "success" or "error"
@@ -467,7 +467,7 @@ The command parser recognizes 16 fast-path commands for instant parameter update
 #### Other
 14. `scale <number>` → Updates scale (for uncertainty_lobes)
 15. `alpha <number>` → Updates general alpha
-16. `method <fdb|mfdb>` → Updates method (for functional_boxplot: 'fdb' = functional band depth, 'mfdb' = modified functional band depth)
+16. `method <fbd|mfbd>` → Updates method (for functional_boxplot: 'fbd' = functional band depth, 'mfbd' = modified functional band depth)
 
 ### Usage
 

@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Now supports **6 visualization types** (up from 5)
 
 ### Changed
-- Updated `functional_boxplot` to include `method` parameter ('fdb' or 'mfdb')
+- Updated `functional_boxplot` to include `method` parameter ('fbd' or 'mfbd')
 - Updated `uncertainty_lobes` to include `workers` parameter for parallel computation
 - Hybrid control system now handles both `percentiles` (list) and `percentile` (single value)
 - Command parser updated to support 16 patterns (includes new `method` command)

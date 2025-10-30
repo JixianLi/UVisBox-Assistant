@@ -61,7 +61,7 @@ def print_help():
     print("    • show/hide median      - Toggle median display")
     print("    • show/hide outliers    - Toggle outliers display")
     print("    • scale <value>         - Change glyph scale (e.g., scale 0.3)")
-    print("    • method <fdb|mfdb>     - Change band depth method")
+    print("    • method <fbd|mfbd>     - Change band depth method")
 
     print("\n  Median Styling:")
     print("    • median color <color>  - Set median color (e.g., median color blue)")
