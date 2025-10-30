@@ -6,10 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current Version**: v0.1.0 (Released 2025-01-29)
+**Current Version**: v0.1.1 (Released 2025-01-29)
 
 **Key Features**:
-- ✅ Natural language interface for 5 visualization types
+- ✅ Natural language interface for 6 visualization types
 - ✅ BoxplotStyleConfig with 10 styling parameters
 - ✅ Hybrid control system (16 commands, 10-15x faster updates)
 - ✅ Multi-turn conversation with context preservation
@@ -217,8 +217,9 @@ python -m chatuvisbox
 - probabilistic_marching_squares (2D scalar field uncertainty)
 - contour_boxplot (contour band depth from scalar field ensembles)
 - uncertainty_lobes (vector uncertainty)
+- squid_glyph_2D (2D vector uncertainty with depth-based filtering)
 
-**Exclude**: All 3D/PyVista visualizations (marching cubes, tetrahedra, 3D squids)
+**Exclude**: All 3D/PyVista visualizations (marching cubes, tetrahedra)
 
 ### 3. Matplotlib Non-Blocking
 Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction while plots are open.
@@ -399,6 +400,17 @@ uncertainty_lobes(positions, ensemble_vectors, percentile1=90, percentile2=50, s
 - `scale`: Glyph scale factor (default: 0.2)
 - `ax`: Matplotlib axes (optional)
 - `workers`: Number of parallel workers for band depth computation (default: None, optimized for large data only)
+
+**squid_glyph_2D**:
+```python
+squid_glyph_2D(positions, ensemble_vectors, percentile=95, scale=0.2, ax=None, workers=None)
+```
+- `positions`: NumPy array of shape (n_points, 2)
+- `ensemble_vectors`: NumPy array of shape (n_points, 2, n_ensemble)
+- `percentile`: Percentile of ensemble members to include based on depth ranking (0-100, default: 95). Higher values include more vectors showing more variation.
+- `scale`: Glyph scale factor (default: 0.2)
+- `ax`: Matplotlib axes (optional)
+- `workers`: Number of parallel workers for computation (default: None)
 
 **Note**: All functions expect numpy arrays and return matplotlib axes.
 

@@ -18,7 +18,8 @@ from chatuvisbox.vis_tools import (
     plot_curve_boxplot,
     plot_contour_boxplot,
     plot_probabilistic_marching_squares,
-    plot_uncertainty_lobes
+    plot_uncertainty_lobes,
+    plot_squid_glyph_2D
 )
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
@@ -210,6 +211,27 @@ def test_plot_uncertainty_lobes():
     print("✓ test_plot_uncertainty_lobes")
 
 
+def test_plot_squid_glyph_2D():
+    """Test squid glyph 2D visualization."""
+    vector_result = generate_vector_field_ensemble(x_res=5, y_res=5, n_instances=10)
+
+    result = plot_squid_glyph_2D(
+        positions_path=vector_result['positions_path'],
+        vectors_path=vector_result['vectors_path'],
+        percentile=95,
+        scale=0.3,
+        workers=None
+    )
+
+    assert result['status'] == 'success'
+    assert result['_vis_params']['percentile'] == 95
+    assert result['_vis_params']['scale'] == 0.3
+    assert result['_vis_params']['workers'] is None
+
+    plt.close('all')
+    print("✓ test_plot_squid_glyph_2D")
+
+
 def test_default_percentiles():
     """Test that default percentiles are applied correctly."""
     curves_result = generate_ensemble_curves(n_curves=10, n_points=50)
@@ -268,6 +290,7 @@ if __name__ == "__main__":
         test_plot_contour_boxplot_full_params,
         test_plot_probabilistic_marching_squares,
         test_plot_uncertainty_lobes,
+        test_plot_squid_glyph_2D,
         test_default_percentiles,
         test_vis_params_structure,
     ]

@@ -12,7 +12,7 @@ ChatUVisBox allows you to create uncertainty visualizations using natural langua
 - **Conversational**: Multi-turn conversations with context preservation
 - **Fast Parameter Updates**: Quick visualization adjustments without reprocessing
 - **Fine-Grained Control**: Control all BoxplotStyleConfig styling parameters
-- **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, and uncertainty lobes
+- **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, uncertainty lobes, and squid glyphs
 - **Session Management**: Clean file management and session control
 
 ## Quick Start
@@ -73,6 +73,13 @@ Directional uncertainty visualization for vector fields.
 **Example**: `Show uncertainty lobes with percentile1 90 and percentile2 50`
 
 **Parameters**: `percentile1` (0-100), `percentile2` (0-100), `scale`
+
+### 6. Squid Glyph 2D
+2D vector uncertainty visualization using squid-shaped glyphs with depth-based filtering.
+
+**Example**: `Show squid glyphs with percentile 95 and scale 0.3`
+
+**Parameters**: `percentile` (0-100, default: 95), `scale` (default: 0.2), `workers`
 
 ## Quick Commands (Hybrid Control)
 

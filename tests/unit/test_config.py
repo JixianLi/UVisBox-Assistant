@@ -65,6 +65,14 @@ def test_uncertainty_lobes_defaults():
     assert params["lobes_workers"] is None
 
 
+def test_squid_glyph_2d_defaults():
+    """Test squid glyph 2D defaults."""
+    params = config.DEFAULT_VIS_PARAMS
+    assert params["squid_percentile"] == 95
+    assert params["squid_scale"] == 0.2
+    assert params["squid_workers"] is None
+
+
 def test_figure_defaults():
     """Test general figure defaults."""
     params = config.DEFAULT_VIS_PARAMS

@@ -13,7 +13,8 @@ try:
         probabilistic_marching_squares,
         uncertainty_lobes,
         contour_boxplot,
-        BoxplotStyleConfig
+        BoxplotStyleConfig,
+        squid_glyph_2D
     )
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
@@ -403,6 +404,89 @@ def plot_uncertainty_lobes(
         }
 
 
+def plot_squid_glyph_2D(
+    vectors_path: str,
+    positions_path: str,
+    percentile: float = 95,
+    scale: float = 0.2,
+    workers: Optional[int] = None
+) -> Dict[str, str]:
+    """
+    Create 2D squid glyphs showing vector ensemble uncertainty.
+
+    Args:
+        vectors_path: Path to .npy with shape (n, m, 2) - ensemble vectors
+        positions_path: Path to .npy with shape (n, 2) - glyph positions
+        percentile: Percentile of ensemble members to include (0-100, default: 95)
+        scale: Scale factor for glyphs (default: 0.2)
+        workers: Number of parallel workers for computation (default: None)
+
+    Returns:
+        Dict with status and message
+    """
+    try:
+        if not Path(vectors_path).exists():
+            return {"status": "error", "message": f"Vectors file not found: {vectors_path}"}
+
+        if not Path(positions_path).exists():
+            return {"status": "error", "message": f"Positions file not found: {positions_path}"}
+
+        vectors = np.load(vectors_path)
+        positions = np.load(positions_path)
+
+        fig, ax = plt.subplots(
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
+        )
+
+        # Call squid_glyph_2D
+        squid_glyph_2D(
+            positions=positions,
+            ensemble_vectors=vectors,
+            percentile=percentile,
+            scale=scale,
+            ax=ax,
+            workers=workers
+        )
+
+        n_positions = positions.shape[0]
+
+        # Set proper axis limits based on positions
+        x_min, x_max = positions[:, 0].min(), positions[:, 0].max()
+        y_min, y_max = positions[:, 1].min(), positions[:, 1].max()
+
+        # Add some margin
+        x_margin = (x_max - x_min) * 0.1 if x_max > x_min else 0.5
+        y_margin = (y_max - y_min) * 0.1 if y_max > y_min else 0.5
+
+        ax.set_xlim(x_min - x_margin, x_max + x_margin)
+        ax.set_ylim(y_min - y_margin, y_max + y_margin)
+
+        ax.set_title("2D Squid Glyphs")
+        ax.set_aspect('equal')
+        plt.show(block=False)
+        plt.pause(0.1)
+
+        return {
+            "status": "success",
+            "message": f"Displayed 2D squid glyphs for {n_positions} positions (percentile={percentile})",
+            "_vis_params": {
+                "_tool_name": "plot_squid_glyph_2D",
+                "positions_path": positions_path,
+                "vectors_path": vectors_path,
+                "percentile": percentile,
+                "scale": scale,
+                "workers": workers
+            }
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error creating squid glyphs: {str(e)}"
+        }
+
+
 def plot_contour_boxplot(
     data_path: str,
     isovalue: float,
@@ -528,6 +612,7 @@ VIS_TOOLS = {
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
+    "plot_squid_glyph_2D": plot_squid_glyph_2D,
     "plot_contour_boxplot": plot_contour_boxplot,
 }
 
@@ -731,6 +816,38 @@ VIS_TOOL_SCHEMAS = [
                 "workers": {
                     "type": "integer",
                     "description": "Number of parallel workers for band depth computation (default: None, optimized for large data only)"
+                }
+            },
+            "required": ["vectors_path", "positions_path"]
+        }
+    },
+    {
+        "name": "plot_squid_glyph_2D",
+        "description": "Create 2D squid glyphs showing directional uncertainty of vector ensembles with depth-based filtering",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "vectors_path": {
+                    "type": "string",
+                    "description": "Path to .npy file with ensemble vectors (n, m, 2)"
+                },
+                "positions_path": {
+                    "type": "string",
+                    "description": "Path to .npy file with glyph positions (n, 2)"
+                },
+                "percentile": {
+                    "type": "number",
+                    "description": "Percentile of ensemble members to include based on depth ranking (0-100). Higher values include more vectors showing more variation. Default: 95",
+                    "default": 95
+                },
+                "scale": {
+                    "type": "number",
+                    "description": "Scale factor for glyph size",
+                    "default": 0.2
+                },
+                "workers": {
+                    "type": "integer",
+                    "description": "Number of parallel workers for computation (default: None)"
                 }
             },
             "required": ["vectors_path", "positions_path"]

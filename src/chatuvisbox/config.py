@@ -64,4 +64,9 @@ DEFAULT_VIS_PARAMS = {
     "percentile1": 90,                      # First percentile for depth filtering
     "percentile2": 50,                      # Second percentile for depth filtering
     "scale": 0.2,                           # Scale factor for glyphs
+
+    # Squid glyph 2D
+    "squid_percentile": 95,                 # Percentile of ensemble members to include (0-100)
+    "squid_scale": 0.2,                     # Scale factor for squid glyphs
+    "squid_workers": None,                  # Number of parallel workers (None = sequential)
 }

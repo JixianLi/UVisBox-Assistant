@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-01-29
+
+### Added
+- **Squid Glyph 2D visualization**: 2D vector uncertainty visualization using squid-shaped glyphs with depth-based filtering
+  - `plot_squid_glyph_2D()` function with parameters: `percentile` (0-100, default: 95), `scale`, `workers`
+  - Single percentile parameter for depth-based filtering (vs. dual percentiles in uncertainty_lobes)
+  - Configuration defaults: `squid_percentile`, `squid_scale`, `squid_workers`
+  - Hybrid control support for `percentile` and `scale` parameters
+  - Now supports **6 visualization types** (up from 5)
+
+### Changed
+- Updated `functional_boxplot` to include `method` parameter ('fdb' or 'mfdb')
+- Updated `uncertainty_lobes` to include `workers` parameter for parallel computation
+- Hybrid control system now handles both `percentiles` (list) and `percentile` (single value)
+- Command parser updated to support 16 patterns (includes new `method` command)
+
+### Fixed
+- `/help` command now displays all 6 visualizations (was missing squid_glyph_2D)
+- `/help` command now shows all 16 hybrid control commands (was only showing 5)
+- Improved help formatting with organized sections: Basic, Median Styling, Outliers Styling
+- Welcome banner updated with squid glyph example
+
 ## [0.1.0] - 2025-01-29
 
 ### Added

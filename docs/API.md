@@ -246,6 +246,51 @@ plot_uncertainty_lobes(
 
 ---
 
+### plot_squid_glyph_2D
+
+Visualize 2D vector field uncertainty using squid-shaped glyphs with depth-based filtering.
+
+**Signature**:
+```python
+plot_squid_glyph_2D(
+    vectors_path: str,
+    positions_path: str,
+    percentile: float = 95,
+    scale: float = 0.2,
+    workers: Optional[int] = None
+) -> Dict[str, Any]
+```
+
+**Parameters**:
+- `vectors_path` (str): Path to .npy file with ensemble vectors (shape: (n_points, 2, n_ensemble))
+- `positions_path` (str): Path to .npy file with glyph positions (shape: (n_points, 2))
+- `percentile` (float): Percentile of ensemble members to include based on depth ranking (0-100, default: 95). Higher values include more vectors showing more variation.
+- `scale` (float): Scale factor for glyph size (default: 0.2)
+- `workers` (Optional[int]): Number of parallel workers for computation (default: None)
+
+**Returns**: Dict with status, message, and _vis_params
+
+**Example**:
+```python
+from chatuvisbox.vis_tools import plot_squid_glyph_2D
+from chatuvisbox.data_tools import generate_vector_field_ensemble
+
+# Generate vector field
+result = generate_vector_field_ensemble(x_res=10, y_res=10, n_instances=30)
+
+# Visualize with squid glyphs
+plot_squid_glyph_2D(
+    vectors_path=result['vectors_path'],
+    positions_path=result['positions_path'],
+    percentile=95,
+    scale=0.3
+)
+```
+
+**Note**: Squid glyphs use depth-based filtering with a single percentile parameter, unlike uncertainty_lobes which uses two percentiles for inner/outer bands.
+
+---
+
 ## Data Generation Tools
 
 ### generate_ensemble_curves
@@ -525,11 +570,12 @@ LOGS_DIR        # Directory for log files (default: "logs/")
 ## Complete Function Reference
 
 ### Visualization Functions
-- `plot_functional_boxplot()` - Band depth for 1D curves
+- `plot_functional_boxplot()` - Band depth for 1D curves (+ method)
 - `plot_curve_boxplot()` - Depth-colored curves (+ workers)
 - `plot_contour_boxplot()` - Contour band depth (+ isovalue, workers)
-- `probabilistic_marching_squares()` - 2D scalar uncertainty
-- `plot_uncertainty_lobes()` - Vector field uncertainty
+- `plot_probabilistic_marching_squares()` - 2D scalar uncertainty
+- `plot_uncertainty_lobes()` - Vector field uncertainty (dual percentiles)
+- `plot_squid_glyph_2D()` - 2D vector uncertainty glyphs (depth-filtered)
 
 ### Data Functions
 - `generate_ensemble_curves()` - 1D curve ensembles

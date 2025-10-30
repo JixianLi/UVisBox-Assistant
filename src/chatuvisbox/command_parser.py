@@ -136,7 +136,7 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
     # The hybrid_control.py will filter based on function signature
     param_mapping = {
         'colormap': ['colormap', 'percentile_colormap'],  # Try both
-        'percentiles': 'percentiles',
+        'percentiles': 'percentiles',  # For boxplot functions (list)
         'isovalue': 'isovalue',
         'show_median': 'show_median',
         'median_color': 'median_color',
@@ -159,6 +159,11 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
             updated[param_name] = command.value
     else:
         updated[mapping] = command.value
+
+    # Special handling: if 'percentiles' was set with a single-item list,
+    # also set 'percentile' (for squid_glyph_2D) with the extracted value
+    if command.param_name == 'percentiles' and isinstance(command.value, list) and len(command.value) == 1:
+        updated['percentile'] = command.value[0]
 
     return updated
 
