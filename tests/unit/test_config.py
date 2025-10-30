@@ -16,68 +16,33 @@ def test_config_paths_exist():
     assert config.LOG_DIR.exists()
 
 
-def test_boxplot_style_config_defaults():
-    """Test BoxplotStyleConfig default parameters."""
-    params = config.DEFAULT_VIS_PARAMS
-
-    # Percentiles and colormap
-    assert params["percentiles"] == [25, 50, 90, 100]
-    assert params["percentile_colormap"] == "viridis"
-
-    # Median styling
-    assert params["show_median"] == True
-    assert params["median_color"] == "red"
-    assert params["median_width"] == 3.0
-    assert params["median_alpha"] == 1.0
-
-    # Outliers styling
-    assert params["show_outliers"] == False
-    assert params["outliers_color"] == "gray"
-    assert params["outliers_width"] == 1.0
-    assert params["outliers_alpha"] == 0.5
-
-    # Functional boxplot method
-    assert params["method"] == "fdb"
-
-    # Parallel computation
-    assert params["workers"] == 12
-
-
-def test_no_plot_all_curves_param():
-    """Verify plot_all_curves parameter is removed."""
-    params = config.DEFAULT_VIS_PARAMS
-    assert "plot_all_curves" not in params
-
-
-def test_probabilistic_marching_squares_defaults():
-    """Test probabilistic marching squares defaults."""
-    params = config.DEFAULT_VIS_PARAMS
-    assert params["isovalue"] == 0.5
-    assert params["colormap"] == "viridis"
-
-
-def test_uncertainty_lobes_defaults():
-    """Test uncertainty lobes defaults."""
-    params = config.DEFAULT_VIS_PARAMS
-    assert params["percentile1"] == 90
-    assert params["percentile2"] == 50
-    assert params["scale"] == 0.2
-    assert params["lobes_workers"] is None
-
-
-def test_squid_glyph_2d_defaults():
-    """Test squid glyph 2D defaults."""
-    params = config.DEFAULT_VIS_PARAMS
-    assert params["squid_percentile"] == 95
-    assert params["squid_scale"] == 0.2
-    assert params["squid_workers"] is None
-
-
 def test_figure_defaults():
-    """Test general figure defaults."""
+    """Test that DEFAULT_VIS_PARAMS only contains figure settings."""
     params = config.DEFAULT_VIS_PARAMS
+
+    # Should only have figsize and dpi
+    assert len(params) == 2
     assert params["figsize"] == (10, 8)
     assert params["dpi"] == 100
+
+
+def test_no_visualization_specific_params():
+    """Verify visualization-specific params are NOT in config (they're in function signatures)."""
+    params = config.DEFAULT_VIS_PARAMS
+
+    # These should NOT be in config - they're hardcoded in vis_tools.py function signatures
+    assert "percentiles" not in params
+    assert "percentile_colormap" not in params
+    assert "show_median" not in params
+    assert "median_color" not in params
+    assert "workers" not in params
+    assert "isovalue" not in params
+    assert "colormap" not in params
+    assert "percentile1" not in params
+    assert "percentile2" not in params
+    assert "scale" not in params
+    assert "squid_percentile" not in params
+    assert "method" not in params
 
 
 def test_api_key_configured():

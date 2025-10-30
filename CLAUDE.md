@@ -164,7 +164,7 @@ python tests/utils/run_all_tests.py
 # Unit tests (0 API calls, < 15 seconds)
 python tests/utils/run_all_tests.py --unit
 python tests/unit/test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
-python tests/unit/test_config.py          # 8 tests: Configuration validation
+python tests/unit/test_config.py          # 5 tests: Configuration validation
 python tests/unit/test_routing.py         # Routing logic tests
 python tests/unit/test_tools.py           # 10 tests: Direct tool function calls
 
@@ -265,10 +265,10 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - **E2E tests** (`tests/e2e/`): 20-30 API calls per file, complete scenarios
 - **Interactive tests** (`tests/interactive/`): User-paced, menu-driven exploration
 
-**BoxplotStyleConfig Testing**:
+**Testing Coverage**:
 - 17 command parser tests for styling parameters (median/outliers color/width/alpha)
-- 8 config tests for BoxplotStyleConfig defaults
-- 10 tool tests for direct function calls with full styling
+- 5 config tests (figsize, dpi, and verification that vis params are NOT duplicated)
+- 11 tool tests for direct function calls with full styling (includes squid_glyph_2D)
 - All 16 hybrid control commands tested
 
 **Benefits**:
@@ -285,8 +285,19 @@ import os
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment. Please set it in your system environment.")
+
+# DEFAULT_VIS_PARAMS only contains figsize and dpi
+# All visualization-specific defaults are in function signatures (vis_tools.py)
+DEFAULT_VIS_PARAMS = {
+    "figsize": (10, 8),
+    "dpi": 100,
+}
 ```
-**Do not** use `python-dotenv` or `.env` files - API key is in system environment.
+**Important Notes:**
+- **Do not** use `python-dotenv` or `.env` files - API key is in system environment
+- **DEFAULT_VIS_PARAMS only contains figure settings** (figsize, dpi)
+- **All visualization defaults are hardcoded in function signatures** - prevents duplication and mismatch
+- Function signatures are the single source of truth for visualization parameters
 
 ### Model Binding Pattern
 ```python
@@ -732,7 +743,7 @@ chatuvisbox/
 │   │
 │   ├── unit/                # Unit tests (0 API calls, instant)
 │   │   ├── test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
-│   │   ├── test_config.py          # 8 tests: Configuration validation
+│   │   ├── test_config.py          # 5 tests: Configuration validation
 │   │   ├── test_routing.py         # Routing logic tests
 │   │   └── test_tools.py           # 10 tests: Direct tool function calls
 │   │

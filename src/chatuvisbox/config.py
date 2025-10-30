@@ -27,46 +27,11 @@ LOG_DIR.mkdir(exist_ok=True)
 TEMP_FILE_PREFIX = "_temp_"
 TEMP_FILE_EXTENSION = ".npy"
 
-# Visualization defaults (Tier-2 parameters)
-# These parameters are used across different visualization tools
+# Figure defaults
+# These are the ONLY parameters actually used from config.DEFAULT_VIS_PARAMS
+# All visualization-specific defaults are hardcoded in function signatures (vis_tools.py)
+# This prevents duplication and mismatch between config and function APIs
 DEFAULT_VIS_PARAMS = {
-    # General figure settings
     "figsize": (10, 8),
     "dpi": 100,
-
-    # BoxplotStyleConfig defaults (for functional_boxplot, curve_boxplot, contour_boxplot)
-    "percentiles": [25, 50, 90, 100],       # List of percentiles for band visualization
-    "percentile_colormap": "viridis",       # Colormap for percentile bands
-    "show_median": True,                    # Whether to show median curve/contour
-    "median_color": "red",                  # Color of median curve/contour
-    "median_width": 3.0,                    # Width of median curve/contour
-    "median_alpha": 1.0,                    # Alpha of median curve/contour
-    "show_outliers": False,                 # Whether to show outlier curves/contours
-    "outliers_color": "gray",               # Color of outlier curves/contours
-    "outliers_width": 1.0,                  # Width of outlier curves/contours
-    "outliers_alpha": 0.5,                  # Alpha of outlier curves/contours
-
-    # Functional boxplot specific
-    "method": "fdb",                        # Band depth method: 'fdb' (functional band depth) or 'mfdb' (modified functional band depth)
-
-    # Contour boxplot specific
-    "contour_percentiles": [25, 50, 75, 90],  # Percentiles for contour bands
-
-    # Parallel computation
-    "workers": 12,                          # Number of parallel workers for band depth (curve_boxplot, contour_boxplot)
-    "lobes_workers": None,                  # Number of parallel workers for uncertainty_lobes (None = optimized for large data only)
-
-    # Probabilistic marching squares
-    "isovalue": 0.5,                        # Threshold for contour extraction
-    "colormap": "viridis",                  # Colormap for scalar field visualization
-
-    # Uncertainty lobes
-    "percentile1": 90,                      # First percentile for depth filtering
-    "percentile2": 50,                      # Second percentile for depth filtering
-    "scale": 0.2,                           # Scale factor for glyphs
-
-    # Squid glyph 2D
-    "squid_percentile": 95,                 # Percentile of ensemble members to include (0-100)
-    "squid_scale": 0.2,                     # Scale factor for squid glyphs
-    "squid_workers": None,                  # Number of parallel workers (None = sequential)
 }

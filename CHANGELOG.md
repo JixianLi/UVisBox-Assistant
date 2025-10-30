@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/help` command now shows all 16 hybrid control commands (was only showing 5)
 - Improved help formatting with organized sections: Basic, Median Styling, Outliers Styling
 - Welcome banner updated with squid glyph example
+- **Removed parameter duplication** - `DEFAULT_VIS_PARAMS` now only contains `figsize` and `dpi`
+  - All visualization-specific defaults are now in function signatures only (single source of truth)
+  - Prevents config/API mismatch and reduces maintenance burden
+  - Config tests updated to verify this architectural decision (5 tests, down from 9)
 
 ## [0.1.0] - 2025-01-29
 
