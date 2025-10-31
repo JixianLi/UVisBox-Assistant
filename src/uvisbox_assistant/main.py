@@ -14,8 +14,8 @@ def print_welcome():
     """Print welcome banner."""
     print("\n" + "="*70)
     print("  ╔═══════════════════════════════════════════════════════════╗")
-    print("  ║              UVisBox-Assistant - Interactive REPL                ║")
-    print("  ║         Natural Language Interface for UVisBox             ║")
+    print("  ║         UVisBox-Assistant - Interactive REPL              ║")
+    print("  ║         Natural Language Interface for UVisBox            ║")
     print("  ╚═══════════════════════════════════════════════════════════╝")
     print("="*70)
     print("\nType your requests in natural language. Examples:")
