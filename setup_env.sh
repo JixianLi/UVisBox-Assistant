@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# ChatUVisBox Environment Setup Script
-# This script sets up the development environment for ChatUVisBox
+# UVisBox-Assistant Environment Setup Script
+# This script sets up the development environment for UVisBox-Assistant
 
 set -e  # Exit on error
 
 echo "=========================================="
-echo "ChatUVisBox Environment Setup"
+echo "UVisBox-Assistant Environment Setup"
 echo "=========================================="
 echo ""
 
@@ -38,7 +38,7 @@ fi
 print_success "Conda is available"
 
 # Default environment name
-ENV_NAME="${1:-chatuvisbox}"
+ENV_NAME="${1:-agent}"
 
 # Check if environment exists
 if conda env list | grep -q "^${ENV_NAME} "; then
@@ -175,7 +175,7 @@ echo "=========================================="
 echo "Setup Complete!"
 echo "=========================================="
 echo ""
-echo "ChatUVisBox v0.1.0 environment is ready."
+echo "UVisBox-Assistant v0.2.0 environment is ready."
 echo ""
 echo "Next steps:"
 echo "  1. Review README.md for project overview"

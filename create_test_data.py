@@ -1,4 +1,4 @@
-"""Create sample test data for ChatUVisBox"""
+"""Create sample test data for UVisBox-Assistant"""
 import numpy as np
 import pandas as pd
 from pathlib import Path
