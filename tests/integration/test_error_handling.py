@@ -2,9 +2,9 @@
 import sys
 from pathlib import Path
 
-from chatuvisbox.graph import run_graph, graph_app
-from chatuvisbox.routing import route_after_tool
-from chatuvisbox.state import create_initial_state
+from uvisbox_assistant.graph import run_graph, graph_app
+from uvisbox_assistant.routing import route_after_tool
+from uvisbox_assistant.state import create_initial_state
 import matplotlib.pyplot as plt
 
 

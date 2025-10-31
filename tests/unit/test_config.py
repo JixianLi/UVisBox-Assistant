@@ -6,7 +6,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from chatuvisbox import config
+from uvisbox_assistant import config
 
 
 def test_config_paths_exist():

@@ -1,8 +1,8 @@
 """Test routing logic"""
 import sys
 
-from chatuvisbox.routing import route_after_model, route_after_tool
-from chatuvisbox.state import create_initial_state
+from uvisbox_assistant.routing import route_after_model, route_after_tool
+from uvisbox_assistant.state import create_initial_state
 from langchain_core.messages import AIMessage
 
 

@@ -6,7 +6,7 @@ them by directly manipulating ConversationSession state and using
 helper functions.
 """
 
-from chatuvisbox.conversation import ConversationSession
+from uvisbox_assistant.conversation import ConversationSession
 
 
 class TestDebugCommands:

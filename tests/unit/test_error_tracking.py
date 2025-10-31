@@ -2,8 +2,8 @@
 
 import pytest
 from datetime import datetime
-from chatuvisbox.error_tracking import ErrorRecord
-from chatuvisbox.conversation import ConversationSession
+from uvisbox_assistant.error_tracking import ErrorRecord
+from uvisbox_assistant.conversation import ConversationSession
 
 
 class TestErrorRecord:

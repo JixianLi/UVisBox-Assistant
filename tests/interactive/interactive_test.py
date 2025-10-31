@@ -7,8 +7,8 @@ visualization and data generation scenarios.
 import sys
 sys.path.insert(0, '/Users/jixianli/projects/chatuvisbox/src')
 
-from chatuvisbox.graph import run_graph
-from chatuvisbox.state import GraphState
+from uvisbox_assistant.graph import run_graph
+from uvisbox_assistant.state import GraphState
 from pathlib import Path
 
 
@@ -129,7 +129,7 @@ def execute_option(option: int, state: GraphState = None) -> GraphState:
     
     elif option == 24:
         # Clear temp files
-        from chatuvisbox.utils import cleanup_temp_files
+        from uvisbox_assistant.utils import cleanup_temp_files
         print("\n🧹 Clearing temporary files...")
         cleanup_temp_files()
         return None

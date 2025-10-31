@@ -1,8 +1,8 @@
 """Unit tests for verbose mode output control."""
 
 import pytest
-from chatuvisbox.output_control import vprint, is_verbose, set_session
-from chatuvisbox.conversation import ConversationSession
+from uvisbox_assistant.output_control import vprint, is_verbose, set_session
+from uvisbox_assistant.conversation import ConversationSession
 
 
 def test_vprint_verbose_off(capsys):
