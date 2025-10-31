@@ -1,10 +1,10 @@
-# ChatUVisBox
+# UVisBox-Assistant
 
 Natural language interface for the [UVisBox](https://github.com/VCCRI/UVisBox) uncertainty visualization library.
 
 ## Overview
 
-ChatUVisBox allows you to create uncertainty visualizations using natural language commands. Powered by Google Gemini and LangGraph, it provides an interactive conversational interface for exploring and visualizing uncertainty in scientific data.
+UVisBox-Assistant allows you to create uncertainty visualizations using natural language commands. Powered by Google Gemini and LangGraph, it provides an interactive conversational interface for exploring and visualizing uncertainty in scientific data.
 
 ## Features
 
@@ -122,8 +122,8 @@ export GEMINI_API_KEY="your-api-key-here"
 
 2. **Create and activate environment**:
 ```bash
-conda create -n chatuvisbox python=3.13
-conda activate chatuvisbox
+conda create -n agent python=3.13
+conda activate agent
 ```
 
 3. **Install dependencies**:
@@ -135,13 +135,14 @@ pip install uvisbox
 4. **Run the application**:
 ```bash
 python main.py
+# Or: python -m uvisbox_assistant
 ```
 
 ## Project Structure
 
 ```
-chatuvisbox/
-├── src/chatuvisbox/
+uvisbox-assistant/
+├── src/uvisbox_assistant/
 │   ├── main.py                 # Main REPL entry point
 │   ├── graph.py                # LangGraph workflow
 │   ├── state.py                # State definitions

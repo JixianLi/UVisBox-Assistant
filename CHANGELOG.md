@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-10-30
+
+### Changed
+
+**Rebrand: ChatUVisBox → UVisBox-Assistant**
+
+This is a complete rebrand of the project. All functionality remains the same, but the package name and branding have changed.
+
+**Breaking Changes:**
+- Package name: `chatuvisbox` → `uvisbox_assistant`
+- Entry point: `python -m chatuvisbox` → `python -m uvisbox_assistant`
+- CLI command: `chatuvisbox` → `uvisbox-assistant`
+- Log file location: `logs/chatuvisbox.log` → `logs/uvisbox_assistant.log`
+
+**Migration Guide:**
+
+For existing users upgrading from 0.1.x:
+
+1. **Update imports** in your code:
+   ```python
+   # OLD
+   from chatuvisbox import ConversationSession
+   from chatuvisbox.graph import graph_app
+
+   # NEW
+   from uvisbox_assistant import ConversationSession
+   from uvisbox_assistant.graph import graph_app
+   ```
+
+2. **Update entry point** usage:
+   ```bash
+   # OLD
+   python -m chatuvisbox
+
+   # NEW
+   python -m uvisbox_assistant
+   ```
+
+3. **Update log file** references:
+   ```python
+   # OLD
+   log_path = "logs/chatuvisbox.log"
+
+   # NEW
+   log_path = "logs/uvisbox_assistant.log"
+   ```
+
+4. **Reinstall** the package:
+   ```bash
+   pip uninstall chatuvisbox
+   pip install uvisbox-assistant  # Or from source
+   ```
+
+**Why the rebrand?**
+- Clearer naming: "UVisBox-Assistant" better describes the project as an assistant for UVisBox
+- Consistency: Aligns with UVisBox naming convention
+- Professionalism: Hyphenated name follows common assistant naming patterns
+
+**No functional changes** - All features, APIs, and behavior remain identical to 0.1.2.
+
+---
+
 ## [0.1.2] - 2025-01-30
 
 ### Added
@@ -203,4 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue Tracker: TBD
 - UVisBox: https://github.com/VCCRI/UVisBox
 
-[0.1.0]: https://github.com/yourusername/chatuvisbox/releases/tag/v0.1.0
+[0.2.0]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.2.0
+[0.1.2]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.1.2
+[0.1.1]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.1.1
+[0.1.0]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.1.0

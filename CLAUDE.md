@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ChatUVisBox** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
+**UVisBox-Assistant** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current Version**: v0.1.1 (Released 2025-01-29)
+**Current Version**: v0.2.0 (Released 2025-10-30)
 
 **Key Features**:
 - ✅ Natural language interface for 6 visualization types
@@ -105,7 +105,7 @@ pip install -r requirements.txt
 
 ### Project Status
 
-ChatUVisBox v0.1.0 is **feature complete** with all core functionality implemented:
+UVisBox-Assistant v0.1.0 is **feature complete** with all core functionality implemented:
 
 **Core Features** ✅ COMPLETE
 - LangGraph workflow with state management
@@ -201,7 +201,7 @@ python tests/utils/run_all_tests.py --quick
 python main.py
 
 # Alternative (using package entry point)
-python -m chatuvisbox
+python -m uvisbox_assistant
 ```
 
 ## Key Design Decisions
@@ -231,7 +231,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - Circuit breaker: `error_count >= 3` → route to END
 - Error recovery: error_count resets to 0 on successful tool execution
 - Context awareness: file list injected in system prompt for helpful suggestions
-- Logging: all tool calls, results, and errors logged to `logs/chatuvisbox.log`
+- Logging: all tool calls, results, and errors logged to `logs/uvisbox_assistant.log`
 - **Error Tracking (v0.1.2)**: Full traceback capture with `_error_details` dict
 - **Error Interpretation (v0.1.2)**: Context-aware hints when debug mode enabled
 - **Auto-Fix Detection (v0.1.2)**: Tracks error → retry → success patterns
@@ -339,7 +339,7 @@ return {
 
 ## UVisBox Interface Reference
 
-ChatUVisBox uses the following matplotlib-based UVisBox functions:
+UVisBox-Assistant uses the following matplotlib-based UVisBox functions:
 
 ### Boxplot Functions (with BoxplotStyleConfig)
 
@@ -437,7 +437,7 @@ squid_glyph_2D(positions, ensemble_vectors, percentile=95, scale=0.2, ax=None, w
 5. **Don't forget _tool_name** - Required in vis params for hybrid control
 6. **Don't exceed error threshold** - Circuit breaker at 3 consecutive errors
 7. **Don't mix GOOGLE_API_KEY and GEMINI_API_KEY** - Use `GEMINI_API_KEY` consistently
-8. **Check logs for debugging** - All tool calls logged to `logs/chatuvisbox.log`
+8. **Check logs for debugging** - All tool calls logged to `logs/uvisbox_assistant.log`
 9. **Error count resets on success** - Don't manually reset error_count
 10. **Use category-based tests** - Run `tests/utils/run_all_tests.py --unit` for fast development
 11. **BoxplotStyleConfig parameters** - All 10 styling parameters must be preserved in `_vis_params`
@@ -537,7 +537,7 @@ The command parser supports 16 patterns including BoxplotStyleConfig styling:
 
 ## Error Handling Architecture
 
-**Circuit Breaker** (`src/chatuvisbox/routing.py:64-71`):
+**Circuit Breaker** (`src/uvisbox_assistant/routing.py:64-71`):
 ```python
 def route_after_tool(state: GraphState) -> Literal["model", "end"]:
     MAX_ERRORS = 3
@@ -547,12 +547,12 @@ def route_after_tool(state: GraphState) -> Literal["model", "end"]:
     return "model"
 ```
 
-**Error Recovery** (`src/chatuvisbox/state.py`):
+**Error Recovery** (`src/uvisbox_assistant/state.py`):
 - `increment_error_count()`: Called on tool failure
 - `update_state_with_data()`: Resets error_count to 0 on success
 - `update_state_with_vis()`: Resets error_count to 0 on success
 
-**Context Awareness** (`src/chatuvisbox/nodes.py:29-32` and `model.py:44-48`):
+**Context Awareness** (`src/uvisbox_assistant/nodes.py:29-32` and `model.py:44-48`):
 ```python
 # In nodes.py: Get list of available files for context
 file_list = []
@@ -565,8 +565,8 @@ if config.TEST_DATA_DIR.exists():
  unless they explicitly mention new data"
 ```
 
-**Logging System** (`src/chatuvisbox/logger.py`):
-- Dual output: file (`logs/chatuvisbox.log`) + console
+**Logging System** (`src/uvisbox_assistant/logger.py`):
+- Dual output: file (`logs/uvisbox_assistant.log`) + console
 - Functions: `log_tool_call()`, `log_tool_result()`, `log_error()`, `log_state_update()`
 - Integrated in `nodes.py` for all tool executions
 
@@ -594,7 +594,7 @@ if config.TEST_DATA_DIR.exists():
 
 ## Multi-Turn Conversation Architecture
 
-**ConversationSession Class** (`src/chatuvisbox/conversation.py`):
+**ConversationSession Class** (`src/uvisbox_assistant/conversation.py`):
 ```python
 class ConversationSession:
     """Manages a multi-turn conversation session."""
@@ -712,7 +712,7 @@ You: /quit
 
 ## Debug and Verbose Mode (v0.1.2)
 
-ChatUVisBox provides two independent debugging modes for enhanced troubleshooting.
+UVisBox-Assistant provides two independent debugging modes for enhanced troubleshooting.
 
 ### Debug Mode (`/debug on/off`)
 
@@ -735,7 +735,7 @@ except Exception as e:
     }
 
 # In conversation.py - interpret with debug mode context
-from chatuvisbox.error_interpretation import interpret_uvisbox_error, format_error_with_hint
+from uvisbox_assistant.error_interpretation import interpret_uvisbox_error, format_error_with_hint
 
 user_msg, hint = interpret_uvisbox_error(error, traceback, debug_mode=self.debug_mode)
 enhanced_msg = format_error_with_hint(user_msg, hint)
@@ -753,7 +753,7 @@ enhanced_msg = format_error_with_hint(user_msg, hint)
 
 **Implementation Pattern**:
 ```python
-from chatuvisbox.output_control import vprint, set_session
+from uvisbox_assistant.output_control import vprint, set_session
 
 # In ConversationSession.__init__
 set_session(self)  # Register for verbose checks
@@ -779,7 +779,7 @@ print("Generated 30 curves")  # Always shown
 
 ### Error Tracking Architecture
 
-**ErrorRecord** (`src/chatuvisbox/error_tracking.py`):
+**ErrorRecord** (`src/uvisbox_assistant/error_tracking.py`):
 - Stores full error details with traceback
 - Provides `summary()` and `detailed()` methods
 - Immutable dataclass
@@ -811,7 +811,7 @@ print("Generated 30 curves")  # Always shown
 
 **DO**:
 ```python
-from chatuvisbox.output_control import vprint
+from uvisbox_assistant.output_control import vprint
 
 # Internal messages
 vprint("[DATA TOOL] Calling function")
@@ -848,7 +848,7 @@ vprint("Generated 30 curves")  # ❌ Wrong
 ## File Structure
 
 ```
-chatuvisbox/
+uvisbox-assistant/
 ├── pyproject.toml           # Poetry configuration
 ├── requirements.txt         # Python dependencies
 ├── README.md                # Package documentation
@@ -859,9 +859,9 @@ chatuvisbox/
 ├── LICENSE                  # MIT License
 ├── .gitignore               # Git ignore patterns
 │
-├── src/chatuvisbox/         # Package source (src layout)
+├── src/uvisbox_assistant/         # Package source (src layout)
 │   ├── __init__.py          # Package exports
-│   ├── __main__.py          # Entry point for python -m chatuvisbox
+│   ├── __main__.py          # Entry point for python -m uvisbox_assistant
 │   ├── graph.py             # LangGraph workflow
 │   ├── state.py             # GraphState with error tracking
 │   ├── nodes.py             # Graph nodes with error handling
@@ -909,7 +909,7 @@ chatuvisbox/
 │
 ├── temp/                    # Generated files (gitignored)
 ├── logs/                    # Log files (gitignored)
-│   └── chatuvisbox.log
+│   └── uvisbox_assistant.log
 │
 ├── docs/                    # Documentation
 │   ├── USER_GUIDE.md        # Detailed user guide with examples

@@ -1,4 +1,4 @@
-# ChatUVisBox Test Suite
+# UVisBox-Assistant Test Suite
 
 ## Quick Start
 
@@ -200,10 +200,10 @@ python tests/utils/run_all_tests.py --e2e
 
 ## Troubleshooting
 
-### ImportError: No module named 'chatuvisbox'
+### ImportError: No module named 'uvisbox_assistant'
 Make sure you're running from the project root:
 ```bash
-cd /path/to/chatuvisbox
+cd /path/to/uvisbox_assistant
 python tests/test_simple.py
 ```
 

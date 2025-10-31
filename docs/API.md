@@ -1,4 +1,4 @@
-# ChatUVisBox API Documentation
+# UVisBox-Assistant API Documentation
 
 ## Table of Contents
 
@@ -52,8 +52,8 @@ plot_functional_boxplot(
 
 **Example**:
 ```python
-from chatuvisbox.vis_tools import plot_functional_boxplot
-from chatuvisbox.data_tools import generate_ensemble_curves
+from uvisbox_assistant.vis_tools import plot_functional_boxplot
+from uvisbox_assistant.data_tools import generate_ensemble_curves
 
 # Generate data
 result = generate_ensemble_curves(n_curves=30, n_points=100)
@@ -184,8 +184,8 @@ probabilistic_marching_squares(
 
 **Example**:
 ```python
-from chatuvisbox.vis_tools import probabilistic_marching_squares
-from chatuvisbox.data_tools import generate_scalar_field_ensemble
+from uvisbox_assistant.vis_tools import probabilistic_marching_squares
+from uvisbox_assistant.data_tools import generate_scalar_field_ensemble
 
 # Generate 2D scalar field
 result = generate_scalar_field_ensemble(nx=50, ny=50, n_ensemble=30)
@@ -228,8 +228,8 @@ plot_uncertainty_lobes(
 
 **Example**:
 ```python
-from chatuvisbox.vis_tools import plot_uncertainty_lobes
-from chatuvisbox.data_tools import generate_vector_field_ensemble
+from uvisbox_assistant.vis_tools import plot_uncertainty_lobes
+from uvisbox_assistant.data_tools import generate_vector_field_ensemble
 
 # Generate vector field
 result = generate_vector_field_ensemble(x_res=10, y_res=10, n_instances=30)
@@ -272,8 +272,8 @@ plot_squid_glyph_2D(
 
 **Example**:
 ```python
-from chatuvisbox.vis_tools import plot_squid_glyph_2D
-from chatuvisbox.data_tools import generate_vector_field_ensemble
+from uvisbox_assistant.vis_tools import plot_squid_glyph_2D
+from uvisbox_assistant.data_tools import generate_vector_field_ensemble
 
 # Generate vector field
 result = generate_vector_field_ensemble(x_res=10, y_res=10, n_instances=30)
@@ -472,7 +472,7 @@ The command parser recognizes 16 fast-path commands for instant parameter update
 ### Usage
 
 ```python
-from chatuvisbox.command_parser import parse_simple_command
+from uvisbox_assistant.command_parser import parse_simple_command
 
 cmd = parse_simple_command("median color blue")
 # Returns: SimpleCommand(median_color='blue')
@@ -571,7 +571,7 @@ LOGS_DIR        # Directory for log files (default: "logs/")
 
 ### ErrorRecord
 
-**File**: `src/chatuvisbox/error_tracking.py`
+**File**: `src/uvisbox_assistant/error_tracking.py`
 
 Dataclass for storing error information with full traceback.
 
@@ -619,7 +619,7 @@ class ErrorRecord:
 
 ### ConversationSession - Error Tracking Methods
 
-**File**: `src/chatuvisbox/conversation.py`
+**File**: `src/uvisbox_assistant/conversation.py`
 
 **New Attributes:**
 
@@ -689,7 +689,7 @@ class ErrorRecord:
 
 ### Output Control Functions
 
-**File**: `src/chatuvisbox/output_control.py`
+**File**: `src/uvisbox_assistant/output_control.py`
 
 Functions for controlling verbose output based on session settings.
 
@@ -725,7 +725,7 @@ Functions for controlling verbose output based on session settings.
 
 ### Error Interpretation Functions
 
-**File**: `src/chatuvisbox/error_interpretation.py`
+**File**: `src/uvisbox_assistant/error_interpretation.py`
 
 Functions for interpreting and enhancing error messages.
 

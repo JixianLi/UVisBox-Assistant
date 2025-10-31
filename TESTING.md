@@ -1,4 +1,4 @@
-# Testing Guide for ChatUVisBox
+# Testing Guide for UVisBox-Assistant
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ python tests/utils/run_all_tests.py
 
 ## Test Structure (Phase 9 - v2.0)
 
-ChatUVisBox uses a reorganized test structure with clear categories:
+UVisBox-Assistant uses a reorganized test structure with clear categories:
 
 ```
 tests/
@@ -214,7 +214,7 @@ The test runner automatically:
 ### Debugging Specific Issues
 1. **Use Python REPL** for single requests:
    ```python
-   from chatuvisbox.graph import create_graph
+   from uvisbox_assistant.graph import create_graph
    graph = create_graph()
    result = graph.invoke({
        "messages": [{"role": "user", "content": "your query here"}]
@@ -310,10 +310,10 @@ Old tests have been reorganized:
 
 ## Troubleshooting
 
-### ImportError: No module named 'chatuvisbox'
+### ImportError: No module named 'uvisbox_assistant'
 Make sure you're running from the project root:
 ```bash
-cd /path/to/chatuvisbox
+cd /path/to/uvisbox_assistant
 python tests/test_simple.py
 ```
 

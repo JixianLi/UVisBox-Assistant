@@ -1,6 +1,6 @@
-# Environment Setup for ChatUVisBox
+# Environment Setup for UVisBox-Assistant
 
-This document explains how to configure the required environment variables and set up your development environment for ChatUVisBox.
+This document explains how to configure the required environment variables and set up your development environment for UVisBox-Assistant.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This document explains how to configure the required environment variables and s
 
 ## API Key Configuration
 
-ChatUVisBox requires the Google Gemini API key to be set in your **system environment** (not in a `.env` file).
+UVisBox-Assistant requires the Google Gemini API key to be set in your **system environment** (not in a `.env` file).
 
 ### Required Environment Variable
 
@@ -84,15 +84,15 @@ You should see your API key printed to the terminal.
 
 ```bash
 # Create environment
-conda create -n chatuvisbox python=3.13
-conda activate chatuvisbox
+conda create -n uvisbox_assistant python=3.13
+conda activate uvisbox_assistant
 
 # Install dependencies
 pip install -r requirements.txt
 pip install uvisbox
 
 # Verify installation
-python -c "import chatuvisbox; print('ChatUVisBox ready!')"
+python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
 ```
 
 ### Using venv
@@ -107,15 +107,15 @@ pip install -r requirements.txt
 pip install uvisbox
 
 # Verify installation
-python -c "import chatuvisbox; print('ChatUVisBox ready!')"
+python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
 ```
 
 ### Using the Setup Script
 
-ChatUVisBox includes an automated setup script:
+UVisBox-Assistant includes an automated setup script:
 
 ```bash
-# Default: creates/uses 'chatuvisbox' environment
+# Default: creates/uses 'uvisbox_assistant' environment
 ./setup_env.sh
 
 # Or specify custom environment name
@@ -151,11 +151,11 @@ The script will:
 3. Ensure you sourced your config file after editing
 4. Try setting it temporarily first: `export GEMINI_API_KEY="..."`
 
-### Problem: API key works in terminal but not in ChatUVisBox
+### Problem: API key works in terminal but not in UVisBox-Assistant
 
 **Solution**:
 1. Restart your terminal after adding to config file
-2. Make sure conda environment is activated: `conda activate chatuvisbox`
+2. Make sure conda environment is activated: `conda activate uvisbox_assistant`
 3. Check Python can access it:
    ```python
    import os
@@ -173,10 +173,10 @@ The script will:
 
 **Solution**:
 1. Check your Python version: `python --version`
-2. ChatUVisBox requires Python 3.10-3.13
+2. UVisBox-Assistant requires Python 3.10-3.13
 3. Create new environment with correct version:
    ```bash
-   conda create -n chatuvisbox python=3.13
+   conda create -n uvisbox_assistant python=3.13
    ```
 
 ## Conda Environment Integration
@@ -186,10 +186,10 @@ When using conda environments, environment variables set in your shell profile w
 If you want to set environment variables specifically for the conda environment:
 
 ```bash
-conda activate chatuvisbox
+conda activate uvisbox_assistant
 conda env config vars set GEMINI_API_KEY="your_api_key_here"
 conda deactivate
-conda activate chatuvisbox  # Reactivate to apply
+conda activate uvisbox_assistant  # Reactivate to apply
 ```
 
 ## CI/CD and Production
@@ -209,7 +209,7 @@ env:
 
 Example for Docker:
 ```bash
-docker run -e GEMINI_API_KEY="$GEMINI_API_KEY" chatuvisbox
+docker run -e GEMINI_API_KEY="$GEMINI_API_KEY" uvisbox_assistant
 ```
 
 ## Quick Start Summary
@@ -238,17 +238,17 @@ source ~/.bashrc
 echo $GEMINI_API_KEY
 
 # 3. Create and activate conda environment
-conda create -n chatuvisbox python=3.13
-conda activate chatuvisbox
+conda create -n uvisbox_assistant python=3.13
+conda activate uvisbox_assistant
 
 # 4. Install dependencies
 pip install -r requirements.txt
 pip install uvisbox
 
 # 5. Verify installation
-python -c "import chatuvisbox; print('Ready!')"
+python -c "import uvisbox_assistant; print('Ready!')"
 
-# 6. Run ChatUVisBox
+# 6. Run UVisBox-Assistant
 python main.py
 ```
 
@@ -261,12 +261,12 @@ For the easiest setup, use the provided script:
 export GEMINI_API_KEY="your_api_key_here"
 
 # 2. Create conda environment
-conda create -n chatuvisbox python=3.13
+conda create -n uvisbox_assistant python=3.13
 
 # 3. Run setup script
 ./setup_env.sh
 
-# 4. Start ChatUVisBox
+# 4. Start UVisBox-Assistant
 python main.py
 ```
 
@@ -279,7 +279,7 @@ After completing the environment setup:
 1. **Read the User Guide**: `docs/USER_GUIDE.md` for usage examples
 2. **Check the API Reference**: `docs/API.md` for complete documentation
 3. **Run tests**: `python tests/test_simple.py` for quick validation
-4. **Start the REPL**: `python main.py` to begin using ChatUVisBox
+4. **Start the REPL**: `python main.py` to begin using UVisBox-Assistant
 
 ## Additional Resources
 
@@ -288,4 +288,4 @@ After completing the environment setup:
 - **CONTRIBUTING.md** - Contribution guidelines
 - **CLAUDE.md** - Implementation details for AI agents
 
-That's it! No `.env` files needed. Your environment is ready for ChatUVisBox v0.1.0.
+That's it! No `.env` files needed. Your environment is ready for UVisBox-Assistant v0.1.0.

@@ -1,6 +1,6 @@
-# Contributing to ChatUVisBox
+# Contributing to UVisBox-Assistant
 
-Thank you for your interest in contributing to ChatUVisBox! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to UVisBox-Assistant! This document provides guidelines for contributing to the project.
 
 ## Table of Contents
 
@@ -13,11 +13,11 @@ Thank you for your interest in contributing to ChatUVisBox! This document provid
 
 ## Getting Started
 
-ChatUVisBox is a natural language interface for the UVisBox uncertainty visualization library. Before contributing, please:
+UVisBox-Assistant is a natural language interface for the UVisBox uncertainty visualization library. Before contributing, please:
 
 1. Read the [README.md](README.md) to understand the project
 2. Review [CLAUDE.md](CLAUDE.md) for implementation details
-3. Check [existing issues](https://github.com/yourusername/chatuvisbox/issues) to avoid duplicates
+3. Check [existing issues](https://github.com/yourusername/uvisbox_assistant/issues) to avoid duplicates
 4. Familiarize yourself with the [testing guide](TESTING.md)
 
 ## Development Setup
@@ -32,14 +32,14 @@ ChatUVisBox is a natural language interface for the UVisBox uncertainty visualiz
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/chatuvisbox.git
-   cd chatuvisbox
+   git clone https://github.com/yourusername/uvisbox_assistant.git
+   cd uvisbox_assistant
    ```
 
 2. **Set up environment**:
    ```bash
-   conda create -n chatuvisbox python=3.13
-   conda activate chatuvisbox
+   conda create -n uvisbox_assistant python=3.13
+   conda activate uvisbox_assistant
    ```
 
 3. **Install dependencies**:
@@ -71,7 +71,7 @@ ChatUVisBox is a natural language interface for the UVisBox uncertainty visualiz
 ### File Organization
 
 ```
-src/chatuvisbox/
+src/uvisbox_assistant/
 ├── graph.py          # LangGraph workflow
 ├── state.py          # State definitions
 ├── nodes.py          # Graph nodes
@@ -114,7 +114,7 @@ src/chatuvisbox/
 
 ### Test Categories
 
-ChatUVisBox uses a category-based test structure:
+UVisBox-Assistant uses a category-based test structure:
 
 1. **Unit Tests** (`tests/unit/`):
    - 0 API calls
@@ -144,7 +144,7 @@ ChatUVisBox uses a category-based test structure:
 ```python
 def test_command_parser():
     """Test command parser for median color."""
-    from chatuvisbox.command_parser import parse_simple_command
+    from uvisbox_assistant.command_parser import parse_simple_command
 
     cmd = parse_simple_command("median color blue")
     assert cmd is not None
@@ -155,7 +155,7 @@ def test_command_parser():
 ```python
 def test_hybrid_control():
     """Test hybrid control for fast parameter updates."""
-    from chatuvisbox.conversation import ConversationSession
+    from uvisbox_assistant.conversation import ConversationSession
 
     session = ConversationSession()
     # Generate data
@@ -272,7 +272,7 @@ Steps to reproduce:
 **Environment**
 - Python version:
 - OS:
-- ChatUVisBox version:
+- UVisBox-Assistant version:
 - UVisBox version:
 
 **Additional context**
@@ -379,4 +379,4 @@ test(unit): add command parser tests for outliers styling
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
-Thank you for contributing to ChatUVisBox!
+Thank you for contributing to UVisBox-Assistant!

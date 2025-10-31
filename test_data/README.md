@@ -1,6 +1,6 @@
 # Test Data
 
-This directory contains sample datasets for testing ChatUVisBox.
+This directory contains sample datasets for testing UVisBox-Assistant.
 
 ## Files
 

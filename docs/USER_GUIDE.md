@@ -1,4 +1,4 @@
-# ChatUVisBox User Guide
+# UVisBox-Assistant User Guide
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@
 
 ## Getting Started
 
-ChatUVisBox provides a natural language interface for creating uncertainty visualizations. You can describe what you want in plain English, and the system will translate your request into appropriate data processing and visualization operations.
+UVisBox-Assistant provides a natural language interface for creating uncertainty visualizations. You can describe what you want in plain English, and the system will translate your request into appropriate data processing and visualization operations.
 
 ### Basic Usage Pattern
 
@@ -33,7 +33,7 @@ Assistant: [adds outliers to the plot]
 
 ### BoxplotStyleConfig Parameters
 
-ChatUVisBox provides fine-grained control over boxplot visualizations through 10 styling parameters:
+UVisBox-Assistant provides fine-grained control over boxplot visualizations through 10 styling parameters:
 
 #### Percentile Bands
 - **percentiles**: List of percentile values (e.g., [25, 50, 75, 90])
@@ -403,7 +403,7 @@ You: Show outliers     # implicitly updates current plot
 
 ## Debugging and Troubleshooting
 
-ChatUVisBox provides powerful debugging features to help you investigate errors and understand execution flow.
+UVisBox-Assistant provides powerful debugging features to help you investigate errors and understand execution flow.
 
 ### Debug Mode
 
