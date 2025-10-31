@@ -1,1 +1,1 @@
-"""Test suite for ChatUVisBox."""
+"""Test suite for UVisBox-Assistant."""

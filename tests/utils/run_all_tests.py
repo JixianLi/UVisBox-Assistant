@@ -67,7 +67,7 @@ def run_tests(test_files, delay=3):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run ChatUVisBox test suite")
+    parser = argparse.ArgumentParser(description="Run UVisBox-Assistant test suite")
     parser.add_argument("--unit", action="store_true", help="Run unit tests only")
     parser.add_argument("--integration", action="store_true", help="Run integration tests only")
     parser.add_argument("--e2e", action="store_true", help="Run e2e tests only")
@@ -75,7 +75,7 @@ def main():
     args = parser.parse_args()
 
     print("\n" + "="*70)
-    print("ChatUVisBox Test Suite")
+    print("UVisBox-Assistant Test Suite")
     print("="*70)
 
     all_tests = []

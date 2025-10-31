@@ -1,7 +1,7 @@
 """
-ChatUVisBox - Main interactive REPL
+UVisBox-Assistant - Main interactive REPL
 
-This is the primary user interface for ChatUVisBox.
+This is the primary user interface for UVisBox-Assistant.
 """
 
 from .conversation import ConversationSession
@@ -14,7 +14,7 @@ def print_welcome():
     """Print welcome banner."""
     print("\n" + "="*70)
     print("  ╔═══════════════════════════════════════════════════════════╗")
-    print("  ║              ChatUVisBox - Interactive REPL                ║")
+    print("  ║              UVisBox-Assistant - Interactive REPL                ║")
     print("  ║         Natural Language Interface for UVisBox             ║")
     print("  ╚═══════════════════════════════════════════════════════════╝")
     print("="*70)
@@ -83,7 +83,7 @@ def print_help():
     print("  • /stats        - Show session statistics")
     print("  • /clear        - Clear session and temp files")
     print("  • /reset        - Reset conversation (keep files)")
-    print("  • /quit         - Exit ChatUVisBox")
+    print("  • /quit         - Exit UVisBox-Assistant")
 
     print("\n🔍 Debug Commands:")
     print("  • /debug on     - Enable debug mode (full error tracebacks)")

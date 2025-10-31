@@ -1,4 +1,4 @@
-"""Configuration for ChatUVisBox"""
+"""Configuration for UVisBox-Assistant"""
 import os
 from pathlib import Path
 
@@ -11,7 +11,7 @@ if not GEMINI_API_KEY:
 MODEL_NAME = "gemini-2.0-flash-lite"  # Lite version: 30 RPM (vs standard: 15 RPM)
 
 # Paths
-# config.py is in src/chatuvisbox/, need to go up 3 levels to project root
+# config.py is in src/uvisbox_assistant/, need to go up 3 levels to project root
 PACKAGE_ROOT = Path(__file__).parent.parent.parent
 PROJECT_ROOT = PACKAGE_ROOT
 TEMP_DIR = PROJECT_ROOT / "temp"

@@ -1,11 +1,12 @@
 """
-Interactive testing script for ChatUVisBox with pre-defined options.
+Interactive testing script for UVisBox-Assistant with pre-defined options.
 
 This script provides a menu-driven interface for testing various
 visualization and data generation scenarios.
 """
 import sys
-sys.path.insert(0, '/Users/jixianli/projects/chatuvisbox/src')
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
 from uvisbox_assistant.graph import run_graph
 from uvisbox_assistant.state import GraphState
@@ -215,7 +216,7 @@ def execute_option(option: int, state: GraphState = None) -> GraphState:
 
 def main():
     """Main interactive loop."""
-    print("\n🎨 ChatUVisBox Interactive Testing Interface")
+    print("\n🎨 UVisBox-Assistant Interactive Testing Interface")
     print("This tool helps you test various visualization scenarios quickly.\n")
     
     state = None

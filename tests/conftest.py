@@ -1,4 +1,4 @@
-"""Pytest fixtures and configuration for ChatUVisBox tests."""
+"""Pytest fixtures and configuration for UVisBox-Assistant tests."""
 
 import pytest
 from pathlib import Path

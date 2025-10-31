@@ -6,7 +6,7 @@ import operator
 
 class GraphState(TypedDict):
     """
-    State for the ChatUVisBox conversation graph.
+    State for the UVisBox-Assistant conversation graph.
 
     Attributes:
         messages: List of conversation messages (user, assistant, tool messages)
