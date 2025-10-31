@@ -6,6 +6,12 @@ them by directly manipulating ConversationSession state and using
 helper functions.
 """
 
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+
 from uvisbox_assistant.conversation import ConversationSession
 
 

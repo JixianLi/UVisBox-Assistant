@@ -1,5 +1,11 @@
 """Unit tests for verbose mode output control."""
 
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+
 import pytest
 from uvisbox_assistant.output_control import vprint, is_verbose, set_session
 from uvisbox_assistant.conversation import ConversationSession

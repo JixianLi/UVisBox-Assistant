@@ -1,5 +1,11 @@
 """Unit tests for error tracking functionality."""
 
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+
 import pytest
 from datetime import datetime
 from uvisbox_assistant.error_tracking import ErrorRecord

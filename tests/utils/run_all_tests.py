@@ -19,9 +19,13 @@ from pathlib import Path
 # Test categories
 UNIT_TESTS = [
     "tests/unit/test_command_parser.py",
+    "tests/unit/test_command_handlers.py",
     "tests/unit/test_config.py",
     "tests/unit/test_routing.py",
     "tests/unit/test_tools.py",
+    "tests/unit/test_error_tracking.py",
+    "tests/unit/test_error_interpretation.py",
+    "tests/unit/test_output_control.py",
 ]
 
 INTEGRATION_TESTS = [
