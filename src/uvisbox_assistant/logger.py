@@ -1,6 +1,6 @@
 """Logging utilities for debugging."""
 import logging
-from chatuvisbox import config
+from uvisbox_assistant import config
 
 # Configure logging (LOG_DIR already created in config.py)
 # Only log to file - console output is controlled by vprint() and verbose mode
@@ -8,11 +8,11 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(config.LOG_DIR / "chatuvisbox.log")
+        logging.FileHandler(config.LOG_DIR / "uvisbox_assistant.log")
     ]
 )
 
-logger = logging.getLogger("chatuvisbox")
+logger = logging.getLogger("uvisbox_assistant")
 
 
 def log_tool_call(tool_name: str, args: dict):

@@ -4,7 +4,7 @@ import pandas as pd
 import traceback
 from pathlib import Path
 from typing import Dict, Optional
-from chatuvisbox import config
+from uvisbox_assistant import config
 
 def load_csv_to_numpy(
     filepath: str,

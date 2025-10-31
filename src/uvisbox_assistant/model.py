@@ -1,7 +1,7 @@
-"""Language model setup for ChatUVisBox"""
+"""Language model setup for UVisBox-Assistant"""
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage
-from chatuvisbox import config
+from uvisbox_assistant import config
 import os
 
 
@@ -15,7 +15,7 @@ def get_system_prompt(file_list: list = None) -> str:
     Returns:
         System prompt string
     """
-    base_prompt = """You are ChatUVisBox, an AI assistant specialized in visualizing uncertainty data using the UVisBox Python library.
+    base_prompt = """You are UVisBox-Assistant, an AI assistant specialized in visualizing uncertainty data using the UVisBox Python library.
 
 Your capabilities:
 1. **Data Tools**: Load CSV files, generate synthetic data, manage numpy arrays

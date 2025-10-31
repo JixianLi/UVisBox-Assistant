@@ -1,13 +1,13 @@
-"""LangGraph workflow definition for ChatUVisBox"""
+"""LangGraph workflow definition for UVisBox-Assistant"""
 from langgraph.graph import StateGraph, END
-from chatuvisbox.state import GraphState
-from chatuvisbox.nodes import call_model, call_data_tool, call_vis_tool
-from chatuvisbox.routing import route_after_model, route_after_tool
+from uvisbox_assistant.state import GraphState
+from uvisbox_assistant.nodes import call_model, call_data_tool, call_vis_tool
+from uvisbox_assistant.routing import route_after_model, route_after_tool
 
 
 def create_graph():
     """
-    Create and compile the ChatUVisBox LangGraph workflow.
+    Create and compile the UVisBox-Assistant LangGraph workflow.
 
     Graph structure:
         START -> model -> [conditional]
@@ -80,7 +80,7 @@ def run_graph(user_input: str, initial_state: dict = None) -> GraphState:
     Returns:
         Final state after graph execution
     """
-    from chatuvisbox.state import create_initial_state
+    from uvisbox_assistant.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)
@@ -107,7 +107,7 @@ def stream_graph(user_input: str, initial_state: dict = None):
     Yields:
         State updates as they occur
     """
-    from chatuvisbox.state import create_initial_state
+    from uvisbox_assistant.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)

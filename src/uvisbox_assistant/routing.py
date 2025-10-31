@@ -1,7 +1,7 @@
 """Routing logic for the LangGraph workflow"""
 from typing import Literal
-from chatuvisbox.state import GraphState
-from chatuvisbox.utils import get_tool_type
+from uvisbox_assistant.state import GraphState
+from uvisbox_assistant.utils import get_tool_type
 
 
 def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "end"]:

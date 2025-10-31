@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import traceback
 from pathlib import Path
 from typing import Dict, Optional, List
-from chatuvisbox import config
+from uvisbox_assistant import config
 
 # Import UVisBox modules
 try:

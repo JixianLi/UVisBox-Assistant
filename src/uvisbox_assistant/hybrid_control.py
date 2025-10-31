@@ -1,9 +1,9 @@
 """Hybrid control system for fast parameter updates."""
 
 from typing import Optional, Dict, Tuple
-from chatuvisbox.command_parser import parse_simple_command, apply_command_to_params
-from chatuvisbox.vis_tools import VIS_TOOLS
-from chatuvisbox.output_control import vprint
+from uvisbox_assistant.command_parser import parse_simple_command, apply_command_to_params
+from uvisbox_assistant.vis_tools import VIS_TOOLS
+from uvisbox_assistant.output_control import vprint
 
 
 def execute_simple_command(
