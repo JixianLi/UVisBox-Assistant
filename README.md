@@ -1,6 +1,6 @@
 # UVisBox-Assistant
 
-Natural language interface for the [UVisBox](https://github.com/VCCRI/UVisBox) uncertainty visualization library.
+Natural language interface for the [UVisBox](https://github.com/ouermijudicael/UVisBox) uncertainty visualization library.
 
 ## Overview
 
