@@ -14,9 +14,9 @@ try:
         probabilistic_marching_squares,
         uncertainty_lobes,
         contour_boxplot,
-        BoxplotStyleConfig,
         squid_glyph_2D
     )
+    from uvisbox.Core.CommonInterface import BoxplotStyleConfig
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
     print("Make sure UVisBox is installed in the 'agent' conda environment")
@@ -163,10 +163,14 @@ def plot_curve_boxplot(
     workers: int = 12
 ) -> Dict[str, str]:
     """
-    Create a curve boxplot from 3D curve ensemble data with multiple percentile bands.
+    Create a curve boxplot from curve ensemble data with multiple percentile bands.
+
+    Accepts 2D or 3D numpy arrays:
+    - 2D array (n_curves, n_points): Functional/1D curves (y-values only, x implicit)
+    - 3D array (n_curves, n_points, 2): 2D spatial curves (explicit x,y coordinates)
 
     Args:
-        data_path: Path to .npy with shape (n_curves, n_steps, n_dims)
+        data_path: Path to .npy file with curve ensemble data
         percentiles: List of percentiles for bands (default: [25, 50, 90, 100])
         percentile_colormap: Colormap for percentile bands (default: "viridis")
         show_median: Whether to show median curve (default: True)
@@ -188,12 +192,13 @@ def plot_curve_boxplot(
 
         curves = np.load(data_path)
 
-        # For 2D curves from functional data, reshape if needed
+        # Handle 2D array (functional/1D curves): add x-coordinates to convert to 3D array
         if curves.ndim == 2:
-            # Shape (n_curves, n_points) -> (n_curves, n_points, 1) for viewing as 1D curves
+            # Convert 2D array (n_curves, n_points) to 3D array (n_curves, n_points, 2)
+            # by adding explicit x-coordinates for 2D spatial representation
             n_curves, n_points = curves.shape
             x_coords = np.linspace(0, 1, n_points)
-            # Stack x and y to make (n_curves, n_points, 2)
+            # Stack [x, y] coordinates along last axis
             curves_3d = np.stack([
                 np.tile(x_coords, (n_curves, 1)),
                 curves
@@ -203,7 +208,7 @@ def plot_curve_boxplot(
         if curves.ndim != 3:
             return {
                 "status": "error",
-                "message": f"Expected 3D array (n_curves, n_steps, n_dims), got shape {curves.shape}"
+                "message": f"Expected 2D array (n_curves, n_points) or 3D array (n_curves, n_points, n_dims), got shape {curves.shape}"
             }
 
         # Set defaults if not provided
