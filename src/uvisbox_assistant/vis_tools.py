@@ -319,7 +319,7 @@ def plot_probabilistic_marching_squares(
         probabilistic_marching_squares(
             ensemble_images=field,
             isovalue=isovalue,
-            cmap=colormap,
+            colormap=colormap,
             ax=ax
         )
 
