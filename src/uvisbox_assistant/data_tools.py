@@ -149,7 +149,7 @@ def generate_scalar_field_ensemble(
     Each ensemble member is a Gaussian centered at (nx/2, ny/2) with:
     - Standard deviation: (nx+ensemble_index, ny)
     - Rescaled to [0, 1]
-    - Uniform noise added from [0, 0.1)
+    - Uniform noise added from [0, 0.01)
     - Final rescale to [0, 1]
 
     Args:
@@ -194,8 +194,8 @@ def generate_scalar_field_ensemble(
             else:
                 Z = np.zeros_like(Z)
 
-            # Add uniform random noise from [0, 0.1)
-            noise = np.random.uniform(0, 0.1, Z.shape)
+            # Add uniform random noise from [0, 0.01)
+            noise = np.random.uniform(0, 0.01, Z.shape)
             Z = Z + noise
 
             # Rescale again to [0, 1]
