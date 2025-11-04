@@ -4,18 +4,18 @@ from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 from datetime import datetime
 import os
 
-from uvisbox_assistant.state import (
+from uvisbox_assistant.core.state import (
     GraphState, update_state_with_data, update_state_with_vis,
     update_state_with_statistics, update_state_with_analysis, increment_error_count
 )
-from uvisbox_assistant.model import create_model_with_tools, prepare_messages_for_model
-from uvisbox_assistant.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
-from uvisbox_assistant.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
-from uvisbox_assistant.statistics_tools import STATISTICS_TOOLS, STATISTICS_TOOL_SCHEMAS
-from uvisbox_assistant.analyzer_tools import ANALYZER_TOOLS, ANALYZER_TOOL_SCHEMAS
+from uvisbox_assistant.llm.model import create_model_with_tools, prepare_messages_for_model
+from uvisbox_assistant.tools.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
+from uvisbox_assistant.tools.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
+from uvisbox_assistant.tools.statistics_tools import STATISTICS_TOOLS, STATISTICS_TOOL_SCHEMAS
+from uvisbox_assistant.tools.analyzer_tools import ANALYZER_TOOLS, ANALYZER_TOOL_SCHEMAS
 from uvisbox_assistant import config
-from uvisbox_assistant.logger import log_tool_call, log_tool_result, log_error
-from uvisbox_assistant.output_control import vprint
+from uvisbox_assistant.utils.logger import log_tool_call, log_tool_result, log_error
+from uvisbox_assistant.utils.output_control import vprint
 
 
 # Create model with all tools

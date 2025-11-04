@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-11-04
+
+### Changed
+
+**Project Restructure** - Feature-based directory architecture for improved code organization
+
+**Directory Structure:**
+- Reorganized 21 Python files from flat structure into 6 feature-based subdirectories:
+  - `core/` - LangGraph workflow orchestration (graph, nodes, routing, state)
+  - `tools/` - Data generation, visualization, statistics, and analysis tools
+  - `session/` - User interaction and session management (conversation, hybrid control, command parser)
+  - `llm/` - LLM configuration and model setup
+  - `errors/` - Error handling infrastructure (tracking, interpretation)
+  - `utils/` - Utilities and logging
+
+**Backward Compatibility:**
+- Root `__init__.py` re-exports all public APIs for backward compatibility
+- Legacy imports (e.g., `from uvisbox_assistant import ConversationSession`) continue working
+- New structured imports also supported (e.g., `from uvisbox_assistant.session import ConversationSession`)
+- Git history fully preserved using `git mv` for all file moves
+
+**Benefits:**
+- Clear feature boundaries and single responsibility per directory
+- Improved discoverability for new developers (3-4 files per directory vs 21 in one)
+- Better scalability for future feature additions
+- Reduced cognitive load
+- Zero functional changes (pure structural refactoring)
+
+**Testing:**
+- ✅ All 77+ unit tests pass (0 API calls)
+- ✅ Backward compatibility verified with automated script
+- ✅ Import updates automated across 25 files (57 imports)
+
+**Migration Tools:**
+- `scripts/update_imports.py` - Automated import updater with dry-run mode
+- `scripts/verify_compatibility.py` - Backward compatibility verification
+
 ## [0.3.0] - 2025-11-04
 
 ### Added

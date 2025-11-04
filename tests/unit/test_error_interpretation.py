@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 import pytest
-from uvisbox_assistant.error_interpretation import (
+from uvisbox_assistant.errors.error_interpretation import (
     interpret_uvisbox_error,
     format_error_with_hint,
     _extract_colormap_name,

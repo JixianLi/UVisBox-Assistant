@@ -173,25 +173,37 @@ python main.py
 
 ```
 uvisbox-assistant/
-├── src/uvisbox_assistant/
-│   ├── main.py                 # Main REPL entry point
-│   ├── graph.py                # LangGraph workflow with 5 nodes
-│   ├── state.py                # State definitions with analysis fields
-│   ├── nodes.py                # Five graph nodes (data, vis, statistics, analyzer, model)
-│   ├── routing.py              # Routing logic with analyzer support
-│   ├── model.py                # LLM setup with analysis workflow guidance
-│   ├── data_tools.py           # Data loading/generation tools
-│   ├── vis_tools.py            # Visualization wrappers (BoxplotStyleConfig)
-│   ├── statistics_tools.py     # Statistical analysis (v0.3.0)
-│   ├── analyzer_tools.py       # LLM-powered reports (v0.3.0)
-│   ├── hybrid_control.py       # Fast parameter updates
-│   ├── command_parser.py       # Command parsing (16 patterns)
-│   ├── conversation.py         # Session management with analysis tracking
+├── src/uvisbox_assistant/      # Feature-based architecture (v0.3.1)
+│   ├── __init__.py             # Backward-compatible exports
 │   ├── config.py               # Configuration
-│   └── utils.py                # Utilities with analyzer routing
+│   ├── main.py                 # Main REPL entry point
+│   ├── core/                   # LangGraph workflow orchestration
+│   │   ├── graph.py            # StateGraph with 5 nodes
+│   │   ├── nodes.py            # Graph nodes (data, vis, statistics, analyzer, model)
+│   │   ├── routing.py          # Conditional routing with circuit breaker
+│   │   └── state.py            # State definitions with analysis fields
+│   ├── tools/                  # Data and visualization tools
+│   │   ├── data_tools.py       # Data loading/generation
+│   │   ├── vis_tools.py        # Visualization wrappers (BoxplotStyleConfig)
+│   │   ├── statistics_tools.py # Statistical analysis (v0.3.0)
+│   │   └── analyzer_tools.py   # LLM-powered reports (v0.3.0)
+│   ├── session/                # User interaction and session management
+│   │   ├── conversation.py     # Session management with analysis tracking
+│   │   ├── hybrid_control.py   # Fast parameter updates
+│   │   └── command_parser.py   # Command parsing (16 patterns)
+│   ├── llm/                    # LLM configuration
+│   │   └── model.py            # Gemini model setup
+│   ├── errors/                 # Error handling infrastructure
+│   │   ├── error_tracking.py   # Error storage and recording
+│   │   └── error_interpretation.py  # Context-aware error hints
+│   └── utils/                  # Utilities and logging
+│       ├── logger.py           # Logging infrastructure
+│       ├── output_control.py   # Verbose mode control
+│       └── utils.py            # Utility functions
 ├── test_data/                  # Sample datasets
 ├── temp/                       # Temporary files (auto-generated)
 ├── tests/                      # Test suites (77+ unit tests, 0 API calls)
+├── scripts/                    # Migration and verification scripts
 ├── requirements.txt            # Dependencies
 └── pyproject.toml              # Poetry configuration
 ```

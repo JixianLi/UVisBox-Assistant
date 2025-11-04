@@ -4,7 +4,7 @@ import sys
 import time
 import matplotlib.pyplot as plt
 
-from uvisbox_assistant.conversation import ConversationSession
+from uvisbox_assistant.session.conversation import ConversationSession
 
 
 def test_hybrid_parameter_update():

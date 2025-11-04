@@ -8,8 +8,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 import pytest
 from datetime import datetime
-from uvisbox_assistant.error_tracking import ErrorRecord
-from uvisbox_assistant.conversation import ConversationSession
+from uvisbox_assistant.errors.error_tracking import ErrorRecord
+from uvisbox_assistant.session.conversation import ConversationSession
 
 
 class TestErrorRecord:

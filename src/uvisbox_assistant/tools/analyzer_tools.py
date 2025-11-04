@@ -5,7 +5,7 @@ import traceback
 from typing import Dict, Optional, Tuple
 from langchain_core.messages import HumanMessage, SystemMessage
 from uvisbox_assistant import config
-from uvisbox_assistant.model import create_model_with_tools
+from uvisbox_assistant.llm.model import create_model_with_tools
 
 
 # Report generation prompts for different formats

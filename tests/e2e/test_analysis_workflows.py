@@ -4,7 +4,7 @@ import pytest
 import time
 import numpy as np
 from unittest.mock import patch
-from uvisbox_assistant.conversation import ConversationSession
+from uvisbox_assistant.session.conversation import ConversationSession
 
 
 @pytest.fixture

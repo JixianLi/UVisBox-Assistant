@@ -7,13 +7,13 @@ import numpy as np
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from uvisbox_assistant.data_tools import (
+from uvisbox_assistant.tools.data_tools import (
     generate_ensemble_curves,
     generate_scalar_field_ensemble,
     generate_vector_field_ensemble,
     clear_session
 )
-from uvisbox_assistant.vis_tools import (
+from uvisbox_assistant.tools.vis_tools import (
     plot_functional_boxplot,
     plot_curve_boxplot,
     plot_contour_boxplot,

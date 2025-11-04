@@ -1,7 +1,7 @@
 """Unit tests for GraphState extensions (0 API calls)."""
 
 import pytest
-from uvisbox_assistant.state import (
+from uvisbox_assistant.core.state import (
     GraphState,
     create_initial_state,
     update_state_with_statistics,

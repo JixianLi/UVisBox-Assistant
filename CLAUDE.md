@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **UVisBox-Assistant** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current Version**: v0.3.0 (Released 2025-11-04)
+**Current Version**: v0.3.1 (Released 2025-11-04)
 
 **Key Features**:
 - ✅ Natural language interface for 6 visualization types
@@ -69,23 +69,25 @@ The system supports **three workflow patterns** for uncertainty analysis:
 
 ### Key Components
 
+**Note**: As of v0.3.1, the project uses a feature-based directory structure. Import from the root package (e.g., `from uvisbox_assistant import ConversationSession`) for backward compatibility.
+
 ```
-graph.py             - ✅ DONE: LangGraph StateGraph with 5 nodes and conditional routing
-state.py             - ✅ DONE: GraphState with analysis fields (processed_statistics, analysis_report, analysis_type)
-nodes.py             - ✅ DONE: Five core nodes: call_model, call_data_tool, call_vis_tool, call_statistics_tool, call_analyzer_tool
-routing.py           - ✅ DONE: Conditional logic with circuit breaker and analyzer routing
-model.py             - ✅ DONE: ChatGoogleGenerativeAI with analysis workflow guidance
-utils.py             - ✅ DONE: Tool type detection (data/vis/statistics/analyzer) and file management
-data_tools.py        - ✅ DONE: Data generation and loading functions
-vis_tools.py         - ✅ DONE: UVisBox visualization wrappers with BoxplotStyleConfig
-statistics_tools.py  - ✅ DONE: Statistical analysis with UVisBox functional_boxplot_summary_statistics (v0.3.0)
-analyzer_tools.py    - ✅ DONE: LLM-powered report generation with three formats (v0.3.0)
-config.py            - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
-logger.py            - ✅ DONE: Logging infrastructure with file and console output
-conversation.py      - ✅ DONE: ConversationSession with analysis state tracking (v0.3.0)
-command_parser.py    - ✅ DONE: Parse simple commands for hybrid control (16 patterns)
-hybrid_control.py    - ✅ DONE: Execute simple commands directly, 10-15x speedup
-main.py              - ✅ DONE: Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
+core/graph.py             - ✅ LangGraph StateGraph with 5 nodes and conditional routing
+core/state.py             - ✅ GraphState with analysis fields (processed_statistics, analysis_report, analysis_type)
+core/nodes.py             - ✅ Five core nodes: call_model, call_data_tool, call_vis_tool, call_statistics_tool, call_analyzer_tool
+core/routing.py           - ✅ Conditional logic with circuit breaker and analyzer routing
+llm/model.py              - ✅ ChatGoogleGenerativeAI with analysis workflow guidance
+utils/utils.py            - ✅ Tool type detection (data/vis/statistics/analyzer) and file management
+tools/data_tools.py       - ✅ Data generation and loading functions
+tools/vis_tools.py        - ✅ UVisBox visualization wrappers with BoxplotStyleConfig
+tools/statistics_tools.py - ✅ Statistical analysis with UVisBox functional_boxplot_summary_statistics (v0.3.0)
+tools/analyzer_tools.py   - ✅ LLM-powered report generation with three formats (v0.3.0)
+config.py                 - ✅ Configuration (API key, paths, DEFAULT_VIS_PARAMS)
+utils/logger.py           - ✅ Logging infrastructure with file and console output
+session/conversation.py   - ✅ ConversationSession with analysis state tracking (v0.3.0)
+session/command_parser.py - ✅ Parse simple commands for hybrid control (16 patterns)
+session/hybrid_control.py - ✅ Execute simple commands directly, 10-15x speedup
+main.py                   - ✅ Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
 ```
 
 ### LangGraph Flow
@@ -149,7 +151,15 @@ pip install -r requirements.txt
 
 ### Project Status
 
-UVisBox-Assistant v0.3.0 is **feature complete** with all core functionality implemented:
+UVisBox-Assistant v0.3.1 (latest) is **feature complete** with improved architecture:
+
+**v0.3.1 Changes** (Project Restructure):
+- Feature-based directory structure (core/, tools/, session/, llm/, errors/, utils/)
+- Backward-compatible imports via root __init__.py
+- Improved code organization and discoverability
+- Zero functional changes (pure refactoring)
+
+**v0.3.0 Features**:
 
 **Core Features** ✅ COMPLETE
 - LangGraph workflow with 5 nodes (data, vis, statistics, analyzer, model)
@@ -977,24 +987,46 @@ uvisbox-assistant/
 ├── LICENSE                  # MIT License
 ├── .gitignore               # Git ignore patterns
 │
-├── src/uvisbox_assistant/         # Package source (src layout)
-│   ├── __init__.py          # Package exports
+├── src/uvisbox_assistant/         # Package source (feature-based structure, v0.3.1)
+│   ├── __init__.py          # Package exports (backward-compatible re-exports)
 │   ├── __main__.py          # Entry point for python -m uvisbox_assistant
-│   ├── graph.py             # LangGraph workflow with 5 nodes
-│   ├── state.py             # GraphState with analysis fields
-│   ├── nodes.py             # Five graph nodes (data, vis, statistics, analyzer, model)
-│   ├── routing.py           # Routing with analyzer support
-│   ├── model.py             # Gemini model with analysis workflow guidance
-│   ├── logger.py            # Logging infrastructure
-│   ├── conversation.py      # ConversationSession with analysis tracking
-│   ├── command_parser.py    # Command parsing (16 patterns)
-│   ├── hybrid_control.py    # Fast path execution
-│   ├── utils.py             # Utility functions with analyzer routing
-│   ├── data_tools.py        # Data generation and loading
-│   ├── vis_tools.py         # Visualization wrappers with BoxplotStyleConfig
-│   ├── statistics_tools.py  # Statistical analysis (v0.3.0)
-│   ├── analyzer_tools.py    # LLM-powered report generation (v0.3.0)
-│   └── config.py            # Configuration and defaults
+│   ├── config.py            # Configuration and defaults
+│   ├── main.py              # Interactive REPL
+│   │
+│   ├── core/                # LangGraph workflow orchestration
+│   │   ├── __init__.py      # Core exports
+│   │   ├── graph.py         # StateGraph with 5 nodes
+│   │   ├── nodes.py         # Five graph nodes (data, vis, statistics, analyzer, model)
+│   │   ├── routing.py       # Conditional routing with circuit breaker
+│   │   └── state.py         # GraphState with analysis fields
+│   │
+│   ├── tools/               # Data and visualization tools
+│   │   ├── __init__.py      # Tools exports
+│   │   ├── data_tools.py    # Data generation and loading
+│   │   ├── vis_tools.py     # Visualization wrappers with BoxplotStyleConfig
+│   │   ├── statistics_tools.py  # Statistical analysis (v0.3.0)
+│   │   └── analyzer_tools.py    # LLM-powered report generation (v0.3.0)
+│   │
+│   ├── session/             # User interaction and session management
+│   │   ├── __init__.py      # Session exports
+│   │   ├── conversation.py  # ConversationSession with analysis tracking
+│   │   ├── hybrid_control.py  # Fast path execution
+│   │   └── command_parser.py  # Command parsing (16 patterns)
+│   │
+│   ├── llm/                 # LLM configuration
+│   │   ├── __init__.py      # LLM exports
+│   │   └── model.py         # Gemini model setup
+│   │
+│   ├── errors/              # Error handling infrastructure
+│   │   ├── __init__.py      # Error exports
+│   │   ├── error_tracking.py  # ErrorRecord and error storage
+│   │   └── error_interpretation.py  # Context-aware error hints
+│   │
+│   └── utils/               # Utilities and logging
+│       ├── __init__.py      # Utils exports
+│       ├── logger.py        # Logging infrastructure
+│       ├── output_control.py  # Verbose mode control
+│       └── utils.py         # Utility functions
 │
 ├── tests/                   # Comprehensive test suite
 │   ├── __init__.py          # Test package marker

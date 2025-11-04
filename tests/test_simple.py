@@ -15,8 +15,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from uvisbox_assistant.graph import create_graph
-from uvisbox_assistant.state import create_initial_state
+from uvisbox_assistant.core.graph import create_graph
+from uvisbox_assistant.core.state import create_initial_state
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt

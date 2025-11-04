@@ -2,7 +2,7 @@
 
 import pytest
 import time
-from uvisbox_assistant.analyzer_tools import generate_uncertainty_report
+from uvisbox_assistant.tools.analyzer_tools import generate_uncertainty_report
 
 
 @pytest.fixture

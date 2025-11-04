@@ -12,7 +12,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from uvisbox_assistant.conversation import ConversationSession
+from uvisbox_assistant.session.conversation import ConversationSession
 
 
 class TestDebugCommands:

@@ -5,8 +5,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from uvisbox_assistant.routing import route_after_model, route_after_tool
-from uvisbox_assistant.state import create_initial_state
+from uvisbox_assistant.core.routing import route_after_model, route_after_tool
+from uvisbox_assistant.core.state import create_initial_state
 from langchain_core.messages import AIMessage
 
 

@@ -1,6 +1,6 @@
 """Test session management features."""
 
-from uvisbox_assistant.conversation import ConversationSession
+from uvisbox_assistant.session.conversation import ConversationSession
 import matplotlib.pyplot as plt
 from pathlib import Path
 from uvisbox_assistant import config
@@ -74,7 +74,7 @@ def test_reset_vs_clear():
     print("✓ Clear removed files")
 
     # Clean up remaining files
-    from uvisbox_assistant.data_tools import clear_session
+    from uvisbox_assistant.tools.data_tools import clear_session
     clear_session()
 
     print("\n✅ Reset vs Clear test passed")

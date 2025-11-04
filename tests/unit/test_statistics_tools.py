@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from uvisbox_assistant.statistics_tools import (
+from uvisbox_assistant.tools.statistics_tools import (
     compute_functional_boxplot_statistics,
     _analyze_median_curve,
     _analyze_percentile_bands,

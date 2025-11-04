@@ -1,7 +1,7 @@
 """Unit tests for analyzer_tools module (0 API calls)."""
 
 import pytest
-from uvisbox_assistant.analyzer_tools import (
+from uvisbox_assistant.tools.analyzer_tools import (
     ANALYZER_TOOLS,
     ANALYZER_TOOL_SCHEMAS,
     generate_uncertainty_report,
