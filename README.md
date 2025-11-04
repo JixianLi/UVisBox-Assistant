@@ -13,6 +13,8 @@ UVisBox-Assistant allows you to create uncertainty visualizations using natural 
 - **Fast Parameter Updates**: Quick visualization adjustments without reprocessing
 - **Fine-Grained Control**: Control all BoxplotStyleConfig styling parameters
 - **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, uncertainty lobes, and squid glyphs
+- **Uncertainty Analysis** (v0.3.0): LLM-powered statistical reports with three formats (inline, quick, detailed)
+- **Combined Workflows** (v0.3.0): Generate both visualizations and text analysis in a single conversation
 - **Session Management**: Clean file management and session control
 
 ## Quick Start
@@ -33,6 +35,35 @@ Assistant: [updates outliers to black]
 You: outliers alpha 1.0
 Assistant: [updates outliers transparency]
 ```
+
+### Example: Uncertainty Analysis (v0.3.0)
+
+```
+You: Generate 50 curves and create a quick uncertainty summary
+Assistant: [computes statistics and generates report]
+
+Here is the quick uncertainty analysis:
+
+The ensemble exhibits moderate uncertainty with tightly clustered curves around
+an increasing median trend (slope: 0.45). The 25th-90th percentile bands show
+consistent widths (mean: 2.3 units), with widest regions occurring at x=40-60.
+No outliers detected, indicating high consistency across all ensemble members.
+
+You: Now provide a detailed report
+Assistant: [generates detailed report with sections]
+
+## Median Behavior
+The median curve follows a clear increasing trend...
+...
+
+You: Plot the functional boxplot with blue median
+Assistant: [displays visualization with analysis from previous step]
+```
+
+**Three Report Formats**:
+- **Inline**: 1 sentence summary (~15-30 words)
+- **Quick**: 3-5 sentence overview (~50-100 words)
+- **Detailed**: Full report with sections (~100-300 words)
 
 ## Available Visualizations
 
@@ -144,21 +175,23 @@ python main.py
 uvisbox-assistant/
 ├── src/uvisbox_assistant/
 │   ├── main.py                 # Main REPL entry point
-│   ├── graph.py                # LangGraph workflow
-│   ├── state.py                # State definitions
-│   ├── nodes.py                # Graph nodes
-│   ├── routing.py              # Routing logic
-│   ├── model.py                # LLM setup
+│   ├── graph.py                # LangGraph workflow with 5 nodes
+│   ├── state.py                # State definitions with analysis fields
+│   ├── nodes.py                # Five graph nodes (data, vis, statistics, analyzer, model)
+│   ├── routing.py              # Routing logic with analyzer support
+│   ├── model.py                # LLM setup with analysis workflow guidance
 │   ├── data_tools.py           # Data loading/generation tools
 │   ├── vis_tools.py            # Visualization wrappers (BoxplotStyleConfig)
+│   ├── statistics_tools.py     # Statistical analysis (v0.3.0)
+│   ├── analyzer_tools.py       # LLM-powered reports (v0.3.0)
 │   ├── hybrid_control.py       # Fast parameter updates
-│   ├── command_parser.py       # Command parsing (13 patterns)
-│   ├── conversation.py         # Session management
+│   ├── command_parser.py       # Command parsing (16 patterns)
+│   ├── conversation.py         # Session management with analysis tracking
 │   ├── config.py               # Configuration
-│   └── utils.py                # Utilities
+│   └── utils.py                # Utilities with analyzer routing
 ├── test_data/                  # Sample datasets
 ├── temp/                       # Temporary files (auto-generated)
-├── tests/                      # Test suites
+├── tests/                      # Test suites (77+ unit tests, 0 API calls)
 ├── requirements.txt            # Dependencies
 └── pyproject.toml              # Poetry configuration
 ```
@@ -203,6 +236,7 @@ See `TESTING.md` for comprehensive testing guide.
 
 - **User Guide**: `docs/USER_GUIDE.md` - Detailed styling control examples
 - **API Reference**: `docs/API.md` - Complete BoxplotStyleConfig documentation
+- **Analysis Examples**: `docs/ANALYSIS_EXAMPLES.md` - Uncertainty analysis workflows and report formats (v0.3.0)
 - **Developer Guide**: `CLAUDE.md` - Implementation details and architecture
 - **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
 

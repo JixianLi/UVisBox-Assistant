@@ -6,17 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **UVisBox-Assistant** is a natural language interface for the UVisBox uncertainty visualization library. It uses LangGraph to orchestrate a conversational AI agent (powered by Google Gemini) that translates natural language requests into data processing and visualization operations.
 
-**Current Version**: v0.2.0 (Released 2025-10-30)
+**Current Version**: v0.3.0 (Released 2025-11-04)
 
 **Key Features**:
 - ✅ Natural language interface for 6 visualization types
 - ✅ BoxplotStyleConfig with 10 styling parameters
 - ✅ Hybrid control system (16 commands, 10-15x faster updates)
+- ✅ **Uncertainty analyzer** with statistics and LLM-powered reports (v0.3.0)
+- ✅ **Three report formats**: inline (1 sentence), quick (3-5 sentences), detailed (full report) (v0.3.0)
 - ✅ Multi-turn conversation with context preservation
 - ✅ Session management with automatic cleanup
 - ✅ Error handling with circuit breaker
 - ✅ Comprehensive test suite (unit/integration/e2e/interactive)
-- ✅ Complete documentation (User Guide, API Reference, Testing Guide)
+- ✅ Complete documentation (User Guide, API Reference, Testing Guide, Analysis Examples)
 
 ## Architecture
 
@@ -34,32 +36,70 @@ The system uses a **two-tier execution model**:
    - Bypasses LangGraph for ~10x speed improvement
    - Updates `last_vis_params` and re-executes visualization directly
 
+### Analysis Workflow Architecture (v0.3.0)
+
+The system supports **three workflow patterns** for uncertainty analysis:
+
+1. **Visualization Only** (existing):
+   - User: "generate curves and plot them"
+   - Workflow: `data_tool → vis_tool`
+   - Result: Visual output only
+
+2. **Text Analysis Only** (new in v0.3.0):
+   - User: "generate curves and analyze uncertainty"
+   - Workflow: `data_tool → statistics_tool → analyzer_tool`
+   - Result: Text report only (inline/quick/detailed)
+   - **Critical Sequence**: MUST call statistics tool before analyzer tool
+
+3. **Combined Visualization + Analysis** (new in v0.3.0):
+   - User: "generate curves, plot boxplot, and create summary"
+   - Workflow: `data_tool → vis_tool → statistics_tool → analyzer_tool`
+   - Result: Both visual and text output
+
+**Tool Sequence Rules** (enforced by system prompt):
+- Statistics tool (`compute_functional_boxplot_statistics`) computes processed statistics from data
+- Analyzer tool (`generate_uncertainty_report`) generates natural language reports from statistics
+- Analyzer automatically receives `processed_statistics` from state (state injection pattern)
+- Model must NEVER skip statistics tool when analysis is requested
+
+**Report Formats**:
+- `inline`: 1 sentence summary (~15-30 words)
+- `quick`: 3-5 sentence overview (~50-100 words)
+- `detailed`: Full report with sections (~100-300 words)
+
 ### Key Components
 
 ```
-graph.py          - ✅ DONE: LangGraph StateGraph definition with conditional routing
-state.py          - ✅ DONE: GraphState TypedDict: messages, current_data_path, last_vis_params, session_files, error_count
-nodes.py          - ✅ DONE: Three core nodes with error handling: call_model, call_data_tool, call_vis_tool
-routing.py        - ✅ DONE: Conditional logic with circuit breaker: route_after_model, route_after_tool
-model.py          - ✅ DONE: ChatGoogleGenerativeAI with error recovery prompt and context awareness
-utils.py          - ✅ DONE: Tool type detection and file management utilities
-data_tools.py     - ✅ DONE: Data generation and loading functions
-vis_tools.py      - ✅ DONE: UVisBox visualization wrappers with BoxplotStyleConfig
-config.py         - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
-logger.py         - ✅ DONE: Logging infrastructure with file and console output
-conversation.py   - ✅ DONE: ConversationSession class for multi-turn conversations with hybrid control
-command_parser.py - ✅ DONE: Parse simple commands for hybrid control (16 patterns)
-hybrid_control.py - ✅ DONE: Execute simple commands directly, 10-15x speedup
-main.py           - ✅ DONE: Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
+graph.py             - ✅ DONE: LangGraph StateGraph with 5 nodes and conditional routing
+state.py             - ✅ DONE: GraphState with analysis fields (processed_statistics, analysis_report, analysis_type)
+nodes.py             - ✅ DONE: Five core nodes: call_model, call_data_tool, call_vis_tool, call_statistics_tool, call_analyzer_tool
+routing.py           - ✅ DONE: Conditional logic with circuit breaker and analyzer routing
+model.py             - ✅ DONE: ChatGoogleGenerativeAI with analysis workflow guidance
+utils.py             - ✅ DONE: Tool type detection (data/vis/statistics/analyzer) and file management
+data_tools.py        - ✅ DONE: Data generation and loading functions
+vis_tools.py         - ✅ DONE: UVisBox visualization wrappers with BoxplotStyleConfig
+statistics_tools.py  - ✅ DONE: Statistical analysis with UVisBox functional_boxplot_summary_statistics (v0.3.0)
+analyzer_tools.py    - ✅ DONE: LLM-powered report generation with three formats (v0.3.0)
+config.py            - ✅ DONE: Configuration (API key, paths, DEFAULT_VIS_PARAMS)
+logger.py            - ✅ DONE: Logging infrastructure with file and console output
+conversation.py      - ✅ DONE: ConversationSession with analysis state tracking (v0.3.0)
+command_parser.py    - ✅ DONE: Parse simple commands for hybrid control (16 patterns)
+hybrid_control.py    - ✅ DONE: Execute simple commands directly, 10-15x speedup
+main.py              - ✅ DONE: Interactive REPL with command handling (/help, /context, /stats, /clear, /reset, /quit)
 ```
 
 ### LangGraph Flow
 
 ```
 START → call_model → [route_after_model]
-                         ├─ data_tool → call_model (loop for multi-step)
-                         ├─ vis_tool  → call_model (confirm to user)
+                         ├─ data_tool       → call_model (loop for multi-step)
+                         ├─ vis_tool        → call_model (confirm to user)
+                         ├─ statistics_tool → call_model (v0.3.0)
+                         ├─ analyzer_tool   → call_model (v0.3.0)
                          └─ END (direct response)
+
+Typical Analysis Flow:
+  data_tool → statistics_tool → analyzer_tool → END
 ```
 
 ### State Management
@@ -70,6 +110,10 @@ START → call_model → [route_after_model]
 - `last_vis_params`: Dict with `_tool_name`, `data_path`, and vis parameters
 - `session_files`: List of temp files created (for cleanup)
 - `error_count`: Circuit breaker (max 3 consecutive errors → END)
+- **`processed_statistics`** (v0.3.0): Structured dict from statistics tool with numeric summaries
+- **`analysis_report`** (v0.3.0): Generated text report from analyzer tool
+- **`analysis_type`** (v0.3.0): Report format ("inline" | "quick" | "detailed")
+- **`_raw_statistics`** (v0.3.0): Original UVisBox output for debugging
 
 **Intermediate data**: All data transformations saved as `.npy` files in `temp/` directory with `_temp_*` prefix.
 
@@ -105,26 +149,31 @@ pip install -r requirements.txt
 
 ### Project Status
 
-UVisBox-Assistant v0.1.0 is **feature complete** with all core functionality implemented:
+UVisBox-Assistant v0.3.0 is **feature complete** with all core functionality implemented:
 
 **Core Features** ✅ COMPLETE
-- LangGraph workflow with state management
-- 5 visualization types with BoxplotStyleConfig support
+- LangGraph workflow with 5 nodes (data, vis, statistics, analyzer, model)
+- 6 visualization types with BoxplotStyleConfig support
 - Data generation and loading tools
+- **Statistical analysis with UVisBox integration** (v0.3.0)
+- **LLM-powered uncertainty report generation** (v0.3.0)
 - Error handling with circuit breaker
 - Logging infrastructure
 
 **User Experience** ✅ COMPLETE
 - Multi-turn conversation support
 - Hybrid control system (16 fast commands)
+- **Three report formats (inline/quick/detailed)** (v0.3.0)
+- **Combined visualization + analysis workflows** (v0.3.0)
 - Session management with cleanup
 - Interactive REPL with full commands
 
 **Quality Assurance** ✅ COMPLETE
 - Comprehensive test suite (unit/integration/e2e/interactive)
-- 45+ unit tests with 0 API calls
+- **77+ unit tests with 0 API calls** (v0.3.0)
+- **46 analysis-specific tests** (v0.3.0)
 - BoxplotStyleConfig testing coverage
-- Documentation complete (User Guide, API Reference, Testing Guide)
+- Documentation complete (User Guide, API Reference, Testing Guide, Analysis Examples)
 
 ### Temporary Verification Files
 
@@ -163,10 +212,12 @@ python tests/utils/run_all_tests.py
 ```bash
 # Unit tests (0 API calls, < 15 seconds)
 python tests/utils/run_all_tests.py --unit
-python tests/unit/test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
-python tests/unit/test_config.py          # 5 tests: Configuration validation
-python tests/unit/test_routing.py         # Routing logic tests
-python tests/unit/test_tools.py           # 10 tests: Direct tool function calls
+python tests/unit/test_command_parser.py       # 17 tests: BoxplotStyleConfig commands
+python tests/unit/test_config.py               # 5 tests: Configuration validation
+python tests/unit/test_routing.py              # Routing logic tests
+python tests/unit/test_tools.py                # 10 tests: Direct tool function calls
+python tests/unit/test_statistics_tools.py     # 25 tests: Statistics analysis (v0.3.0)
+python tests/unit/test_analyzer_tools.py       # 21 tests: Report generation (v0.3.0)
 
 # Integration tests (15-25 API calls per file, 2-4 minutes each)
 python tests/utils/run_all_tests.py --integration
@@ -177,6 +228,7 @@ python tests/integration/test_session_management.py  # Session cleanup
 # End-to-end tests (20-30 API calls per file, 3-5 minutes each)
 python tests/utils/run_all_tests.py --e2e
 python tests/e2e/test_matplotlib_behavior.py
+python tests/e2e/test_analysis_workflows.py    # Analysis workflows (v0.3.0)
 
 # Interactive testing (user-paced)
 python tests/interactive/interactive_test.py
@@ -188,11 +240,11 @@ python tests/interactive/interactive_test.py
 python tests/utils/run_all_tests.py --quick
 ```
 
-**BoxplotStyleConfig Testing:**
-- 17 command parser tests for styling parameters (median/outliers color/width/alpha)
-- 8 config tests for BoxplotStyleConfig defaults
-- 10 tool tests for direct function calls with full styling
-- Total: 45+ unit tests, all 0 API calls, instant execution
+**Testing Coverage Summary:**
+- **BoxplotStyleConfig**: 17 command parser tests + 8 config tests + 10 tool tests
+- **Analysis Tools** (v0.3.0): 25 statistics tests + 21 analyzer tests + 12 E2E workflow tests
+- **Total**: 77+ unit tests (0 API calls, instant execution)
+- **Integration**: 46 analysis-specific tests with real UVisBox and Gemini calls
 
 ### Running the Application
 
@@ -263,7 +315,7 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 **Decision**: Category-based test structure (unit/integration/e2e/interactive) for clear separation by API usage.
 
 **Test Categories**:
-- **Unit tests** (`tests/unit/`): 0 API calls, instant execution, 45+ tests
+- **Unit tests** (`tests/unit/`): 0 API calls, instant execution, 77+ tests (v0.3.0)
 - **Integration tests** (`tests/integration/`): 15-25 API calls per file, workflow testing
 - **E2E tests** (`tests/e2e/`): 20-30 API calls per file, complete scenarios
 - **Interactive tests** (`tests/interactive/`): User-paced, menu-driven exploration
@@ -272,13 +324,36 @@ Always use `plt.show(block=False)` + `plt.pause(0.1)` to allow REPL interaction 
 - 17 command parser tests for styling parameters (median/outliers color/width/alpha)
 - 5 config tests (figsize, dpi, and verification that vis params are NOT duplicated)
 - 11 tool tests for direct function calls with full styling (includes squid_glyph_2D)
+- **25 statistics tests** (v0.3.0): Analysis, validation, error handling
+- **21 analyzer tests** (v0.3.0): Report generation, prompts, validation
+- **12 E2E workflow tests** (v0.3.0): Three workflow patterns, multi-turn analysis
 - All 16 hybrid control commands tested
 
 **Benefits**:
 - Clear separation by API usage (unit tests = 0 calls, safe to run repeatedly)
 - Test runner with category flags (--unit, --integration, --e2e, --quick)
-- Reduced from ~2600 lines (17 files) to ~1600 lines (14 files)
-- Deleted ~1444 lines of obsolete phase-based tests
+- Comprehensive analysis test coverage with 0 API calls for development
+
+### 8. Separating Statistics from Analysis (v0.3.0)
+**Decision**: Split uncertainty analysis into two distinct tools: `compute_functional_boxplot_statistics` and `generate_uncertainty_report`.
+
+**Rationale**:
+- **Separation of concerns**: Statistics computation (numerical) vs. report generation (language)
+- **State injection pattern**: Statistics stored in state, automatically injected into analyzer
+- **Cost efficiency**: Statistics computed once, multiple reports can be generated
+- **Testing**: Statistics logic testable without LLM calls (0 API cost)
+
+**Implementation**:
+- `statistics_tools.py`: Computes median analysis, band characteristics, outlier detection
+- `analyzer_tools.py`: Uses Gemini to generate natural language reports from statistics
+- `nodes.py`: Implements state injection in `call_analyzer_tool` node
+- System prompt: Enforces REQUIRED sequence (statistics → analyzer)
+
+**Key Benefits**:
+- Clear error messages when statistics missing
+- Model can't skip statistics step
+- Multiple reports from same statistics
+- Fast unit testing for statistics logic
 
 ## Important Implementation Notes
 
@@ -444,8 +519,51 @@ squid_glyph_2D(positions, ensemble_vectors, percentile=95, scale=0.2, ax=None, w
 12. **Use vprint for internal messages** (v0.1.2) - All internal state messages must use `vprint()` from `output_control.py`, not regular `print()`
 13. **Record errors with full traceback** (v0.1.2) - Always capture `traceback.format_exc()` in tool error handling with `_error_details` dict
 14. **Check debug mode for hints** (v0.1.2) - Error interpretation should only show hints when debug mode is enabled
+15. **Always call statistics before analyzer** (v0.3.0) - Analyzer tool requires processed_statistics from state
+16. **UVisBox returns "depths" not "depth"** (v0.3.0) - Use plural form: `raw_stats["depths"]`
+17. **Outliers ≠ Percentile bands** (v0.3.0) - Outliers use depth-based detection (Q1 - 1.5×IQR), not percentile position
+18. **Model must present reports** (v0.3.0) - System prompt enforces displaying report content to user, not just confirmation
 
 ## Implementation-Specific Notes
+
+### Outlier Detection vs Percentile Bands (v0.3.0)
+
+**IMPORTANT CLARIFICATION**: Outliers and percentile bands are computed differently and serve different purposes.
+
+**Percentile Bands** (Visual Representation):
+- Based on depth ranking of curves
+- Example: 90th percentile = deepest 90% of curves form the outer band
+- With 100 curves, the 10 curves outside 90th percentile are the **outer envelope**, NOT outliers
+- These bands show the data distribution and variation
+- Controlled by `percentiles` parameter (e.g., `[25, 50, 90, 100]`)
+
+**Outliers** (Statistical Definition):
+- Based on traditional boxplot fence: curves with `depth < Q1 - 1.5×IQR`
+- Uses interquartile range (IQR) of depth values
+- With 100 similar curves, IQR of depths is typically small (e.g., ≈2.0)
+- Lower fence = Q1 - 1.5×IQR ≈ 96.0 (example)
+- No curves fall below fence → 0 outliers detected
+- This is **correct behavior** per UVisBox's functional boxplot definition
+
+**Example Scenario**:
+```
+Data: 100 curves with percentiles [25, 50, 75, 90]
+Percentile bands: Show distribution of deepest 25%, 50%, 75%, 90%
+Outer 10 curves: Outside 90th percentile band (part of envelope)
+Outliers: 0 (no curves below depth fence)
+
+Why? All curves are similar → small IQR → low fence → no outliers
+```
+
+**Key Insight**:
+- **Percentiles describe distribution** (relative position in ranking)
+- **Outliers describe anomalies** (statistical deviation from main cluster)
+- A curve can be in the outer percentile band WITHOUT being an outlier
+
+**UVisBox API**: `functional_boxplot_summary_statistics` returns:
+- `depths`: Array of depth values for all curves (note: plural!)
+- `outliers`: Array of curves classified as outliers (depth < Q1 - 1.5×IQR)
+- `percentile_bands`: Dict of (bottom, top) curves for each percentile
 
 ### UVisBox BoxplotStyleConfig Interface
 
@@ -862,18 +980,20 @@ uvisbox-assistant/
 ├── src/uvisbox_assistant/         # Package source (src layout)
 │   ├── __init__.py          # Package exports
 │   ├── __main__.py          # Entry point for python -m uvisbox_assistant
-│   ├── graph.py             # LangGraph workflow
-│   ├── state.py             # GraphState with error tracking
-│   ├── nodes.py             # Graph nodes with error handling
-│   ├── routing.py           # Routing with circuit breaker
-│   ├── model.py             # Gemini model with error recovery
+│   ├── graph.py             # LangGraph workflow with 5 nodes
+│   ├── state.py             # GraphState with analysis fields
+│   ├── nodes.py             # Five graph nodes (data, vis, statistics, analyzer, model)
+│   ├── routing.py           # Routing with analyzer support
+│   ├── model.py             # Gemini model with analysis workflow guidance
 │   ├── logger.py            # Logging infrastructure
-│   ├── conversation.py      # ConversationSession with hybrid control
+│   ├── conversation.py      # ConversationSession with analysis tracking
 │   ├── command_parser.py    # Command parsing (16 patterns)
 │   ├── hybrid_control.py    # Fast path execution
-│   ├── utils.py             # Utility functions
+│   ├── utils.py             # Utility functions with analyzer routing
 │   ├── data_tools.py        # Data generation and loading
 │   ├── vis_tools.py         # Visualization wrappers with BoxplotStyleConfig
+│   ├── statistics_tools.py  # Statistical analysis (v0.3.0)
+│   ├── analyzer_tools.py    # LLM-powered report generation (v0.3.0)
 │   └── config.py            # Configuration and defaults
 │
 ├── tests/                   # Comprehensive test suite
@@ -883,10 +1003,12 @@ uvisbox-assistant/
 │   ├── test_simple.py       # Quick sanity check (30s, 1-2 API calls)
 │   │
 │   ├── unit/                # Unit tests (0 API calls, instant)
-│   │   ├── test_command_parser.py  # 17 tests: BoxplotStyleConfig commands
-│   │   ├── test_config.py          # 5 tests: Configuration validation
-│   │   ├── test_routing.py         # Routing logic tests
-│   │   └── test_tools.py           # 10 tests: Direct tool function calls
+│   │   ├── test_command_parser.py       # 17 tests: BoxplotStyleConfig commands
+│   │   ├── test_config.py               # 5 tests: Configuration validation
+│   │   ├── test_routing.py              # Routing logic tests
+│   │   ├── test_tools.py                # 10 tests: Direct tool function calls
+│   │   ├── test_statistics_tools.py     # 25 tests: Statistics analysis (v0.3.0)
+│   │   └── test_analyzer_tools.py       # 21 tests: Report generation (v0.3.0)
 │   │
 │   ├── integration/         # Integration tests (15-25 API calls per file)
 │   │   ├── test_hybrid_control.py      # Fast parameter updates
@@ -894,7 +1016,8 @@ uvisbox-assistant/
 │   │   └── test_session_management.py  # Session cleanup & stats
 │   │
 │   ├── e2e/                 # End-to-end tests (20-30 API calls per file)
-│   │   └── test_matplotlib_behavior.py # Matplotlib non-blocking
+│   │   ├── test_matplotlib_behavior.py # Matplotlib non-blocking
+│   │   └── test_analysis_workflows.py  # Analysis workflows (v0.3.0)
 │   │
 │   ├── interactive/         # Interactive tests (user-paced)
 │   │   └── interactive_test.py         # Menu-driven testing (24+ scenarios)
@@ -914,7 +1037,8 @@ uvisbox-assistant/
 ├── docs/                    # Documentation
 │   ├── USER_GUIDE.md        # Detailed user guide with examples
 │   ├── API.md               # Complete API reference
-│   └── ENVIRONMENT_SETUP.md # Environment setup guide
+│   ├── ENVIRONMENT_SETUP.md # Environment setup guide
+│   └── ANALYSIS_EXAMPLES.md # Uncertainty analysis workflows (v0.3.0)
 │
 ├── main.py                  # Production REPL with full commands
 ├── setup_env.sh             # Environment setup script
@@ -926,6 +1050,7 @@ uvisbox-assistant/
 - **User Guide**: `docs/USER_GUIDE.md` - Detailed usage examples and workflows
 - **API Reference**: `docs/API.md` - Complete API documentation
 - **Environment Setup**: `docs/ENVIRONMENT_SETUP.md` - API key configuration and setup
+- **Analysis Examples**: `docs/ANALYSIS_EXAMPLES.md` - Uncertainty analysis workflows and report formats (v0.3.0)
 - **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
 - **Contributing**: `CONTRIBUTING.md` - Contribution guidelines
 - **Changelog**: `CHANGELOG.md` - Version history

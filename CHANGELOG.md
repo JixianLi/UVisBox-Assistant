@@ -5,6 +5,123 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-11-04
+
+### Added
+
+**Uncertainty Analysis System** - LLM-powered statistical analysis and report generation
+
+**Core Features:**
+- **Statistics Tool** (`statistics_tools.py`): Computes numerical summaries from functional boxplot data
+  - `compute_functional_boxplot_statistics()` function with UVisBox integration
+  - Median analysis: trend, slope, fluctuation, smoothness, value range
+  - Band characteristics: widths, variation regions, uncertainty scores
+  - Outlier analysis: count, similarity to median, clustering metrics
+  - Returns structured JSON-serializable dict (no numpy arrays)
+
+- **Analyzer Tool** (`analyzer_tools.py`): Generates natural language uncertainty reports
+  - `generate_uncertainty_report()` function with three report formats
+  - **Inline**: 1 sentence summary (~15-30 words)
+  - **Quick**: 3-5 sentence overview (~50-100 words) - DEFAULT
+  - **Detailed**: Full report with sections (~100-300 words)
+  - Uses Gemini Flash Lite (temperature=0.3) for report generation
+  - Report validation: word count checks, structure validation
+
+- **Three Workflow Patterns**:
+  1. **Visualization Only** (existing): `data_tool → vis_tool`
+  2. **Text Analysis Only** (new): `data_tool → statistics_tool → analyzer_tool`
+  3. **Combined Visualization + Analysis** (new): `data_tool → vis_tool → statistics_tool → analyzer_tool`
+
+**Architecture Changes:**
+- **5-node LangGraph**: Added `call_statistics_tool` and `call_analyzer_tool` nodes
+- **State injection pattern**: Statistics automatically passed from state to analyzer
+- **GraphState extensions**: Added `processed_statistics`, `analysis_report`, `analysis_type`, `_raw_statistics` fields
+- **Enhanced routing**: Tool type detection now includes "statistics" and "analyzer" types
+- **System prompt guidance**: Enforces REQUIRED sequence (statistics → analyzer)
+
+**Testing:**
+- **46 analysis-specific tests**: 25 statistics + 21 analyzer
+- **12 E2E workflow tests**: Three workflow patterns with multi-turn conversations
+- **77+ total unit tests** (0 API calls, instant execution)
+- **Integration tests**: Real UVisBox and Gemini calls with report validation
+
+**Documentation:**
+- **`docs/ANALYSIS_EXAMPLES.md`**: 400+ lines covering all workflows, formats, examples
+- **Outlier detection clarification**: Explains depth-based detection vs. percentile bands
+- **Updated all docs**: CLAUDE.md, README.md, API.md, TESTING.md with v0.3.0 info
+
+### Changed
+
+**Enhanced Modules:**
+- `nodes.py`: Implements state injection in `call_analyzer_tool` node (lines 398-413)
+- `model.py`: System prompt updated with workflow guidance and presentation instructions
+- `conversation.py`: Added `get_analysis_summary()` method for analysis state tracking
+- `state.py`: Added analysis-related state update functions
+- `routing.py`: Updated tool type detection for analyzer routing
+- `utils.py`: Added `is_statistics_tool()` and `is_analyzer_tool()` functions
+- `graph.py`: Added statistics and analyzer nodes with conditional edges
+
+**Tool Schemas:**
+- Simplified analyzer schema: removed `statistics_summary` parameter (state injection instead)
+- Statistics schema: clear documentation of required sequence
+- Model binding: Now includes STATISTICS_TOOL_SCHEMAS + ANALYZER_TOOL_SCHEMAS
+
+### Fixed
+
+**Critical Bug Fixes:**
+- **UVisBox API mismatch**: Changed `raw_stats["depth"]` → `raw_stats["depths"]` (plural)
+  - Fixed in `statistics_tools.py` lines 298, 335
+  - Updated all test mocks to use "depths"
+
+- **Workflow routing issue**: Analyzer tool wasn't being called correctly
+  - Root cause: Schema required manual statistics parameter
+  - Solution: State injection + simplified schema
+
+- **Report display issue**: Reports generated but not shown to user
+  - Root cause: System prompt didn't instruct model to present reports
+  - Solution: Added explicit presentation instructions in prompt
+
+### Technical Details
+
+**New Modules:**
+- `src/uvisbox_assistant/statistics_tools.py` - Statistical analysis with UVisBox integration
+- `src/uvisbox_assistant/analyzer_tools.py` - LLM-powered report generation
+
+**Key Implementation Patterns:**
+1. **Separation of Concerns**: Statistics (numerical) separate from analysis (language)
+2. **State Injection**: Automatic parameter passing via GraphState
+3. **Cost Efficiency**: Statistics computed once, multiple reports generated
+4. **Zero-API Testing**: All statistics logic testable without LLM calls
+
+**Outlier Detection (Important Clarification):**
+- **Percentile bands** ≠ **Outliers**
+- Percentiles show distribution (e.g., 90th percentile = deepest 90% of curves)
+- Outliers use statistical fence: `depth < Q1 - 1.5×IQR`
+- With similar curves → small IQR → low fence → fewer outliers
+- Example: 100 curves with [25,50,75,90] percentiles may have 0 outliers (correct behavior)
+
+**Prompt Engineering:**
+- Three specialized templates (inline, quick, detailed)
+- "No recommendations" constraint for descriptive-only reports
+- Specific structure guidance for each format
+- Word count validation to ensure format adherence
+
+### Performance
+
+- Statistics computation: < 1 second for 100 curves
+- Report generation: ~1-2 seconds (Gemini Flash Lite call)
+- Unit tests: 77+ tests in < 15 seconds (0 API calls)
+- No impact on existing visualization workflows
+
+### Backward Compatibility
+
+- ✅ Fully backward compatible
+- ✅ No breaking changes to existing commands or APIs
+- ✅ Existing visualization workflows unchanged
+- ✅ New analysis features are additive (opt-in)
+
+---
+
 ## [0.2.0] - 2025-10-30
 
 ### Changed
@@ -263,8 +380,9 @@ For existing users upgrading from 0.1.x:
 - Repository: TBD
 - Documentation: `docs/`
 - Issue Tracker: TBD
-- UVisBox: https://github.com/VCCRI/UVisBox
+- UVisBox: https://github.com/ouermijudicael/UVisBox
 
+[0.3.0]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.3.0
 [0.2.0]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.2.0
 [0.1.2]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.1.2
 [0.1.1]: https://github.com/yourusername/uvisbox-assistant/releases/tag/v0.1.1

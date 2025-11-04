@@ -375,6 +375,104 @@ with open("uncertainty_report.txt", "w") as f:
     f.write(report)
 ```
 
+## Understanding Outlier Detection
+
+**IMPORTANT CLARIFICATION**: Outliers and percentile bands are computed differently and serve different purposes in functional boxplots.
+
+### Percentile Bands vs Outliers
+
+Many users expect that curves outside a given percentile band (e.g., 90th percentile) are automatically classified as outliers. **This is not the case.** Let's clarify the distinction:
+
+#### Percentile Bands (Visual Distribution)
+
+Percentile bands show the **distribution** of curves based on their depth ranking:
+
+- **Definition**: Based on depth ranking of curves
+- **Example**: 90th percentile = the deepest 90% of curves form the outer band
+- **Interpretation**: The 10 curves outside the 90th percentile band are the **outer envelope**, NOT outliers
+- **Purpose**: Show data distribution and variation across the ensemble
+- **Controlled by**: `percentiles` parameter (e.g., `[25, 50, 90, 100]`)
+
+#### Outliers (Statistical Anomalies)
+
+Outliers represent **statistical anomalies** using traditional boxplot fencing:
+
+- **Definition**: Curves with `depth < Q1 - 1.5×IQR` (traditional boxplot fence)
+- **Calculation**: Uses interquartile range (IQR) of depth values
+- **Interpretation**: Curves that are statistically distinct from the main cluster
+- **Purpose**: Identify anomalous curves that deviate significantly from the ensemble
+- **Detection**: Automatic based on depth distribution
+
+### Example Scenario
+
+Consider this common case that often confuses users:
+
+```python
+# Generate 100 similar curves
+session.send("Generate 100 curves and show functional boxplot with percentiles [25, 50, 75, 90]")
+
+# Check outliers
+session.send("Create quick analysis")
+```
+
+**Expected**: 10 outliers (the 10 curves outside 90th percentile band)
+**Actual**: 0 outliers
+**Why?** All curves are similar → small IQR of depths → low fence → no outliers
+
+**Detailed Explanation**:
+1. **Percentile bands**: Show distribution of deepest 25%, 50%, 75%, 90%
+2. **Outer 10 curves**: Outside 90th percentile band (part of outer envelope)
+3. **Depth IQR**: With 100 similar curves, IQR ≈ 2.0 (small variation)
+4. **Outlier fence**: Q1 - 1.5×IQR ≈ 96.0 (very low threshold)
+5. **Result**: No curves fall below fence → 0 outliers detected
+
+**This is correct behavior** per UVisBox's functional boxplot definition.
+
+### Key Insights
+
+**Percentiles describe distribution** (relative position in ranking):
+- "This curve is in the top 10%" (outside 90th percentile)
+- Shows where the curve ranks among all curves
+- Visual representation of ensemble spread
+
+**Outliers describe anomalies** (statistical deviation):
+- "This curve is statistically distinct from the cluster"
+- Requires significant depth deviation (> 1.5×IQR below Q1)
+- Indicates unusual behavior relative to the ensemble
+
+**A curve can be in the outer percentile band WITHOUT being an outlier.**
+
+### When You See Outliers
+
+Outliers typically appear when:
+1. **High heterogeneity**: Ensemble contains distinctly different curve shapes
+2. **Large depth variation**: High IQR in depth values
+3. **Contaminated data**: Some curves don't belong to the main population
+4. **Mixed populations**: Ensemble contains multiple distinct groups
+
+### Accessing Outlier Information
+
+```python
+# Get outlier statistics
+stats = session.state["processed_statistics"]
+
+outliers_info = stats["outliers"]
+print(f"Outlier count: {outliers_info['count']}")
+print(f"Outlier percentage: {outliers_info['outlier_percentage']:.1f}%")
+print(f"Median similarity: {outliers_info['median_similarity_mean']:.2f}")
+
+# Percentiles show distribution, not outliers
+bands_info = stats["bands"]
+print(f"Number of bands: {bands_info['num_bands']}")
+print(f"Outer band: includes {100 - max(percentiles)}% of curves (not outliers)")
+```
+
+### Further Reading
+
+For the mathematical definition of band depth and outlier detection:
+- Sun, Y., & Genton, M. G. (2011). "Functional boxplots" *Journal of Computational and Graphical Statistics*
+- UVisBox documentation: [Functional Boxplot Method](https://github.com/ouermijudicael/UVisBox)
+
 ## See Also
 
 - [User Guide](USER_GUIDE.md) - Complete usage documentation

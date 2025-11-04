@@ -4,8 +4,10 @@
 
 1. [Visualization Tools](#visualization-tools)
 2. [Data Generation Tools](#data-generation-tools)
-3. [Command Parser](#command-parser)
-4. [Configuration](#configuration)
+3. [Statistics Tools](#statistics-tools) **(v0.3.0)**
+4. [Analyzer Tools](#analyzer-tools) **(v0.3.0)**
+5. [Command Parser](#command-parser)
+6. [Configuration](#configuration)
 
 ## Visualization Tools
 
@@ -436,6 +438,186 @@ load_npy(
 ```python
 result = load_npy("temp/my_data.npy")
 ```
+
+---
+
+## Statistics Tools
+
+**(v0.3.0)** Statistical analysis module for uncertainty quantification.
+
+### compute_functional_boxplot_statistics
+
+Compute comprehensive statistical summaries from functional boxplot data using UVisBox integration.
+
+**Signature**:
+```python
+compute_functional_boxplot_statistics(
+    data_path: str,
+    method: str = "fbd"
+) -> Dict[str, Any]
+```
+
+**Parameters**:
+- `data_path` (str): Path to .npy file with shape (n_curves, n_points)
+- `method` (str): Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')
+
+**Returns**: Dict with:
+- `status` (str): "success" or "error"
+- `message` (str): Human-readable message
+- `processed_statistics` (dict): Structured numerical summaries (JSON-serializable, no numpy arrays)
+  - `data_shape`: Dict with n_curves and n_points
+  - `median`: Dict with trend, slope, fluctuation, smoothness, value_range, mean_value, std_value
+  - `bands`: Dict with band_widths, widest_regions, overall_uncertainty_score, num_bands
+  - `outliers`: Dict with count, median_similarity_mean, median_similarity_std, intra_outlier_similarity, outlier_percentage
+  - `method`: Band depth method used
+- `_raw_statistics` (dict): Original UVisBox output for debugging (lists, not numpy arrays)
+
+**Median Analysis Metrics**:
+- **trend**: Overall direction ("increasing" | "decreasing" | "stationary")
+- **overall_slope**: Linear regression slope (positive/negative/~0)
+- **fluctuation_level**: Standard deviation normalized by range
+- **smoothness_score**: Inverse of gradient variability (0-1, higher = smoother)
+- **value_range**: Tuple (min, max) of median values
+- **mean_value**: Mean of median curve
+- **std_value**: Standard deviation of median curve
+
+**Band Analysis Metrics**:
+- **band_widths**: Dict with mean/max/min/std widths per band
+- **widest_regions**: List of (start, end) index tuples for top 10% widths
+- **overall_uncertainty_score**: Mean normalized band width (0-1, higher = more uncertain)
+- **num_bands**: Number of percentile bands
+
+**Outlier Analysis Metrics**:
+- **count**: Number of outliers (depth < Q1 - 1.5×IQR)
+- **median_similarity_mean**: Mean Pearson correlation with median
+- **median_similarity_std**: Standard deviation of correlations
+- **intra_outlier_similarity**: Mean pairwise correlation among outliers
+- **outlier_percentage**: Outliers as percentage of total curves
+
+**Important**: Outliers use depth-based detection (Q1 - 1.5×IQR), NOT percentile position. See [ANALYSIS_EXAMPLES.md](ANALYSIS_EXAMPLES.md#understanding-outlier-detection) for clarification.
+
+**Example**:
+```python
+from uvisbox_assistant.statistics_tools import compute_functional_boxplot_statistics
+from uvisbox_assistant.data_tools import generate_ensemble_curves
+
+# Generate data
+result = generate_ensemble_curves(n_curves=50, n_points=100)
+
+# Compute statistics
+stats_result = compute_functional_boxplot_statistics(
+    data_path=result['output_path'],
+    method='fbd'
+)
+
+# Access processed statistics
+stats = stats_result['processed_statistics']
+print(f"Median trend: {stats['median']['trend']}")
+print(f"Overall uncertainty: {stats['bands']['overall_uncertainty_score']:.2f}")
+print(f"Outliers: {stats['outliers']['count']}")
+```
+
+**Sequential Workflow**:
+This function must be called **before** `generate_uncertainty_report()`. Statistics are stored in GraphState and automatically injected into the analyzer tool.
+
+---
+
+## Analyzer Tools
+
+**(v0.3.0)** LLM-powered report generation module for natural language uncertainty analysis.
+
+### generate_uncertainty_report
+
+Generate natural language uncertainty analysis reports from statistical summaries.
+
+**Signature**:
+```python
+generate_uncertainty_report(
+    processed_statistics: dict,
+    analysis_type: str = "quick"
+) -> Dict[str, Any]
+```
+
+**Parameters**:
+- `processed_statistics` (dict): Structured statistics from `compute_functional_boxplot_statistics`
+  - **Note**: In agent workflow, this is automatically injected from GraphState. Users don't pass this manually.
+- `analysis_type` (str): Report format - "inline" | "quick" | "detailed" (default: "quick")
+
+**Report Formats**:
+
+**1. Inline** (1 sentence, ~15-30 words):
+- Concise summary of overall uncertainty level
+- Mentions key metrics (low/moderate/high uncertainty)
+- Example: "This ensemble shows moderate uncertainty with 15% band width variation and 2 outliers."
+
+**2. Quick** (3-5 sentences, ~50-100 words):
+- Brief overview covering main characteristics
+- Structure: overall assessment, median behavior, band characteristics, outliers
+- Example:
+  > "The ensemble exhibits moderate uncertainty with 30 curves showing consistent trends. The median curve displays an increasing trend with a slope of 0.05 and smooth behavior. Percentile bands show an average width of 1.2 units with widest regions near indices 45-55. Two outliers were detected with 65% similarity to the median curve."
+
+**3. Detailed** (Full report, ~100-300 words):
+- Comprehensive analysis with structured sections
+- Sections: Median Behavior, Band Characteristics, Outlier Analysis, Overall Assessment
+- Includes specific numbers and metrics from all summaries
+
+**Returns**: Dict with:
+- `status` (str): "success" or "error"
+- `message` (str): Confirmation message with word count
+- `report` (str): Generated natural language report
+- `analysis_type` (str): Echo of requested format
+
+**LLM Configuration**:
+- Model: `gemini-2.0-flash-lite` (cost-effective)
+- Temperature: 0.3 (mostly deterministic, slight creativity for natural language)
+- Validation: Word count checks per format
+- Constraint: Descriptive only, no recommendations or prescriptions
+
+**Example (Direct Call)**:
+```python
+from uvisbox_assistant.analyzer_tools import generate_uncertainty_report
+from uvisbox_assistant.statistics_tools import compute_functional_boxplot_statistics
+
+# Compute statistics first
+stats_result = compute_functional_boxplot_statistics(data_path)
+stats = stats_result['processed_statistics']
+
+# Generate report
+report_result = generate_uncertainty_report(
+    processed_statistics=stats,
+    analysis_type='detailed'
+)
+
+print(report_result['report'])
+```
+
+**Example (Agent Workflow)**:
+```python
+from uvisbox_assistant.conversation import ConversationSession
+
+session = ConversationSession()
+
+# Statistics are computed and stored automatically
+session.send("Generate 50 curves and compute statistics")
+
+# Analyzer automatically uses statistics from state
+session.send("Create a detailed uncertainty report")
+# Report is generated and presented to user
+```
+
+**Tool Sequence (REQUIRED)**:
+1. FIRST: Call `compute_functional_boxplot_statistics` with data_path
+2. THEN: Call `generate_uncertainty_report` with analysis_type
+3. FINALLY: Model presents report to user
+
+The system prompt enforces this sequence. Skipping statistics will result in an error: "No statistics available. Please run compute_functional_boxplot_statistics first."
+
+**State Injection Pattern**:
+In the LangGraph workflow, the `call_analyzer_tool` node automatically injects `processed_statistics` from GraphState into the tool arguments. This pattern:
+- Separates concerns (statistics computation vs. report generation)
+- Enables cost efficiency (statistics computed once, multiple reports generated)
+- Provides clear error messages when statistics missing
+- Prevents model from attempting to construct statistics manually
 
 ---
 
