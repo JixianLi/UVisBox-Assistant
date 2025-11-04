@@ -284,7 +284,7 @@ def compute_functional_boxplot_statistics(
         Dict with:
         - status: "success" or "error"
         - message: User-friendly message
-        - statistics_summary: Structured dict with numeric summaries
+        - processed_statistics: Structured dict with numeric summaries
         - _raw_statistics: Original UVisBox output (for debugging)
     """
     try:
@@ -338,7 +338,7 @@ def compute_functional_boxplot_statistics(
         outlier_analysis = _analyze_outliers(outliers, median, sorted_curves)
 
         # Construct LLM-friendly summary (no numpy arrays!)
-        statistics_summary = {
+        processed_statistics = {
             "data_shape": {
                 "n_curves": int(n_curves),
                 "n_points": int(n_points)
@@ -364,7 +364,7 @@ def compute_functional_boxplot_statistics(
         return {
             "status": "success",
             "message": f"Computed statistics for {n_curves} curves ({outlier_analysis['count']} outliers)",
-            "statistics_summary": statistics_summary,
+            "processed_statistics": processed_statistics,
             "_raw_statistics": raw_stats_serializable
         }
 
@@ -628,10 +628,10 @@ class TestComputeFunctionalBoxplotStatistics:
 
         # Verify success
         assert result["status"] == "success"
-        assert "statistics_summary" in result
+        assert "processed_statistics" in result
 
         # Verify structure
-        summary = result["statistics_summary"]
+        summary = result["processed_statistics"]
         assert "data_shape" in summary
         assert summary["data_shape"]["n_curves"] == n_curves
         assert summary["data_shape"]["n_points"] == n_points
@@ -668,7 +668,7 @@ class TestComputeFunctionalBoxplotStatistics:
 
         result = compute_functional_boxplot_statistics(str(data_path))
 
-        # Recursively check for numpy arrays in statistics_summary
+        # Recursively check for numpy arrays in processed_statistics
         def has_numpy_array(obj):
             if isinstance(obj, np.ndarray):
                 return True
@@ -678,8 +678,8 @@ class TestComputeFunctionalBoxplotStatistics:
                 return any(has_numpy_array(item) for item in obj)
             return False
 
-        assert not has_numpy_array(result["statistics_summary"]), \
-            "statistics_summary should not contain numpy arrays"
+        assert not has_numpy_array(result["processed_statistics"]), \
+            "processed_statistics should not contain numpy arrays"
 ```
 
 ### Integration Test (Optional for Phase 2)
@@ -715,7 +715,7 @@ def test_real_uvisbox_integration(tmp_path):
 
     # Verify success
     assert result["status"] == "success"
-    assert "statistics_summary" in result
+    assert "processed_statistics" in result
 ```
 
 ## Success Conditions
@@ -727,7 +727,7 @@ def test_real_uvisbox_integration(tmp_path):
 - [ ] compute_functional_boxplot_statistics() fully implemented
 - [ ] Main function handles file not found errors
 - [ ] Main function handles invalid data shape errors
-- [ ] Main function returns no numpy arrays in statistics_summary
+- [ ] Main function returns no numpy arrays in processed_statistics
 - [ ] 20+ unit tests pass (0 API calls)
 - [ ] All tests use mocked UVisBox function for predictability
 - [ ] Optional integration test with real UVisBox works
@@ -736,7 +736,7 @@ def test_real_uvisbox_integration(tmp_path):
 
 ### Output Structure
 
-The `statistics_summary` dict structure:
+The `processed_statistics` dict structure:
 
 ```python
 {

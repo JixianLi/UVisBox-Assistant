@@ -112,8 +112,8 @@ class GraphState(TypedDict):
     error_count: int
 
     # New fields for uncertainty analysis
-    summary_statistics: Optional[dict]      # Raw UVisBox output
-    statistics_summary: Optional[dict]      # LLM-friendly structured summary
+    raw_statistics: Optional[dict]          # Raw UVisBox output (numpy arrays)
+    processed_statistics: Optional[dict]    # LLM-friendly structured summary
     analysis_report: Optional[str]          # Generated text report
     analysis_type: Optional[str]            # "inline" | "quick" | "detailed" | None
 ```
@@ -125,10 +125,10 @@ statistics_tool (call_statistics_tool)
 ├─ Input: current_data_path
 ├─ Process: functional_boxplot_summary_statistics()
 ├─ Analyze: median/band/outlier statistics
-└─ Output: structured dict → statistics_summary
+└─ Output: structured dict → processed_statistics
 
 analyzer_tool (call_analyzer_tool)
-├─ Input: statistics_summary + analysis_type
+├─ Input: processed_statistics + analysis_type
 ├─ Process: LLM with specialized prompts
 ├─ Generate: text report
 └─ Output: analysis_report

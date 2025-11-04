@@ -42,8 +42,8 @@ class GraphState(TypedDict):
         last_error_id: ID of last error (for auto-fix detection)
 
         # NEW: Uncertainty analysis fields (v0.3.0)
-        summary_statistics: Raw output from functional_boxplot_summary_statistics
-        statistics_summary: LLM-friendly structured summary from statistics_tool
+        raw_statistics: Raw output from functional_boxplot_summary_statistics (numpy arrays)
+        processed_statistics: LLM-friendly structured summary from statistics_tool
         analysis_report: Generated text report from analyzer_tool
         analysis_type: Report format - "inline" | "quick" | "detailed" | None
     """
@@ -58,8 +58,8 @@ class GraphState(TypedDict):
     last_error_id: Optional[int]
 
     # NEW: Uncertainty analysis state
-    summary_statistics: Optional[dict]
-    statistics_summary: Optional[dict]
+    raw_statistics: Optional[dict]
+    processed_statistics: Optional[dict]
     analysis_report: Optional[str]
     analysis_type: Optional[str]
 ```
@@ -89,8 +89,8 @@ def create_initial_state(user_message: str) -> GraphState:
         last_error_tool=None,
         last_error_id=None,
         # NEW: Initialize analysis state
-        summary_statistics=None,
-        statistics_summary=None,
+        raw_statistics=None,
+        processed_statistics=None,
         analysis_report=None,
         analysis_type=None
     )
@@ -99,21 +99,21 @@ def create_initial_state(user_message: str) -> GraphState:
 Add new state update helper functions:
 
 ```python
-def update_state_with_statistics(state: GraphState, summary_stats: dict, stats_summary: dict) -> dict:
+def update_state_with_statistics(state: GraphState, raw_stats: dict, processed_stats: dict) -> dict:
     """
     Update state after successful statistics tool execution.
 
     Args:
         state: Current graph state
-        summary_stats: Raw output from functional_boxplot_summary_statistics
-        stats_summary: Processed LLM-friendly summary
+        raw_stats: Raw output from functional_boxplot_summary_statistics (numpy arrays)
+        processed_stats: Processed LLM-friendly summary
 
     Returns:
         Dict of updates to merge into state
     """
     return {
-        "summary_statistics": summary_stats,
-        "statistics_summary": stats_summary,
+        "raw_statistics": raw_stats,
+        "processed_statistics": processed_stats,
         "error_count": 0  # Reset error count on success
     }
 
@@ -511,11 +511,11 @@ class TestGraphStateExtensions:
         state = create_initial_state("test message")
 
         # Check new fields exist and are None
-        assert "summary_statistics" in state
-        assert state["summary_statistics"] is None
+        assert "raw_statistics" in state
+        assert state["raw_statistics"] is None
 
-        assert "statistics_summary" in state
-        assert state["statistics_summary"] is None
+        assert "processed_statistics" in state
+        assert state["processed_statistics"] is None
 
         assert "analysis_report" in state
         assert state["analysis_report"] is None
@@ -547,8 +547,8 @@ class TestStatisticsStateUpdate:
 
         updates = update_state_with_statistics(state, raw_stats, processed_stats)
 
-        assert updates["summary_statistics"] == raw_stats
-        assert updates["statistics_summary"] == processed_stats
+        assert updates["raw_statistics"] == raw_stats
+        assert updates["processed_statistics"] == processed_stats
         assert updates["error_count"] == 0
 
     def test_resets_error_count(self):
@@ -615,9 +615,9 @@ python -c "from uvisbox_assistant import state, statistics_tools, analyzer_tools
 
 ### State Field Usage
 
-**summary_statistics**: Stores raw numpy arrays and data from UVisBox function. Used for internal processing, not passed to LLM.
+**raw_statistics**: Stores raw numpy arrays and data from UVisBox function. Used for internal processing, not passed to LLM.
 
-**statistics_summary**: LLM-friendly structured dict with numeric summaries. No numpy arrays. Passed to analyzer_tool.
+**processed_statistics**: LLM-friendly structured dict with numeric summaries. No numpy arrays. Passed to analyzer_tool.
 
 **analysis_report**: Final text output from analyzer_tool. Shown to user.
 

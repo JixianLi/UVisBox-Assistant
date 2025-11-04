@@ -135,7 +135,7 @@ Replace placeholder with full implementation:
 
 ```python
 def generate_uncertainty_report(
-    statistics_summary: dict,
+    processed_statistics: dict,
     analysis_type: str = "quick"
 ) -> Dict:
     """
@@ -147,7 +147,7 @@ def generate_uncertainty_report(
     - detailed: Full report with median, band, and outlier analysis
 
     Args:
-        statistics_summary: Structured dict from compute_functional_boxplot_statistics
+        processed_statistics: Structured dict from compute_functional_boxplot_statistics
         analysis_type: "inline" | "quick" | "detailed" (default: "quick")
 
     Returns:
@@ -168,15 +168,15 @@ def generate_uncertainty_report(
         # Validate input structure
         required_keys = ["data_shape", "median", "bands", "outliers"]
         for key in required_keys:
-            if key not in statistics_summary:
+            if key not in processed_statistics:
                 return {
                     "status": "error",
-                    "message": f"Missing required key in statistics_summary: {key}"
+                    "message": f"Missing required key in processed_statistics: {key}"
                 }
 
         # Convert statistics summary to JSON string for prompt
         import json
-        statistics_json = json.dumps(statistics_summary, indent=2)
+        statistics_json = json.dumps(processed_statistics, indent=2)
 
         # Get appropriate prompt template
         prompt_template = _get_prompt_for_analysis_type(analysis_type)
@@ -238,9 +238,9 @@ def generate_uncertainty_report(
 Add a helper function for statistics summary validation:
 
 ```python
-def validate_statistics_summary(summary: dict) -> Tuple[bool, Optional[str]]:
+def validate_processed_statistics(summary: dict) -> Tuple[bool, Optional[str]]:
     """
-    Validate statistics summary structure.
+    Validate processed statistics structure.
 
     Args:
         summary: Dictionary to validate
@@ -279,7 +279,7 @@ Update generate_uncertainty_report() to use validation:
 
 ```python
 def generate_uncertainty_report(
-    statistics_summary: dict,
+    processed_statistics: dict,
     analysis_type: str = "quick"
 ) -> Dict:
     """..."""
@@ -292,11 +292,11 @@ def generate_uncertainty_report(
             }
 
         # Validate input structure
-        is_valid, error_msg = validate_statistics_summary(statistics_summary)
+        is_valid, error_msg = validate_processed_statistics(processed_statistics)
         if not is_valid:
             return {
                 "status": "error",
-                "message": f"Invalid statistics_summary: {error_msg}"
+                "message": f"Invalid processed_statistics: {error_msg}"
             }
 
         # ... rest of implementation
@@ -318,7 +318,7 @@ from uvisbox_assistant.analyzer_tools import (
     ANALYZER_TOOLS,
     ANALYZER_TOOL_SCHEMAS,
     generate_uncertainty_report,
-    validate_statistics_summary,
+    validate_processed_statistics,
     _get_prompt_for_analysis_type,
     INLINE_REPORT_PROMPT,
     QUICK_REPORT_PROMPT,
@@ -366,8 +366,8 @@ class TestPromptTemplates:
             _get_prompt_for_analysis_type("invalid")
 
 
-class TestValidateStatisticsSummary:
-    """Test statistics summary validation."""
+class TestValidateProcessedStatistics:
+    """Test processed statistics validation."""
 
     def test_valid_summary(self):
         """Test validation with valid summary."""
@@ -396,7 +396,7 @@ class TestValidateStatisticsSummary:
             "method": "fbd"
         }
 
-        is_valid, error_msg = validate_statistics_summary(summary)
+        is_valid, error_msg = validate_processed_statistics(summary)
         assert is_valid is True
         assert error_msg is None
 
@@ -407,7 +407,7 @@ class TestValidateStatisticsSummary:
             # Missing "median", "bands", "outliers", "method"
         }
 
-        is_valid, error_msg = validate_statistics_summary(summary)
+        is_valid, error_msg = validate_processed_statistics(summary)
         assert is_valid is False
         assert "Missing required top-level key" in error_msg
 
@@ -421,7 +421,7 @@ class TestValidateStatisticsSummary:
             "method": "fbd"
         }
 
-        is_valid, error_msg = validate_statistics_summary(summary)
+        is_valid, error_msg = validate_processed_statistics(summary)
         assert is_valid is False
         assert "data_shape" in error_msg.lower()
 
@@ -435,7 +435,7 @@ class TestValidateStatisticsSummary:
             "method": "fbd"
         }
 
-        is_valid, error_msg = validate_statistics_summary(summary)
+        is_valid, error_msg = validate_processed_statistics(summary)
         assert is_valid is False
         assert "median" in error_msg.lower()
 
@@ -471,7 +471,7 @@ class TestGenerateReportErrorHandling:
         result = generate_uncertainty_report(invalid_summary, "quick")
 
         assert result["status"] == "error"
-        assert "Invalid statistics_summary" in result["message"]
+        assert "Invalid processed_statistics" in result["message"]
 ```
 
 ### Integration Tests (Uses API Calls)
@@ -487,8 +487,8 @@ from uvisbox_assistant.analyzer_tools import generate_uncertainty_report
 
 
 @pytest.fixture
-def valid_statistics_summary():
-    """Fixture providing valid statistics summary."""
+def valid_processed_statistics():
+    """Fixture providing valid processed statistics."""
     return {
         "data_shape": {"n_curves": 30, "n_points": 100},
         "median": {
@@ -533,12 +533,12 @@ def valid_statistics_summary():
 class TestInlineReportGeneration:
     """Test inline report generation."""
 
-    def test_inline_report_success(self, valid_statistics_summary):
+    def test_inline_report_success(self, valid_processed_statistics):
         """Test successful inline report generation."""
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_statistics_summary,
+            valid_processed_statistics,
             analysis_type="inline"
         )
 
@@ -559,12 +559,12 @@ class TestInlineReportGeneration:
 class TestQuickReportGeneration:
     """Test quick report generation."""
 
-    def test_quick_report_success(self, valid_statistics_summary):
+    def test_quick_report_success(self, valid_processed_statistics):
         """Test successful quick report generation."""
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_statistics_summary,
+            valid_processed_statistics,
             analysis_type="quick"
         )
 
@@ -585,12 +585,12 @@ class TestQuickReportGeneration:
 class TestDetailedReportGeneration:
     """Test detailed report generation."""
 
-    def test_detailed_report_success(self, valid_statistics_summary):
+    def test_detailed_report_success(self, valid_processed_statistics):
         """Test successful detailed report generation."""
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_statistics_summary,
+            valid_processed_statistics,
             analysis_type="detailed"
         )
 
@@ -613,12 +613,12 @@ class TestDetailedReportGeneration:
 class TestReportNoRecommendations:
     """Verify reports are descriptive only (no recommendations)."""
 
-    def test_no_prescriptive_language(self, valid_statistics_summary):
+    def test_no_prescriptive_language(self, valid_processed_statistics):
         """Verify reports don't include recommendations."""
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_statistics_summary,
+            valid_processed_statistics,
             analysis_type="detailed"
         )
 
@@ -647,7 +647,7 @@ class TestReportNoRecommendations:
 
 - [ ] Three prompt templates created (inline, quick, detailed)
 - [ ] _get_prompt_for_analysis_type() implemented and tested
-- [ ] validate_statistics_summary() implemented and tested (6+ tests)
+- [ ] validate_processed_statistics() implemented and tested (6+ tests)
 - [ ] generate_uncertainty_report() fully implemented
 - [ ] Error handling for invalid analysis_type
 - [ ] Error handling for invalid summary structure
