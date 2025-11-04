@@ -295,7 +295,7 @@ def compute_functional_boxplot_statistics(
         )
 
         # Extract components from raw statistics
-        depth = raw_stats["depth"]              # Shape: (n_curves,)
+        depths = raw_stats["depths"]              # Shape: (n_curves,) - Note: plural "depths"
         median = raw_stats["median"]            # Shape: (n_points,)
         percentile_bands = raw_stats.get("percentile_bands", {})  # Dict of (bottom, top) tuples
         outliers = raw_stats.get("outliers", np.array([]))        # Shape: (n_outliers, n_points)
@@ -332,7 +332,7 @@ def compute_functional_boxplot_statistics(
 
         # Prepare raw statistics for debugging (convert numpy to lists)
         raw_stats_serializable = {
-            "depth": depth.tolist(),
+            "depths": depths.tolist(),
             "median": median.tolist(),
             "percentile_bands": {
                 name: (bottom.tolist(), top.tolist())

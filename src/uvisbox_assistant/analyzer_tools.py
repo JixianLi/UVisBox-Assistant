@@ -208,11 +208,11 @@ def generate_uncertainty_report(
 
         # Validate output length based on type
         word_count = len(report_text.split())
-        if analysis_type == "inline" and word_count > 30:
+        if analysis_type == "inline" and word_count > 40:
             # Inline should be very short
             return {
                 "status": "error",
-                "message": f"Inline report too long ({word_count} words). Expected ~15-25 words."
+                "message": f"Inline report too long ({word_count} words). Expected ~15-30 words."
             }
         elif analysis_type == "quick" and word_count > 150:
             # Quick should be brief

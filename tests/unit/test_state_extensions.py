@@ -48,7 +48,7 @@ class TestStatisticsStateUpdate:
         """Verify statistics state update."""
         state = create_initial_state("test")
 
-        raw_stats = {"depth": [0.1, 0.2], "median": [1.0, 2.0]}
+        raw_stats = {"depths": [0.1, 0.2], "median": [1.0, 2.0]}
         processed_stats = {"median_trend": "increasing"}
 
         updates = update_state_with_statistics(state, raw_stats, processed_stats)

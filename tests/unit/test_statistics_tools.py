@@ -256,7 +256,7 @@ class TestComputeFunctionalBoxplotStatistics:
 
         # Mock UVisBox output
         mock_uvisbox.return_value = {
-            "depth": np.random.rand(n_curves),
+            "depths": np.random.rand(n_curves),
             "median": np.random.randn(n_points),
             "percentile_bands": {
                 "50_percentile_band": (
@@ -305,7 +305,7 @@ class TestComputeFunctionalBoxplotStatistics:
 
         # Mock UVisBox
         mock_uvisbox.return_value = {
-            "depth": np.random.rand(30),
+            "depths": np.random.rand(30),
             "median": np.random.randn(100),
             "percentile_bands": {
                 "50_percentile_band": (np.random.randn(100), np.random.randn(100) + 1.0)

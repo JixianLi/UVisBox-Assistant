@@ -4,17 +4,22 @@ from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 from datetime import datetime
 import os
 
-from uvisbox_assistant.state import GraphState, update_state_with_data, update_state_with_vis, increment_error_count
+from uvisbox_assistant.state import (
+    GraphState, update_state_with_data, update_state_with_vis,
+    update_state_with_statistics, update_state_with_analysis, increment_error_count
+)
 from uvisbox_assistant.model import create_model_with_tools, prepare_messages_for_model
 from uvisbox_assistant.data_tools import DATA_TOOLS, DATA_TOOL_SCHEMAS
 from uvisbox_assistant.vis_tools import VIS_TOOLS, VIS_TOOL_SCHEMAS
+from uvisbox_assistant.statistics_tools import STATISTICS_TOOLS, STATISTICS_TOOL_SCHEMAS
+from uvisbox_assistant.analyzer_tools import ANALYZER_TOOLS, ANALYZER_TOOL_SCHEMAS
 from uvisbox_assistant import config
 from uvisbox_assistant.logger import log_tool_call, log_tool_result, log_error
 from uvisbox_assistant.output_control import vprint
 
 
 # Create model with all tools
-ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS
+ALL_TOOL_SCHEMAS = DATA_TOOL_SCHEMAS + VIS_TOOL_SCHEMAS + STATISTICS_TOOL_SCHEMAS + ANALYZER_TOOL_SCHEMAS
 MODEL = create_model_with_tools(ALL_TOOL_SCHEMAS)
 
 
@@ -220,6 +225,214 @@ def call_vis_tool(state: GraphState) -> Dict:
 
     except Exception as e:
         vprint(f"[VIS TOOL] Exception: {e}")
+        log_error(f"Exception in {tool_name}: {str(e)}")
+        error_result = {
+            "status": "error",
+            "message": f"Exception in {tool_name}: {str(e)}"
+        }
+
+        execution_entry["status"] = "error"
+
+        tool_message = ToolMessage(
+            content=str(error_result),
+            tool_call_id=tool_call_id
+        )
+
+        state_updates = {
+            "messages": [tool_message],
+            **increment_error_count(state),
+            "last_error_tool": tool_name,
+            "last_error_id": state.get("_pending_error_id")
+        }
+
+        # Add execution to sequence
+        _add_execution_entry(state, execution_entry, state_updates)
+
+        return state_updates
+
+
+def call_statistics_tool(state: GraphState) -> Dict:
+    """
+    Node that executes a statistics tool.
+
+    Args:
+        state: Current graph state
+
+    Returns:
+        Dict with tool result message and state updates
+    """
+    last_message = state["messages"][-1]
+
+    # Extract tool call
+    if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
+        raise ValueError("call_statistics_tool invoked but no tool_calls in last message")
+
+    tool_call = last_message.tool_calls[0]
+    tool_name = tool_call["name"]
+    tool_args = tool_call["args"]
+    tool_call_id = tool_call["id"]
+
+    vprint(f"[STATISTICS TOOL] Calling {tool_name} with args: {tool_args}")
+    log_tool_call(tool_name, tool_args)
+
+    # Track execution start
+    execution_entry = {
+        "tool_name": tool_name,
+        "timestamp": datetime.now(),
+        "status": None,
+        "error_id": None
+    }
+
+    # Execute tool
+    try:
+        if tool_name not in STATISTICS_TOOLS:
+            result = {
+                "status": "error",
+                "message": f"Unknown statistics tool: {tool_name}"
+            }
+        else:
+            tool_func = STATISTICS_TOOLS[tool_name]
+            result = tool_func(**tool_args)
+
+        vprint(f"[STATISTICS TOOL] Result: {result}")
+        log_tool_result(tool_name, result)
+
+        # Create tool message
+        tool_message = ToolMessage(
+            content=str(result),
+            tool_call_id=tool_call_id
+        )
+
+        # Update state
+        state_updates = {"messages": [tool_message]}
+
+        if result.get("status") == "success" and "processed_statistics" in result:
+            execution_entry["status"] = "success"
+            # Extract raw and processed statistics from result
+            raw_stats = result.get("_raw_statistics", {})
+            processed_stats = result["processed_statistics"]
+            state_updates.update(update_state_with_statistics(state, raw_stats, processed_stats))
+
+            # Check for auto-fix pattern
+            _check_and_mark_auto_fix(state, tool_name, state_updates)
+        else:
+            execution_entry["status"] = "error"
+            state_updates.update(increment_error_count(state))
+            # Store error info for auto-fix detection
+            state_updates["last_error_tool"] = tool_name
+            state_updates["last_error_id"] = state.get("_pending_error_id")
+
+        # Add execution to sequence
+        _add_execution_entry(state, execution_entry, state_updates)
+
+        return state_updates
+
+    except Exception as e:
+        vprint(f"[STATISTICS TOOL] Exception: {e}")
+        log_error(f"Exception in {tool_name}: {str(e)}")
+        error_result = {
+            "status": "error",
+            "message": f"Exception in {tool_name}: {str(e)}"
+        }
+
+        execution_entry["status"] = "error"
+
+        tool_message = ToolMessage(
+            content=str(error_result),
+            tool_call_id=tool_call_id
+        )
+
+        state_updates = {
+            "messages": [tool_message],
+            **increment_error_count(state),
+            "last_error_tool": tool_name,
+            "last_error_id": state.get("_pending_error_id")
+        }
+
+        # Add execution to sequence
+        _add_execution_entry(state, execution_entry, state_updates)
+
+        return state_updates
+
+
+def call_analyzer_tool(state: GraphState) -> Dict:
+    """
+    Node that executes an analyzer tool.
+
+    Args:
+        state: Current graph state
+
+    Returns:
+        Dict with tool result message and state updates
+    """
+    last_message = state["messages"][-1]
+
+    # Extract tool call
+    if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
+        raise ValueError("call_analyzer_tool invoked but no tool_calls in last message")
+
+    tool_call = last_message.tool_calls[0]
+    tool_name = tool_call["name"]
+    tool_args = tool_call["args"]
+    tool_call_id = tool_call["id"]
+
+    vprint(f"[ANALYZER TOOL] Calling {tool_name} with args: {tool_args}")
+    log_tool_call(tool_name, tool_args)
+
+    # Track execution start
+    execution_entry = {
+        "tool_name": tool_name,
+        "timestamp": datetime.now(),
+        "status": None,
+        "error_id": None
+    }
+
+    # Execute tool
+    try:
+        if tool_name not in ANALYZER_TOOLS:
+            result = {
+                "status": "error",
+                "message": f"Unknown analyzer tool: {tool_name}"
+            }
+        else:
+            tool_func = ANALYZER_TOOLS[tool_name]
+            result = tool_func(**tool_args)
+
+        vprint(f"[ANALYZER TOOL] Result: {result}")
+        log_tool_result(tool_name, result)
+
+        # Create tool message
+        tool_message = ToolMessage(
+            content=str(result),
+            tool_call_id=tool_call_id
+        )
+
+        # Update state
+        state_updates = {"messages": [tool_message]}
+
+        if result.get("status") == "success" and "report" in result:
+            execution_entry["status"] = "success"
+            # Extract report and analysis type from result
+            report = result["report"]
+            analysis_type = result.get("analysis_type", "quick")
+            state_updates.update(update_state_with_analysis(state, report, analysis_type))
+
+            # Check for auto-fix pattern
+            _check_and_mark_auto_fix(state, tool_name, state_updates)
+        else:
+            execution_entry["status"] = "error"
+            state_updates.update(increment_error_count(state))
+            # Store error info for auto-fix detection
+            state_updates["last_error_tool"] = tool_name
+            state_updates["last_error_id"] = state.get("_pending_error_id")
+
+        # Add execution to sequence
+        _add_execution_entry(state, execution_entry, state_updates)
+
+        return state_updates
+
+    except Exception as e:
+        vprint(f"[ANALYZER TOOL] Exception: {e}")
         log_error(f"Exception in {tool_name}: {str(e)}")
         error_result = {
             "status": "error",
