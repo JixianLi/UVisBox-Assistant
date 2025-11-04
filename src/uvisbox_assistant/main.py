@@ -4,8 +4,8 @@ UVisBox-Assistant - Main interactive REPL
 This is the primary user interface for UVisBox-Assistant.
 """
 
-from .conversation import ConversationSession
-from .output_control import vprint
+from .session.conversation import ConversationSession
+from .utils.output_control import vprint
 import matplotlib.pyplot as plt
 import sys
 

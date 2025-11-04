@@ -3,7 +3,7 @@
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .conversation import ConversationSession
+    from ..session.conversation import ConversationSession
 
 # Global session reference for accessing verbose_mode
 # Set by conversation.py when session is created
