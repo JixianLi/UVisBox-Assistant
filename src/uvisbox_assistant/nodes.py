@@ -395,8 +395,22 @@ def call_analyzer_tool(state: GraphState) -> Dict:
                 "message": f"Unknown analyzer tool: {tool_name}"
             }
         else:
-            tool_func = ANALYZER_TOOLS[tool_name]
-            result = tool_func(**tool_args)
+            # For generate_uncertainty_report, inject processed_statistics from state
+            if tool_name == "generate_uncertainty_report":
+                # Check if statistics are available in state
+                if "processed_statistics" not in state or state["processed_statistics"] is None:
+                    result = {
+                        "status": "error",
+                        "message": "No statistics available. Please run compute_functional_boxplot_statistics first."
+                    }
+                else:
+                    # Inject processed_statistics into tool args
+                    tool_args["processed_statistics"] = state["processed_statistics"]
+                    tool_func = ANALYZER_TOOLS[tool_name]
+                    result = tool_func(**tool_args)
+            else:
+                tool_func = ANALYZER_TOOLS[tool_name]
+                result = tool_func(**tool_args)
 
         vprint(f"[ANALYZER TOOL] Result: {result}")
         log_tool_result(tool_name, result)

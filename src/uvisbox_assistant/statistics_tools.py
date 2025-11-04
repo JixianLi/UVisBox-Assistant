@@ -374,6 +374,7 @@ STATISTICS_TOOL_SCHEMAS = [
         "description": (
             "Compute summary statistics for functional boxplot data including "
             "median behavior, percentile band characteristics, and outlier analysis. "
+            "REQUIRED FIRST STEP before generating text reports with generate_uncertainty_report. "
             "Use this when user requests uncertainty analysis or data summary."
         ),
         "parameters": {

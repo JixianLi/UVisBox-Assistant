@@ -42,14 +42,20 @@ class TestAnalyzerToolSchemas:
         assert "description" in schema
         assert "parameters" in schema
 
+        # Verify description mentions sequential workflow
+        assert "compute_functional_boxplot_statistics FIRST" in schema["description"]
+
         params = schema["parameters"]["properties"]
-        assert "statistics_summary" in params
+        # statistics are injected from state, not passed as parameter
         assert "analysis_type" in params
 
         # Verify enum values
         assert "inline" in params["analysis_type"]["enum"]
         assert "quick" in params["analysis_type"]["enum"]
         assert "detailed" in params["analysis_type"]["enum"]
+
+        # Verify no required parameters (analysis_type has default)
+        assert len(schema["parameters"]["required"]) == 0
 
 
 class TestPromptTemplates:

@@ -252,23 +252,21 @@ ANALYZER_TOOL_SCHEMAS = [
         "name": "generate_uncertainty_report",
         "description": (
             "Generate a natural language uncertainty analysis report from statistical summaries. "
-            "Use this after compute_functional_boxplot_statistics to create text-based analysis."
+            "IMPORTANT: You must call compute_functional_boxplot_statistics FIRST to compute statistics. "
+            "This tool will automatically use the statistics from that computation. "
+            "Do NOT try to pass statistics manually - just specify the analysis_type."
         ),
         "parameters": {
             "type": "object",
             "properties": {
-                "statistics_summary": {
-                    "type": "object",
-                    "description": "Structured statistical summary from statistics tool"
-                },
                 "analysis_type": {
                     "type": "string",
-                    "description": "Report format",
+                    "description": "Report format: 'inline' (1 sentence), 'quick' (3-5 sentences), or 'detailed' (full report)",
                     "enum": ["inline", "quick", "detailed"],
                     "default": "quick"
                 }
             },
-            "required": ["statistics_summary"]
+            "required": []
         }
     }
 ]

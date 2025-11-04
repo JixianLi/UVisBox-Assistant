@@ -34,23 +34,27 @@ Workflow Patterns:
 
 1. VISUALIZATION ONLY (existing):
    User: "generate curves and plot them"
-   → data_tool → vis_tool
+   Workflow: data_tool → vis_tool
 
 2. TEXT ANALYSIS ONLY (new):
    User: "generate curves and analyze uncertainty"
    User: "create a data summary"
-   → data_tool → statistics_tool → analyzer_tool
+   Workflow: data_tool → statistics_tool → analyzer_tool
+   IMPORTANT: Call compute_functional_boxplot_statistics FIRST, then generate_uncertainty_report
 
 3. COMBINED VISUALIZATION + ANALYSIS (new):
    User: "generate curves, plot boxplot, and create summary"
-   → data_tool → vis_tool → statistics_tool → analyzer_tool
+   Workflow: data_tool → vis_tool → statistics_tool → analyzer_tool
+   IMPORTANT: Always call statistics tool before analyzer tool
 
-Tool Selection Guidelines:
-- Use statistics_tool when user requests: "analyze", "summary", "statistics", "uncertainty characteristics"
-- Use analyzer_tool AFTER statistics_tool to generate text reports
+Critical Tool Sequence Rules:
+- To generate analysis reports, you MUST follow this sequence:
+  1. FIRST: Call compute_functional_boxplot_statistics with the data_path
+  2. THEN: Call generate_uncertainty_report with just the analysis_type
+- The analyzer tool automatically uses statistics from the previous computation
+- NEVER skip the statistics tool when user requests analysis/summary
 - Analysis types: "inline" (1 sentence), "quick" (3-5 sentences), "detailed" (full report)
-- If user says "analyze" without specifying format, use "quick"
-- You can combine visualization and analysis in the same workflow
+- Default to "quick" if user doesn't specify format
 
 Workflow:
 1. User requests a visualization
