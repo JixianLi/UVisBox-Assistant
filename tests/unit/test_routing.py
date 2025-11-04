@@ -57,21 +57,53 @@ def test_route_after_model():
     assert route3 == "end", f"Expected 'end', got '{route3}'"
     print(f"✅ Route with no tool call: {route3}")
 
-    # Test 4: Route with unknown tool
+    # Test 4: Route with statistics tool
     state4 = create_initial_state("test")
+    ai_msg_statistics = AIMessage(
+        content="",
+        tool_calls=[{
+            "name": "compute_functional_boxplot_statistics",
+            "args": {"data_path": "test.npy"},
+            "id": "789"
+        }]
+    )
+    state4["messages"].append(ai_msg_statistics)
+
+    route4 = route_after_model(state4)
+    assert route4 == "statistics_tool", f"Expected 'statistics_tool', got '{route4}'"
+    print(f"✅ Route with statistics tool: {route4}")
+
+    # Test 5: Route with analyzer tool
+    state5 = create_initial_state("test")
+    ai_msg_analyzer = AIMessage(
+        content="",
+        tool_calls=[{
+            "name": "generate_uncertainty_report",
+            "args": {"statistics_summary": {}, "analysis_type": "quick"},
+            "id": "abc"
+        }]
+    )
+    state5["messages"].append(ai_msg_analyzer)
+
+    route5 = route_after_model(state5)
+    assert route5 == "analyzer_tool", f"Expected 'analyzer_tool', got '{route5}'"
+    print(f"✅ Route with analyzer tool: {route5}")
+
+    # Test 6: Route with unknown tool
+    state6 = create_initial_state("test")
     ai_msg_unknown = AIMessage(
         content="",
         tool_calls=[{
             "name": "unknown_tool",
             "args": {},
-            "id": "789"
+            "id": "def"
         }]
     )
-    state4["messages"].append(ai_msg_unknown)
+    state6["messages"].append(ai_msg_unknown)
 
-    route4 = route_after_model(state4)
-    assert route4 == "end", f"Expected 'end' for unknown tool, got '{route4}'"
-    print(f"✅ Route with unknown tool: {route4}")
+    route6 = route_after_model(state6)
+    assert route6 == "end", f"Expected 'end' for unknown tool, got '{route6}'"
+    print(f"✅ Route with unknown tool: {route6}")
 
 
 def test_route_after_tool():

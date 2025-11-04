@@ -20,17 +20,20 @@ UVisBox-Assistant uses a reorganized test structure with clear categories:
 ```
 tests/
 ├── test_simple.py              # Quick sanity check
-├── unit/                       # Unit tests (0 API calls)
-│   ├── test_command_parser.py  # 17 tests
-│   ├── test_config.py          # 8 tests
-│   ├── test_routing.py         # Routing logic
-│   └── test_tools.py           # 10 tests
+├── unit/                       # Unit tests (0 API calls, 77+ tests)
+│   ├── test_command_parser.py       # 17 tests: Styling commands
+│   ├── test_config.py               # 8 tests: Configuration
+│   ├── test_routing.py              # Routing logic
+│   ├── test_tools.py                # 10 tests: Data/vis tools
+│   ├── test_statistics_tools.py     # 25 tests: Statistics (v0.3.0)
+│   └── test_analyzer_tools.py       # 21 tests: Analyzer (v0.3.0)
 ├── integration/                # Integration tests (15-25 API calls)
 │   ├── test_hybrid_control.py
 │   ├── test_error_handling.py
 │   └── test_session_management.py
 ├── e2e/                        # End-to-end tests (20-30 API calls)
-│   └── test_matplotlib_behavior.py
+│   ├── test_matplotlib_behavior.py
+│   └── test_analysis_workflows.py   # 12 tests: Analysis workflows (v0.3.0)
 ├── interactive/                # Manual tests (user-paced)
 │   └── interactive_test.py
 └── utils/
@@ -51,18 +54,22 @@ python tests/utils/run_all_tests.py --unit
 
 **Individual unit tests**:
 ```bash
-python tests/unit/test_command_parser.py  # 17 tests for BoxplotStyleConfig commands
-python tests/unit/test_config.py          # 8 tests for configuration
-python tests/unit/test_routing.py         # Routing logic tests
-python tests/unit/test_tools.py           # 10 tests for data/vis tools
+python tests/unit/test_command_parser.py       # 17 tests: BoxplotStyleConfig commands
+python tests/unit/test_config.py               # 8 tests: Configuration
+python tests/unit/test_routing.py              # Routing logic tests
+python tests/unit/test_tools.py                # 10 tests: Data/vis tools
+python tests/unit/test_statistics_tools.py     # 25 tests: Statistics analysis (v0.3.0)
+python tests/unit/test_analyzer_tools.py       # 21 tests: Report generation (v0.3.0)
 ```
 
 **What's tested**:
-- All 13 BoxplotStyleConfig hybrid commands
+- All 16 BoxplotStyleConfig hybrid commands
 - Parameter mapping and application
 - Configuration defaults and validation
-- Graph routing logic
+- Graph routing logic (includes statistics/analyzer routing)
 - Direct tool function calls with styling parameters
+- **Statistics computation** (v0.3.0): Median analysis, band characteristics, outlier detection
+- **Analyzer tools** (v0.3.0): Report generation, prompt templates, validation
 
 ### Integration Tests (15-25 API Calls)
 **When to run**: After modifying workflows or state management
@@ -91,7 +98,17 @@ python tests/integration/test_session_management.py  # Session cleanup
 ```bash
 python tests/utils/run_all_tests.py --e2e
 python tests/e2e/test_matplotlib_behavior.py
+python tests/e2e/test_analysis_workflows.py     # Analysis workflows (v0.3.0)
 ```
+
+**What's tested**:
+- Complete matplotlib non-blocking behavior
+- **Three analysis workflow patterns** (v0.3.0):
+  1. Visualization only (existing)
+  2. Text analysis only (new)
+  3. Combined visualization + analysis (new)
+- Multi-turn analysis conversations
+- Report format validation (inline/quick/detailed)
 
 ### Interactive Tests (User-Paced)
 **When to run**: For manual verification
@@ -135,11 +152,166 @@ All unit tests verify the new BoxplotStyleConfig interface:
 | Configuration | 8 | 0 | Unit |
 | Routing Logic | ~10 | 0 | Unit |
 | Tool Functions | 10 | 0 | Unit |
-| **Total Unit** | **45+** | **0** | **Unit** |
+| **Statistics Tools (v0.3.0)** | **25** | **0** | **Unit** |
+| **Analyzer Tools (v0.3.0)** | **21** | **0** | **Unit** |
+| **Total Unit** | **77+** | **0** | **Unit** |
 | Hybrid Control | ~10 | 15-20 | Integration |
 | Error Handling | ~8 | 10-15 | Integration |
 | Session Management | ~6 | 5-10 | Integration |
 | Matplotlib | ~5 | 0 | E2E |
+| **Analysis Workflows (v0.3.0)** | **12** | **~20** | **E2E** |
+
+## Analysis Testing (v0.3.0)
+
+### Overview
+
+The v0.3.0 release adds comprehensive testing for uncertainty analysis features:
+- **46 analysis-specific tests**: 25 statistics + 21 analyzer
+- **12 E2E workflow tests**: Three workflow patterns
+- **77+ total unit tests** (0 API calls)
+- **All statistics logic testable without LLM calls**
+
+### Statistics Tool Tests (25 tests, 0 API calls)
+
+**`tests/unit/test_statistics_tools.py`**
+
+**Registry and Schema Tests** (6 tests):
+- Tool registry structure
+- Schema validation for LLM binding
+- Required sequence documentation
+
+**Median Analysis Tests** (5 tests):
+- Trend detection (increasing/decreasing/stationary)
+- Slope calculation
+- Fluctuation and smoothness metrics
+- Value range analysis
+
+**Band Analysis Tests** (4 tests):
+- Band width computation (mean/max/min/std)
+- Widest region detection
+- Uncertainty score calculation
+
+**Outlier Analysis Tests** (4 tests):
+- Outlier count and percentage
+- Similarity to median (Pearson correlation)
+- Intra-outlier clustering
+
+**Integration Tests** (6 tests):
+- Full end-to-end statistics computation
+- UVisBox API integration (`functional_boxplot_summary_statistics`)
+- Error handling for missing files and invalid data shapes
+
+**Key Insight**: All statistics computation testable with 0 API calls due to separation of concerns (statistics vs. report generation).
+
+### Analyzer Tool Tests (21 tests, 0 API calls)
+
+**`tests/unit/test_analyzer_tools.py`**
+
+**Registry and Schema Tests** (4 tests):
+- Tool registry structure
+- Schema validation
+- Sequential workflow documentation
+- No required parameters (state injection pattern)
+
+**Prompt Template Tests** (7 tests):
+- Three prompt templates exist (inline/quick/detailed)
+- Prompt selection logic
+- Statistics JSON formatting in prompts
+- Invalid analysis type error handling
+
+**Validation Tests** (6 tests):
+- Processed statistics structure validation
+- Missing top-level keys detection
+- Incomplete data_shape/median/bands/outliers detection
+
+**Error Handling Tests** (4 tests):
+- Invalid analysis_type error
+- Invalid summary structure error
+- Word count validation
+
+**Note**: These tests don't invoke the LLM. Report generation tests are in E2E suite.
+
+### E2E Analysis Workflow Tests (12 tests, ~20 API calls)
+
+**`tests/e2e/test_analysis_workflows.py`**
+
+**Three Workflow Patterns** (6 tests):
+1. **Visualization Only** (existing):
+   - Test data → vis workflow without analysis
+   - Verify no statistics/reports in state
+
+2. **Text Analysis Only** (new):
+   - Test data → statistics → analyzer workflow
+   - Verify report generation
+   - Validate inline/quick/detailed formats
+
+3. **Combined Visualization + Analysis** (new):
+   - Test data → vis → statistics → analyzer
+   - Verify both visual and text output
+
+**Multi-Turn Analysis** (3 tests):
+- Incremental analysis (step-by-step)
+- Report refinement (quick → detailed)
+- Analysis-first, visualization-second
+
+**Report Format Validation** (3 tests):
+- Inline: 1 sentence, ~15-30 words
+- Quick: 3-5 sentences, ~50-100 words
+- Detailed: Structured sections, ~100-300 words
+
+### Analysis Test Strategy
+
+**Unit Tests (0 API calls)**:
+- All statistics computation logic
+- All analyzer validation and schema logic
+- Prompt template selection
+- Error handling
+
+**Integration Tests** (if needed):
+- Real UVisBox calls with statistics computation
+- State injection pattern verification
+
+**E2E Tests** (~2-3 API calls per test):
+- Complete analysis workflows
+- Real LLM report generation
+- Multi-turn conversations
+- Format validation
+
+### Running Analysis Tests
+
+**Unit tests only** (instant, 0 API calls):
+```bash
+# All unit tests including analysis
+python tests/utils/run_all_tests.py --unit
+
+# Statistics tests only
+python tests/unit/test_statistics_tools.py
+
+# Analyzer tests only
+python tests/unit/test_analyzer_tools.py
+```
+
+**E2E analysis workflows** (~20 API calls, 2-3 minutes):
+```bash
+# All E2E tests including analysis
+python tests/utils/run_all_tests.py --e2e
+
+# Analysis workflows only
+python tests/e2e/test_analysis_workflows.py
+```
+
+### Outlier Detection Testing
+
+**Important**: Tests verify that outlier detection uses depth-based fencing (Q1 - 1.5×IQR), NOT percentile position.
+
+**Test Scenarios**:
+- **Similar curves** (100 curves): IQR small → low fence → 0 outliers (correct)
+- **Heterogeneous curves**: IQR large → high fence → multiple outliers detected
+- **Edge cases**: Empty data, single curve, all identical curves
+
+See [ANALYSIS_EXAMPLES.md](docs/ANALYSIS_EXAMPLES.md#understanding-outlier-detection) for detailed explanation.
+
+---
 
 ## Gemini API Rate Limits (Free Tier)
 

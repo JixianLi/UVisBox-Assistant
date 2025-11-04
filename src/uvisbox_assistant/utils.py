@@ -16,18 +16,32 @@ def is_vis_tool(tool_name: str) -> bool:
     return tool_name in VIS_TOOLS
 
 
-def get_tool_type(tool_name: str) -> Optional[str]:
+def get_tool_type(tool_name: str) -> str:
     """
-    Determine the type of tool.
+    Determine the type of tool based on its name.
+
+    Args:
+        tool_name: Name of the tool
 
     Returns:
-        "data", "vis", or None if unknown
+        Tool type: "data", "vis", "statistics", "analyzer", or "unknown"
     """
-    if is_data_tool(tool_name):
+    # Import tool registries
+    from uvisbox_assistant.data_tools import DATA_TOOLS
+    from uvisbox_assistant.vis_tools import VIS_TOOLS
+    from uvisbox_assistant.statistics_tools import STATISTICS_TOOLS
+    from uvisbox_assistant.analyzer_tools import ANALYZER_TOOLS
+
+    if tool_name in DATA_TOOLS:
         return "data"
-    elif is_vis_tool(tool_name):
+    elif tool_name in VIS_TOOLS:
         return "vis"
-    return None
+    elif tool_name in STATISTICS_TOOLS:
+        return "statistics"
+    elif tool_name in ANALYZER_TOOLS:
+        return "analyzer"
+    else:
+        return "unknown"
 
 
 def cleanup_temp_files():

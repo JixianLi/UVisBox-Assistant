@@ -147,9 +147,10 @@ def generate_scalar_field_ensemble(
     Generate synthetic 2D scalar field ensemble.
 
     Each ensemble member is a Gaussian centered at (nx/2, ny/2) with:
-    - Standard deviation: (nx+ensemble_index, ny)
+    - Standard deviation proportional to grid size and varying with ensemble index
+    - sigma = grid_size * (0.3 + 0.05 * ensemble_index)
     - Rescaled to [0, 1]
-    - Uniform noise added from [0, 0.1)
+    - Uniform noise added from [0, 0.01)
     - Final rescale to [0, 1]
 
     Args:
@@ -179,9 +180,11 @@ def generate_scalar_field_ensemble(
         # Generate ensemble of 2D Gaussian fields
         ensemble = []
         for ensemble_index in range(n_ensemble):
-            # Standard deviation varies with ensemble index
-            sigma_x = nx + ensemble_index
-            sigma_y = ny
+            # Standard deviation varies with ensemble index and is proportional to grid size
+            # This creates significant variation between ensemble members
+            spread_factor = 0.3 + 0.05 * ensemble_index
+            sigma_x = nx * spread_factor
+            sigma_y = ny * spread_factor
 
             # Generate 2D Gaussian
             Z = np.exp(-((X - center_x)**2 / (2 * sigma_x**2) +
@@ -194,8 +197,8 @@ def generate_scalar_field_ensemble(
             else:
                 Z = np.zeros_like(Z)
 
-            # Add uniform random noise from [0, 0.1)
-            noise = np.random.uniform(0, 0.1, Z.shape)
+            # Add uniform random noise from [0, 0.01)
+            noise = np.random.uniform(0, 0.01, Z.shape)
             Z = Z + noise
 
             # Rescale again to [0, 1]

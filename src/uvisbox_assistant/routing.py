@@ -4,7 +4,7 @@ from uvisbox_assistant.state import GraphState
 from uvisbox_assistant.utils import get_tool_type
 
 
-def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "end"]:
+def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "statistics_tool", "analyzer_tool", "end"]:
     """
     Determine the next node after the model has responded.
 
@@ -12,13 +12,15 @@ def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "en
     - If the last message contains tool_calls:
       - Route to "data_tool" if it's a data tool
       - Route to "vis_tool" if it's a vis tool
+      - Route to "statistics_tool" if it's a statistics tool
+      - Route to "analyzer_tool" if it's an analyzer tool
     - Otherwise, route to "end" (conversation response without tool call)
 
     Args:
         state: Current graph state
 
     Returns:
-        Next node name: "data_tool", "vis_tool", or "end"
+        Next node name: "data_tool", "vis_tool", "statistics_tool", "analyzer_tool", or "end"
     """
     last_message = state["messages"][-1]
 
@@ -38,6 +40,10 @@ def route_after_model(state: GraphState) -> Literal["data_tool", "vis_tool", "en
         return "data_tool"
     elif tool_type == "vis":
         return "vis_tool"
+    elif tool_type == "statistics":
+        return "statistics_tool"
+    elif tool_type == "analyzer":
+        return "analyzer_tool"
     else:
         # Unknown tool - end and let user see the error
         print(f"WARNING: Unknown tool type for {tool_name}")

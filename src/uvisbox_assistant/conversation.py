@@ -191,6 +191,8 @@ class ConversationSession:
                 "turn_count": 0,
                 "current_data": None,
                 "last_vis": None,
+                "statistics": None,
+                "analysis": None,
                 "session_files": [],
                 "error_count": 0,
                 "message_count": 0
@@ -200,6 +202,8 @@ class ConversationSession:
             "turn_count": self.turn_count,
             "current_data": self.state.get("current_data_path"),
             "last_vis": self.state.get("last_vis_params"),
+            "statistics": "computed" if self.state.get("processed_statistics") else None,
+            "analysis": self.state.get("analysis_type") if self.state.get("analysis_report") else None,
             "session_files": self.state.get("session_files", []),
             "error_count": self.state.get("error_count", 0),
             "message_count": len(self.state["messages"])
@@ -346,3 +350,44 @@ class ConversationSession:
             True if error was auto-fixed, False otherwise
         """
         return error_id in self.auto_fixed_errors
+
+    def get_analysis_summary(self) -> Optional[str]:
+        """
+        Get summary of current analysis state.
+
+        Returns:
+            Formatted string with analysis info, or None if no analysis
+        """
+        if not self.state:
+            return None
+
+        has_stats = self.state.get("processed_statistics") is not None
+        has_report = self.state.get("analysis_report") is not None
+
+        if not has_stats and not has_report:
+            return None
+
+        lines = ["📊 Analysis State:"]
+
+        if has_stats:
+            stats = self.state["processed_statistics"]
+            data_shape = stats.get("data_shape", {})
+            n_curves = data_shape.get("n_curves", "?")
+            n_points = data_shape.get("n_points", "?")
+            lines.append(f"  ✓ Statistics computed: {n_curves} curves, {n_points} points")
+
+            median = stats.get("median", {})
+            lines.append(f"  - Median trend: {median.get('trend', 'unknown')}")
+
+            outliers = stats.get("outliers", {})
+            outlier_count = outliers.get("count", 0)
+            lines.append(f"  - Outliers: {outlier_count}")
+
+        if has_report:
+            report = self.state["analysis_report"]
+            analysis_type = self.state.get("analysis_type", "unknown")
+            word_count = len(report.split())
+            lines.append(f"  ✓ Report generated: {analysis_type} ({word_count} words)")
+            lines.append(f"  - Preview: {report[:100]}...")
+
+        return "\n".join(lines)
