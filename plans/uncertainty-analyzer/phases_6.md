@@ -60,10 +60,10 @@ statistics_tool (call_statistics_tool)
 ├─ Input: current_data_path, method (fbd/mfbd)
 ├─ Process: functional_boxplot_summary_statistics()
 ├─ Analyze: median behavior, band characteristics, outlier analysis
-└─ Output: statistics_summary (LLM-friendly dict, no numpy arrays)
+└─ Output: processed_statistics (LLM-friendly dict, no numpy arrays)
 
 analyzer_tool (call_analyzer_tool)
-├─ Input: statistics_summary, analysis_type (inline/quick/detailed)
+├─ Input: processed_statistics, analysis_type (inline/quick/detailed)
 ├─ Process: LLM with specialized prompts
 ├─ Generate: natural language report
 └─ Output: analysis_report (text string)
@@ -82,7 +82,7 @@ analyzer_tool (call_analyzer_tool)
 
 ```
 graph.py          - ✅ DONE: LangGraph StateGraph with 5 tool nodes (data, vis, statistics, analyzer, model)
-state.py          - ✅ DONE: GraphState with analysis fields (summary_statistics, statistics_summary, analysis_report, analysis_type)
+state.py          - ✅ DONE: GraphState with analysis fields (raw_statistics, processed_statistics, analysis_report, analysis_type)
 nodes.py          - ✅ DONE: 5 core nodes: call_model, call_data_tool, call_vis_tool, call_statistics_tool, call_analyzer_tool
 routing.py        - ✅ DONE: Conditional routing with 5 tool types (data/vis/statistics/analyzer/unknown)
 statistics_tools.py - ✅ DONE: Statistical analysis with scipy/numpy/scikit-learn (v0.3.0)
@@ -145,7 +145,7 @@ main.py           - ✅ DONE: Interactive REPL with command handling
 **Implementation**:
 - statistics_tools.py: scipy/numpy/scikit-learn for analysis
 - analyzer_tools.py: Gemini LLM for text generation
-- statistics_summary: LLM-friendly dict (no numpy arrays)
+- processed_statistics: LLM-friendly dict (no numpy arrays)
 - Three report formats: inline (1 sentence), quick (3-5 sentences), detailed (full report)
 ```
 
@@ -156,7 +156,7 @@ main.py           - ✅ DONE: Interactive REPL with command handling
 
 [... existing pitfalls ...]
 
-13. **Statistics summary numpy arrays** (v0.3.0) - statistics_summary must NOT contain numpy arrays (LLM can't process them)
+13. **Processed statistics numpy arrays** (v0.3.0) - processed_statistics must NOT contain numpy arrays (LLM can't process them)
 14. **Analysis report length validation** (v0.3.0) - Verify inline reports are ~15-30 words, quick reports ~50-100 words
 15. **UVisBox statistics function** (v0.3.0) - functional_boxplot_summary_statistics() returns numpy arrays, must serialize for LLM
 16. **Analyzer tool prompts** (v0.3.0) - Prompts must emphasize "no recommendations" to keep reports descriptive only
@@ -249,8 +249,8 @@ All notable changes to UVisBox-Assistant will be documented in this file.
   - `call_analyzer_tool`: Generates natural language reports from statistical summaries
 
 - **GraphState Extensions**:
-  - `summary_statistics`: Raw UVisBox functional_boxplot_summary_statistics() output
-  - `statistics_summary`: LLM-friendly structured dict (no numpy arrays)
+  - `raw_statistics`: Raw UVisBox functional_boxplot_summary_statistics() output
+  - `processed_statistics`: LLM-friendly structured dict (no numpy arrays)
   - `analysis_report`: Generated text report
   - `analysis_type`: Report format ("inline" | "quick" | "detailed")
 
@@ -661,8 +661,8 @@ else:
 ### Programmatic Access
 
 ```python
-# Get raw statistics summary
-stats = session.state.get("statistics_summary")
+# Get processed statistics summary
+stats = session.state.get("processed_statistics")
 if stats:
     median_trend = stats["median"]["trend"]
     outlier_count = stats["outliers"]["count"]
@@ -718,7 +718,7 @@ def compute_functional_boxplot_statistics(
 Dict with:
 - `status` (str): "success" or "error"
 - `message` (str): User-friendly message
-- `statistics_summary` (dict): Structured summary with:
+- `processed_statistics` (dict): Structured summary with:
   - `data_shape`: {"n_curves": int, "n_points": int}
   - `median`: Median curve analysis
   - `bands`: Percentile band analysis
@@ -732,7 +732,7 @@ from uvisbox_assistant.statistics_tools import compute_functional_boxplot_statis
 
 result = compute_functional_boxplot_statistics("/path/to/curves.npy", method="fbd")
 if result["status"] == "success":
-    stats = result["statistics_summary"]
+    stats = result["processed_statistics"]
     print(f"Median trend: {stats['median']['trend']}")
     print(f"Outliers: {stats['outliers']['count']}")
 ```
@@ -748,13 +748,13 @@ Generate natural language uncertainty analysis report.
 **Function**:
 ```python
 def generate_uncertainty_report(
-    statistics_summary: dict,
+    processed_statistics: dict,
     analysis_type: str = "quick"
 ) -> Dict
 ```
 
 **Arguments**:
-- `statistics_summary` (dict): Structured summary from compute_functional_boxplot_statistics
+- `processed_statistics` (dict): Structured summary from compute_functional_boxplot_statistics
 - `analysis_type` (str): Report format - "inline", "quick", or "detailed". Default: "quick"
 
 **Returns**:
@@ -768,8 +768,8 @@ Dict with:
 ```python
 from uvisbox_assistant.analyzer_tools import generate_uncertainty_report
 
-# Assuming you have statistics_summary from compute_functional_boxplot_statistics
-result = generate_uncertainty_report(statistics_summary, analysis_type="detailed")
+# Assuming you have processed_statistics from compute_functional_boxplot_statistics
+result = generate_uncertainty_report(processed_statistics, analysis_type="detailed")
 if result["status"] == "success":
     print(result["report"])
 ```
@@ -785,8 +785,8 @@ class GraphState(TypedDict):
     # ... existing fields ...
 
     # Analysis state fields (v0.3.0)
-    summary_statistics: Optional[dict]      # Raw UVisBox output
-    statistics_summary: Optional[dict]      # LLM-friendly summary
+    raw_statistics: Optional[dict]          # Raw UVisBox output
+    processed_statistics: Optional[dict]    # LLM-friendly summary
     analysis_report: Optional[str]          # Generated text report
     analysis_type: Optional[str]            # "inline" | "quick" | "detailed"
 ```
@@ -794,7 +794,7 @@ class GraphState(TypedDict):
 ### State Update Helpers
 
 ```python
-def update_state_with_statistics(state: GraphState, summary_stats: dict, stats_summary: dict) -> dict
+def update_state_with_statistics(state: GraphState, raw_stats: dict, processed_stats: dict) -> dict
 ```
 Update state after successful statistics tool execution.
 
@@ -850,7 +850,7 @@ print(summary)
 - Helper functions (median analysis, band analysis, outlier analysis)
 - Main statistics computation function
 - Error handling (file not found, invalid shape)
-- Output validation (no numpy arrays in statistics_summary)
+- Output validation (no numpy arrays in processed_statistics)
 
 **Run**:
 ```bash

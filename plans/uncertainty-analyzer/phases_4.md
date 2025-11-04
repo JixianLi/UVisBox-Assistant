@@ -86,7 +86,7 @@ def call_statistics_tool(state: GraphState) -> Dict:
         # Update state
         state_updates = {"messages": [tool_message]}
 
-        if result.get("status") == "success" and "statistics_summary" in result:
+        if result.get("status") == "success" and "processed_statistics" in result:
             execution_entry["status"] = "success"
 
             # Import state update helper
@@ -94,10 +94,10 @@ def call_statistics_tool(state: GraphState) -> Dict:
 
             # Update state with both raw and processed statistics
             raw_stats = result.get("_raw_statistics", {})
-            stats_summary = result["statistics_summary"]
+            processed_stats = result["processed_statistics"]
 
             state_updates.update(
-                update_state_with_statistics(state, raw_stats, stats_summary)
+                update_state_with_statistics(state, raw_stats, processed_stats)
             )
 
             # Check for auto-fix pattern
@@ -575,7 +575,7 @@ class TestRouteAfterModelNewTools:
             content="",
             tool_calls=[{
                 "name": "generate_uncertainty_report",
-                "args": {"statistics_summary": {}, "analysis_type": "quick"},
+                "args": {"processed_statistics": {}, "analysis_type": "quick"},
                 "id": "call_456"
             }]
         )
@@ -697,9 +697,9 @@ class TestDataToStatisticsWorkflow:
         state = session.send(f"Load {temp_data_file} and compute statistics")
 
         # Verify statistics were computed
-        assert state.get("statistics_summary") is not None
-        assert "median" in state["statistics_summary"]
-        assert "bands" in state["statistics_summary"]
+        assert state.get("processed_statistics") is not None
+        assert "median" in state["processed_statistics"]
+        assert "bands" in state["processed_statistics"]
 
 
 class TestStatisticsToAnalyzerWorkflow:
@@ -729,7 +729,7 @@ class TestStatisticsToAnalyzerWorkflow:
 
         # Manually set state for testing (in real use, would come from graph)
         session.state = create_initial_state("generate report")
-        session.state["statistics_summary"] = mock_stats_summary
+        session.state["processed_statistics"] = mock_stats_summary
 
         # Request analysis report
         state = session.send("Generate quick analysis report")
@@ -779,7 +779,7 @@ Flow:
 Each tool node:
 - Receives current state
 - Executes tool function
-- Updates specific state fields (statistics_summary, analysis_report, etc.)
+- Updates specific state fields (processed_statistics, analysis_report, etc.)
 - Preserves all other state fields
 - Resets error_count on success
 - Returns to model for next decision

@@ -62,7 +62,7 @@ Context Awareness:
 - Remember current_data_path from previous operations
 - If user requests visualization/analysis, use current_data_path unless they specify new data
 - For statistics tools, use the data_path from current_data_path
-- For analyzer tools, use statistics_summary from state (passed automatically)
+- For analyzer tools, use processed_statistics from state (passed automatically)
 
 Error Recovery:
 - If a tool fails, suggest alternatives or ask for clarification
@@ -120,7 +120,7 @@ class ConversationSession:
         if not self.state:
             return None
 
-        has_stats = self.state.get("statistics_summary") is not None
+        has_stats = self.state.get("processed_statistics") is not None
         has_report = self.state.get("analysis_report") is not None
 
         if not has_stats and not has_report:
@@ -129,7 +129,7 @@ class ConversationSession:
         lines = ["📊 Analysis State:"]
 
         if has_stats:
-            stats = self.state["statistics_summary"]
+            stats = self.state["processed_statistics"]
             data_shape = stats.get("data_shape", {})
             n_curves = data_shape.get("n_curves", "?")
             n_points = data_shape.get("n_points", "?")
@@ -178,7 +178,7 @@ def get_context_summary(self) -> dict:
         "message_count": len(self.state.get("messages", [])),
         "current_data": self.state.get("current_data_path"),
         "last_vis": self.state.get("last_vis_params", {}).get("_tool_name") if self.state.get("last_vis_params") else None,
-        "statistics": "computed" if self.state.get("statistics_summary") else None,
+        "statistics": "computed" if self.state.get("processed_statistics") else None,
         "analysis": self.state.get("analysis_type") if self.state.get("analysis_report") else None,
         "error_count": self.state.get("error_count", 0)
     }
@@ -239,7 +239,7 @@ class TestPattern1VisualizationOnly:
         assert state["last_vis_params"]["_tool_name"] == "plot_functional_boxplot"
 
         # Verify NO analysis was performed (backward compatibility)
-        assert state.get("statistics_summary") is None
+        assert state.get("processed_statistics") is None
         assert state.get("analysis_report") is None
 
 
@@ -274,9 +274,9 @@ class TestPattern2TextAnalysisOnly:
         assert state.get("current_data_path") is not None
 
         # Verify statistics were computed
-        assert state.get("statistics_summary") is not None
-        assert "median" in state["statistics_summary"]
-        assert "bands" in state["statistics_summary"]
+        assert state.get("processed_statistics") is not None
+        assert "median" in state["processed_statistics"]
+        assert "bands" in state["processed_statistics"]
 
         # Verify analysis report was generated
         assert state.get("analysis_report") is not None
@@ -388,7 +388,7 @@ class TestPattern3CombinedWorkflow:
         assert state["last_vis_params"]["_tool_name"] == "plot_functional_boxplot"
 
         # Verify statistics were computed
-        assert state.get("statistics_summary") is not None
+        assert state.get("processed_statistics") is not None
 
         # Verify analysis report was generated
         assert state.get("analysis_report") is not None
@@ -418,12 +418,12 @@ class TestMultiTurnAnalysisWorkflow:
         time.sleep(2)
         state = session.send(f"Load {test_data_path}")
         assert state.get("current_data_path") is not None
-        assert state.get("statistics_summary") is None
+        assert state.get("processed_statistics") is None
 
         # Turn 2: Compute statistics
         time.sleep(2)
         state = session.send("Compute statistics for this data")
-        assert state.get("statistics_summary") is not None
+        assert state.get("processed_statistics") is not None
         assert state.get("analysis_report") is None
 
         # Turn 3: Generate report
@@ -452,7 +452,7 @@ class TestMultiTurnAnalysisWorkflow:
         # Turn 1: Load and analyze
         time.sleep(3)
         state = session.send(f"Load {test_data_path} and analyze uncertainty")
-        assert state.get("statistics_summary") is not None
+        assert state.get("processed_statistics") is not None
         assert state.get("analysis_report") is not None
 
         # Turn 2: Now visualize
@@ -460,7 +460,7 @@ class TestMultiTurnAnalysisWorkflow:
         state = session.send("Now plot it as functional boxplot")
         assert state.get("last_vis_params") is not None
         # Statistics should still be there
-        assert state.get("statistics_summary") is not None
+        assert state.get("processed_statistics") is not None
 ```
 
 ### Step 4: Add Example Usage Documentation
@@ -626,7 +626,7 @@ The enhanced system prompt guides the model to:
 
 State fields are preserved across workflow:
 - `current_data_path`: Set by data tool, used by statistics tool
-- `statistics_summary`: Set by statistics tool, used by analyzer tool
+- `processed_statistics`: Set by statistics tool, used by analyzer tool
 - `analysis_report`: Set by analyzer tool, displayed to user
 - `last_vis_params`: Independent, can coexist with analysis state
 
