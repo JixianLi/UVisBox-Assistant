@@ -355,5 +355,23 @@ class TestConversationSessionAnalysis:
         assert 'This is a detailed' in result
 
 
+def test_get_current_session():
+    """Test global session accessor."""
+    from uvisbox_assistant.session.conversation import get_current_session, ConversationSession
+    from uvisbox_assistant.utils.output_control import set_session
+
+    # Reset global state first
+    set_session(None)
+
+    # Initially None
+    session = get_current_session()
+    assert session is None
+
+    # After creating session, should be accessible
+    new_session = ConversationSession()
+    session = get_current_session()
+    assert session is new_session
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

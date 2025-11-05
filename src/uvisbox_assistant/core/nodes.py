@@ -91,6 +91,20 @@ def call_data_tool(state: GraphState) -> Dict:
             tool_func = DATA_TOOLS[tool_name]
             result = tool_func(**tool_args)
 
+        # Check for errors and record immediately (before serialization)
+        if result.get("status") == "error" and "_error_details" in result:
+            from uvisbox_assistant.utils.output_control import get_current_session
+            session = get_current_session()
+            if session:
+                error_details = result["_error_details"]
+                session.record_error(
+                    tool_name=tool_name,
+                    error=error_details["exception"],
+                    traceback_str=error_details["traceback"],
+                    user_message=result.get("message", str(error_details["exception"])),
+                    auto_fixed=False
+                )
+
         vprint(f"[DATA TOOL] Result: {result}")
         log_tool_result(tool_name, result)
 
@@ -191,6 +205,20 @@ def call_vis_tool(state: GraphState) -> Dict:
         else:
             tool_func = VIS_TOOLS[tool_name]
             result = tool_func(**tool_args)
+
+        # Check for errors and record immediately (before serialization)
+        if result.get("status") == "error" and "_error_details" in result:
+            from uvisbox_assistant.utils.output_control import get_current_session
+            session = get_current_session()
+            if session:
+                error_details = result["_error_details"]
+                session.record_error(
+                    tool_name=tool_name,
+                    error=error_details["exception"],
+                    traceback_str=error_details["traceback"],
+                    user_message=result.get("message", str(error_details["exception"])),
+                    auto_fixed=False
+                )
 
         vprint(f"[VIS TOOL] Result: {result}")
         log_tool_result(tool_name, result)
@@ -295,6 +323,20 @@ def call_statistics_tool(state: GraphState) -> Dict:
             vprint("[STATISTICS] Computing functional boxplot statistics...")
             tool_func = STATISTICS_TOOLS[tool_name]
             result = tool_func(**tool_args)
+
+        # Check for errors and record immediately (before serialization)
+        if result.get("status") == "error" and "_error_details" in result:
+            from uvisbox_assistant.session.conversation import get_current_session
+            session = get_current_session()
+            if session:
+                error_details = result["_error_details"]
+                session.record_error(
+                    tool_name=tool_name,
+                    error=error_details["exception"],
+                    traceback_str=error_details["traceback"],
+                    user_message=result.get("message", str(error_details["exception"])),
+                    auto_fixed=False
+                )
 
         vprint(f"[STATISTICS TOOL] Result: {result}")
         log_tool_result(tool_name, result)
@@ -413,6 +455,32 @@ def call_analyzer_tool(state: GraphState) -> Dict:
             else:
                 tool_func = ANALYZER_TOOLS[tool_name]
                 result = tool_func(**tool_args)
+
+        # Check for errors and record immediately (before serialization)
+        if result.get("status") == "error":
+            from uvisbox_assistant.utils.output_control import get_current_session
+            session = get_current_session()
+            if session:
+                if "_error_details" in result:
+                    # Exception from tool execution
+                    error_details = result["_error_details"]
+                    session.record_error(
+                        tool_name=tool_name,
+                        error=error_details["exception"],
+                        traceback_str=error_details["traceback"],
+                        user_message=result.get("message", str(error_details["exception"])),
+                        auto_fixed=False
+                    )
+                else:
+                    # Manual error (e.g., validation error in node)
+                    error_msg = result.get("message", "Unknown error")
+                    session.record_error(
+                        tool_name=tool_name,
+                        error=Exception(error_msg),
+                        traceback_str="",
+                        user_message=error_msg,
+                        auto_fixed=False
+                    )
 
         vprint(f"[ANALYZER TOOL] Result: {result}")
         log_tool_result(tool_name, result)

@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2025-11-05
+
+### Added
+- **CSV/TXT file format support**: All visualization and data tools now accept CSV and TXT files in addition to NPY format
+  - `load_array()` utility function for unified multi-format data loading
+  - Supports `.npy` (binary numpy), `.csv` (comma-separated), and `.txt` (space/tab-delimited) formats
+  - Automatic delimiter detection with fallback for misnamed files (e.g., space-separated files with .csv extension)
+- Enhanced error recording infrastructure across all tool categories (VIS, DATA, ANALYZER, STATISTICS)
+
+### Changed
+- Updated all visualization tools to use `load_array()` instead of direct `np.load()`:
+  - `plot_functional_boxplot`
+  - `plot_curve_boxplot`
+  - `plot_contour_boxplot`
+  - `plot_probabilistic_marching_squares`
+  - `plot_uncertainty_lobes`
+  - `plot_squid_glyph_2D`
+- Updated data tools: `load_npy` now supports CSV/TXT formats
+- Updated statistics tools: `compute_functional_boxplot_statistics` now supports CSV/TXT formats
+
+### Fixed
+- CSV files with space delimiters (misnamed as .csv) now load correctly with automatic fallback
+- Pytest configuration: Added missing `e2e` marker to fix strict-markers validation
+
+### Technical Details
+- `load_array()` returns tuple: `(success: bool, array: np.ndarray, error_msg: str)`
+- CSV loading tries comma delimiter first, falls back to whitespace if needed
+- Error recording now captures full tracebacks before serialization for better debugging
+
 ## [0.3.2] - 2025-11-05
 
 ### Added

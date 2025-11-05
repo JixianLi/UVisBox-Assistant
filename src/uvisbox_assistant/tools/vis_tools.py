@@ -61,7 +61,11 @@ def plot_functional_boxplot(
         if not Path(data_path).exists():
             return {"status": "error", "message": f"Data file not found: {data_path}"}
 
-        curves = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, curves, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         # Validate shape (should be 2D: n_curves x n_points)
         if curves.ndim != 2:
@@ -190,7 +194,11 @@ def plot_curve_boxplot(
         if not Path(data_path).exists():
             return {"status": "error", "message": f"Data file not found: {data_path}"}
 
-        curves = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, curves, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         # Handle 2D array (functional/1D curves): add x-coordinates to convert to 3D array
         if curves.ndim == 2:
@@ -303,7 +311,11 @@ def plot_probabilistic_marching_squares(
         if not Path(data_path).exists():
             return {"status": "error", "message": f"Data file not found: {data_path}"}
 
-        field = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, field, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         if field.ndim != 3:
             return {
@@ -385,8 +397,15 @@ def plot_uncertainty_lobes(
         if not Path(positions_path).exists():
             return {"status": "error", "message": f"Positions file not found: {positions_path}"}
 
-        vectors = np.load(vectors_path)
-        positions = np.load(positions_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, vectors, error_msg = load_array(vectors_path)
+        if not success:
+            return {"status": "error", "message": f"Vectors: {error_msg}"}
+
+        success, positions, error_msg = load_array(positions_path)
+        if not success:
+            return {"status": "error", "message": f"Positions: {error_msg}"}
 
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
@@ -481,8 +500,15 @@ def plot_squid_glyph_2D(
         if not Path(positions_path).exists():
             return {"status": "error", "message": f"Positions file not found: {positions_path}"}
 
-        vectors = np.load(vectors_path)
-        positions = np.load(positions_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, vectors, error_msg = load_array(vectors_path)
+        if not success:
+            return {"status": "error", "message": f"Vectors: {error_msg}"}
+
+        success, positions, error_msg = load_array(positions_path)
+        if not success:
+            return {"status": "error", "message": f"Positions: {error_msg}"}
 
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
@@ -591,7 +617,11 @@ def plot_contour_boxplot(
         if not Path(data_path).exists():
             return {"status": "error", "message": f"Data file not found: {data_path}"}
 
-        data = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, data, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         # Validate shape (should be 3D)
         if data.ndim != 3:

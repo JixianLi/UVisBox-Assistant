@@ -726,19 +726,19 @@ def test_generate_scalar_field_save_exception(mock_save):
     print("✓ test_generate_scalar_field_save_exception")
 
 
-@patch('numpy.load')
-def test_load_npy_corrupt_data(mock_load, tmp_path):
+@patch('uvisbox_assistant.utils.data_loading.load_array')
+def test_load_npy_corrupt_data(mock_load_array, tmp_path):
     """Test load_npy with corrupt file to trigger exception."""
     npy_file = tmp_path / "corrupt.npy"
     npy_file.write_text("not valid npy data")
 
-    # Mock numpy.load to raise exception
-    mock_load.side_effect = ValueError("Failed to load npy")
+    # Mock load_array to return error
+    mock_load_array.return_value = (False, None, "Error loading .npy file: Failed to load npy")
 
     result = load_npy(str(npy_file))
 
     assert result['status'] == 'error'
-    assert '_error_details' in result
+    assert 'Failed to load npy' in result['message']
     print("✓ test_load_npy_corrupt_data")
 
 

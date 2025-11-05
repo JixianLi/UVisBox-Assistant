@@ -280,7 +280,11 @@ def compute_functional_boxplot_statistics(
             }
 
         # Load data
-        curves = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, curves, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         # Validate shape
         if curves.ndim != 2:
