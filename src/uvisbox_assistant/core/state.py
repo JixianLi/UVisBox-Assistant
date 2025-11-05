@@ -21,8 +21,7 @@ class GraphState(TypedDict):
         # NEW: Uncertainty analysis fields (v0.3.0)
         raw_statistics: Raw output from functional_boxplot_summary_statistics (numpy arrays)
         processed_statistics: LLM-friendly structured summary from statistics_tool
-        analysis_report: Generated text report from analyzer_tool
-        analysis_type: Report format - "inline" | "quick" | "detailed" | None
+        analysis_reports: Dictionary of all three report types {"inline": "...", "quick": "...", "detailed": "..."}
     """
     # Messages list - appended to over time
     messages: Annotated[List[BaseMessage], operator.add]
@@ -41,8 +40,7 @@ class GraphState(TypedDict):
     # NEW: Uncertainty analysis state (v0.3.0)
     raw_statistics: Optional[dict]
     processed_statistics: Optional[dict]
-    analysis_report: Optional[str]
-    analysis_type: Optional[str]
+    analysis_reports: Optional[Dict[str, str]]
 
 
 def create_initial_state(user_message: str) -> GraphState:
