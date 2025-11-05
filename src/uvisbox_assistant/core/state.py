@@ -129,20 +129,18 @@ def update_state_with_statistics(state: GraphState, raw_stats: dict, processed_s
     }
 
 
-def update_state_with_analysis(state: GraphState, report: str, analysis_type: str) -> dict:
+def update_state_with_analysis(state: GraphState, reports: Dict[str, str]) -> dict:
     """
     Update state after successful analyzer tool execution.
 
     Args:
         state: Current graph state
-        report: Generated text report
-        analysis_type: Type of report ("inline" | "quick" | "detailed")
+        reports: Dictionary with all three report types {"inline": "...", "quick": "...", "detailed": "..."}
 
     Returns:
         Dict of updates to merge into state
     """
     return {
-        "analysis_report": report,
-        "analysis_type": analysis_type,
+        "analysis_reports": reports,
         "error_count": 0  # Reset error count on success
     }
