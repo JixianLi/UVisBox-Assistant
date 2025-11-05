@@ -389,8 +389,15 @@ def plot_uncertainty_lobes(
         if not Path(positions_path).exists():
             return {"status": "error", "message": f"Positions file not found: {positions_path}"}
 
-        vectors = np.load(vectors_path)
-        positions = np.load(positions_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, vectors, error_msg = load_array(vectors_path)
+        if not success:
+            return {"status": "error", "message": f"Vectors: {error_msg}"}
+
+        success, positions, error_msg = load_array(positions_path)
+        if not success:
+            return {"status": "error", "message": f"Positions: {error_msg}"}
 
         fig, ax = plt.subplots(
             figsize=config.DEFAULT_VIS_PARAMS["figsize"],
