@@ -164,6 +164,49 @@ class TestCallDataTool:
         assert "error" in result["messages"][0].content.lower()
         assert result.get("error_count", 0) > 0
 
+    @patch('uvisbox_assistant.core.nodes.DATA_TOOLS')
+    def test_calls_data_tool_with_valid_result(self, mock_data_tools):
+        """Test successful data tool call with output_path."""
+        mock_tool = MagicMock()
+        mock_tool.return_value = {
+            'status': 'success',
+            'output_path': '/path/to/data.npy',
+            'message': 'Generated'
+        }
+        mock_data_tools.__contains__.return_value = True
+        mock_data_tools.__getitem__.return_value = mock_tool
+
+        state = create_initial_state("test")
+        state['session_files'] = []
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'generate_curves', 'args': {'n_curves': 10}, 'id': '123'}]
+        ))
+
+        result = call_data_tool(state)
+
+        assert 'messages' in result
+        assert len(result['messages']) == 1
+        assert 'current_data_path' in result
+        assert result['current_data_path'] == '/path/to/data.npy'
+
+    @patch('uvisbox_assistant.core.nodes.DATA_TOOLS')
+    def test_handles_tool_not_in_dict(self, mock_data_tools):
+        """Test handling when tool not in DATA_TOOLS dict."""
+        mock_data_tools.__contains__.return_value = False
+
+        state = create_initial_state("test")
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'nonexistent_tool', 'args': {}, 'id': '123'}]
+        ))
+
+        result = call_data_tool(state)
+
+        assert 'error_count' in result
+        assert result['error_count'] > 0
+        assert 'error' in result['messages'][0].content.lower()
+
 
 class TestCallVisTool:
     """Test call_vis_tool node."""
@@ -236,6 +279,29 @@ class TestCallVisTool:
         assert "last_vis_params" in result
         assert result["error_count"] == 0
 
+    @patch('uvisbox_assistant.core.nodes.VIS_TOOLS')
+    def test_calls_vis_tool_with_vis_params(self, mock_vis_tools):
+        """Test successful vis tool call that returns vis params."""
+        mock_tool = MagicMock()
+        mock_tool.return_value = {
+            'status': 'success',
+            'message': 'Plotted',
+            '_vis_params': {'_tool_name': 'plot_test', 'param': 'value'}
+        }
+        mock_vis_tools.__contains__.return_value = True
+        mock_vis_tools.__getitem__.return_value = mock_tool
+
+        state = create_initial_state("test")
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'plot_test', 'args': {'data_path': '/test.npy'}, 'id': '123'}]
+        ))
+
+        result = call_vis_tool(state)
+
+        assert 'last_vis_params' in result
+        assert result['last_vis_params']['_tool_name'] == 'plot_test'
+
 
 class TestCallStatisticsTool:
     """Test call_statistics_tool node."""
@@ -281,6 +347,29 @@ class TestCallStatisticsTool:
         assert "messages" in result
         assert "raw_statistics" in result
         assert "processed_statistics" in result
+
+    @patch('uvisbox_assistant.core.nodes.STATISTICS_TOOLS')
+    def test_calls_statistics_tool_with_stats(self, mock_stats_tools):
+        """Test successful statistics tool call that returns statistics."""
+        mock_tool = MagicMock()
+        mock_tool.return_value = {
+            'status': 'success',
+            'processed_statistics': {'median': {}, 'outliers': {}},
+            'raw_statistics': {}
+        }
+        mock_stats_tools.__contains__.return_value = True
+        mock_stats_tools.__getitem__.return_value = mock_tool
+
+        state = create_initial_state("test")
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'compute_stats', 'args': {'data_path': '/test.npy'}, 'id': '123'}]
+        ))
+
+        result = call_statistics_tool(state)
+
+        assert 'processed_statistics' in result
+        assert 'raw_statistics' in result
 
 
 class TestCallAnalyzerTool:
@@ -359,3 +448,49 @@ class TestCallAnalyzerTool:
         assert "messages" in result
         assert "analysis_report" in result
         assert "analysis_type" in result
+
+    @patch('uvisbox_assistant.core.nodes.ANALYZER_TOOLS')
+    def test_injects_statistics_into_analyzer(self, mock_analyzer_tools):
+        """Test statistics are injected from state for generate_uncertainty_report."""
+        mock_tool = MagicMock()
+        mock_tool.return_value = {
+            'status': 'success',
+            'report': 'Analysis report',
+            'analysis_type': 'quick'
+        }
+        mock_analyzer_tools.__contains__.return_value = True
+        mock_analyzer_tools.__getitem__.return_value = mock_tool
+
+        state = create_initial_state("test")
+        state['processed_statistics'] = {'median': {}, 'outliers': {}}
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'generate_uncertainty_report', 'args': {'analysis_type': 'quick'}, 'id': '123'}]
+        ))
+
+        result = call_analyzer_tool(state)
+
+        # Verify tool was called
+        assert mock_tool.called
+        # Verify statistics were injected
+        call_args = mock_tool.call_args[1]
+        assert 'processed_statistics' in call_args
+        assert call_args['processed_statistics'] == {'median': {}, 'outliers': {}}
+
+    @patch('uvisbox_assistant.core.nodes.ANALYZER_TOOLS')
+    def test_handles_missing_statistics_for_report(self, mock_analyzer_tools):
+        """Test error when statistics missing for generate_uncertainty_report."""
+        mock_analyzer_tools.__contains__.return_value = True
+
+        state = create_initial_state("test")
+        # No processed_statistics in state
+        state['messages'].append(AIMessage(
+            content="",
+            tool_calls=[{'name': 'generate_uncertainty_report', 'args': {'analysis_type': 'quick'}, 'id': '123'}]
+        ))
+
+        result = call_analyzer_tool(state)
+
+        # Should return error
+        assert 'error_count' in result
+        assert result['error_count'] > 0
