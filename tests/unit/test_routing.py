@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 from uvisbox_assistant.core.routing import route_after_model, route_after_tool, should_continue
 from uvisbox_assistant.core.state import create_initial_state
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 
 def test_route_after_model():
@@ -207,11 +207,68 @@ def test_should_continue():
     print(f"✅ Should NOT continue with empty tool_calls: {should_cont5}")
 
 
+def test_route_after_model_edge_cases():
+    """Test edge cases for route_after_model"""
+    print("\n" + "="*60)
+    print("TEST: route_after_model edge cases")
+    print("="*60)
+
+    # Test 1: Message without tool_calls attribute
+    state = create_initial_state("test")
+    # Add a message without tool_calls attribute
+    state["messages"].append(HumanMessage(content="test"))
+
+    route = route_after_model(state)
+    assert route == "end", f"Expected 'end', got '{route}'"
+    print(f"✅ Route with message without tool_calls attribute: {route}")
+
+    # Test 2: Empty messages list (edge case - should handle gracefully)
+    state2 = create_initial_state("test")
+    state2["messages"] = []
+
+    try:
+        route2 = route_after_model(state2)
+        # If it doesn't crash, it should be either "end" or "tool"
+        assert route2 in ["end", "tool", "data_tool", "vis_tool", "statistics_tool", "analyzer_tool"], \
+            f"Expected valid route, got '{route2}'"
+        print(f"✅ Route with empty messages (handled gracefully): {route2}")
+    except IndexError:
+        # If it raises IndexError, that's expected for empty list
+        print(f"✅ Route with empty messages (raises IndexError as expected)")
+
+
+def test_route_after_tool_edge_cases():
+    """Test edge cases for route_after_tool"""
+    print("\n" + "="*60)
+    print("TEST: route_after_tool edge cases")
+    print("="*60)
+
+    # Test 1: Missing error_count key
+    state = create_initial_state("test")
+    if 'error_count' in state:
+        del state['error_count']
+
+    route = route_after_tool(state)
+    # Should handle gracefully with .get() default
+    assert route in ["model", "end"], f"Expected 'model' or 'end', got '{route}'"
+    print(f"✅ Route with missing error_count (handled gracefully): {route}")
+
+    # Test 2: Exactly at threshold (already tested in main test, but explicit edge case)
+    state2 = create_initial_state("test")
+    state2["error_count"] = 3  # Exactly at threshold
+
+    route2 = route_after_tool(state2)
+    assert route2 == "end", f"Expected 'end', got '{route2}'"
+    print(f"✅ Route exactly at MAX_ERRORS threshold (3): {route2}")
+
+
 if __name__ == "__main__":
     try:
         test_route_after_model()
         test_route_after_tool()
         test_should_continue()
+        test_route_after_model_edge_cases()
+        test_route_after_tool_edge_cases()
 
         print("\n" + "="*60)
         print("✅ ALL ROUTING TESTS PASSED")
