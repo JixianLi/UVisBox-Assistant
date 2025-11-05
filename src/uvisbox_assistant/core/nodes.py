@@ -424,12 +424,11 @@ def call_analyzer_tool(state: GraphState) -> Dict:
         # Update state
         state_updates = {"messages": [tool_message]}
 
-        if result.get("status") == "success" and "report" in result:
+        if result.get("status") == "success" and "reports" in result:
             execution_entry["status"] = "success"
-            # Extract report and analysis type from result
-            report = result["report"]
-            analysis_type = result.get("analysis_type", "quick")
-            state_updates.update(update_state_with_analysis(state, report, analysis_type))
+            # Extract all three reports from result
+            reports = result["reports"]  # {"inline": "...", "quick": "...", "detailed": "..."}
+            state_updates.update(update_state_with_analysis(state, reports))
 
             # Check for auto-fix pattern
             _check_and_mark_auto_fix(state, tool_name, state_updates)
