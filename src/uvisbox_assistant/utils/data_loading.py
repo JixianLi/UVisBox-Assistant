@@ -39,8 +39,12 @@ def load_array(filepath: str) -> Tuple[bool, Optional[np.ndarray], str]:
         if suffix == '.npy':
             array = np.load(filepath)
         elif suffix == '.csv':
-            # CSV files use comma delimiter
-            array = np.loadtxt(filepath, delimiter=',')
+            # CSV files: try comma delimiter first, fall back to whitespace
+            try:
+                array = np.loadtxt(filepath, delimiter=',')
+            except ValueError:
+                # If comma delimiter fails, try whitespace (common for misnamed files)
+                array = np.loadtxt(filepath, delimiter=None)
         elif suffix == '.txt':
             # TXT files use whitespace delimiter (space or tab)
             # delimiter=None tells numpy to auto-detect whitespace
