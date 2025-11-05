@@ -291,6 +291,8 @@ def call_statistics_tool(state: GraphState) -> Dict:
                 "message": f"Unknown statistics tool: {tool_name}"
             }
         else:
+            # User-friendly CLI feedback
+            vprint("[STATISTICS] Computing functional boxplot statistics...")
             tool_func = STATISTICS_TOOLS[tool_name]
             result = tool_func(**tool_args)
 
