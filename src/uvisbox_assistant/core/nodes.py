@@ -91,6 +91,20 @@ def call_data_tool(state: GraphState) -> Dict:
             tool_func = DATA_TOOLS[tool_name]
             result = tool_func(**tool_args)
 
+        # Check for errors and record immediately (before serialization)
+        if result.get("status") == "error" and "_error_details" in result:
+            from uvisbox_assistant.utils.output_control import get_current_session
+            session = get_current_session()
+            if session:
+                error_details = result["_error_details"]
+                session.record_error(
+                    tool_name=tool_name,
+                    error=error_details["exception"],
+                    traceback_str=error_details["traceback"],
+                    user_message=result.get("message", str(error_details["exception"])),
+                    auto_fixed=False
+                )
+
         vprint(f"[DATA TOOL] Result: {result}")
         log_tool_result(tool_name, result)
 
