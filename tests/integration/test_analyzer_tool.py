@@ -153,3 +153,97 @@ class TestReportNoRecommendations:
         for word in prescriptive_words:
             assert word not in report_lower, \
                 f"Report should be descriptive only, found prescriptive word: {word}"
+
+
+class TestMultiReportGeneration:
+    """Test that analyzer generates all three report types at once (v0.3.2)"""
+
+    def test_all_three_reports_generated(self):
+        """Verify analyzer returns inline, quick, and detailed reports in single call"""
+        # Arrange
+        processed_stats = {
+            "data_shape": {"n_curves": 100, "n_points": 50},
+            "median": {
+                "trend": "increasing",
+                "overall_slope": 0.5,
+                "fluctuation_level": "low",
+                "smoothness_score": 0.95,
+                "value_range": {"min": 0.0, "max": 10.0}
+            },
+            "bands": {
+                "band_widths": [0.5, 1.0, 1.5],
+                "overall_uncertainty": 0.3
+            },
+            "outliers": {
+                "count": 2,
+                "similarity_to_median": 0.7
+            },
+            "method": "modified_band_depth"
+        }
+
+        # Act
+        from uvisbox_assistant.tools.analyzer_tools import generate_uncertainty_report
+        result = generate_uncertainty_report(processed_stats)
+
+        # Assert
+        assert result["status"] == "success", f"Expected success, got: {result.get('message')}"
+        assert "reports" in result, "Result should contain 'reports' key"
+        assert isinstance(result["reports"], dict), "Reports should be a dictionary"
+
+        # Verify all three types present
+        assert "inline" in result["reports"], "Missing inline report"
+        assert "quick" in result["reports"], "Missing quick report"
+        assert "detailed" in result["reports"], "Missing detailed report"
+
+        # Verify each is non-empty string
+        for report_type in ["inline", "quick", "detailed"]:
+            report = result["reports"][report_type]
+            assert isinstance(report, str), f"{report_type} report should be string"
+            assert len(report) > 0, f"{report_type} report should not be empty"
+            assert len(report.split()) > 5, f"{report_type} report should have multiple words"
+
+    def test_multi_report_word_counts(self):
+        """Verify different report types have appropriate lengths"""
+        # Arrange
+        processed_stats = {
+            "data_shape": {"n_curves": 100, "n_points": 50},
+            "median": {
+                "trend": "increasing",
+                "overall_slope": 0.5,
+                "fluctuation_level": "low",
+                "smoothness_score": 0.95,
+                "value_range": {"min": 0.0, "max": 10.0}
+            },
+            "bands": {
+                "band_widths": [0.5, 1.0, 1.5],
+                "overall_uncertainty": 0.3
+            },
+            "outliers": {
+                "count": 2,
+                "similarity_to_median": 0.7
+            },
+            "method": "modified_band_depth"
+        }
+
+        # Act
+        from uvisbox_assistant.tools.analyzer_tools import generate_uncertainty_report
+        result = generate_uncertainty_report(processed_stats)
+
+        # Assert - verify appropriate lengths
+        reports = result["reports"]
+        inline_words = len(reports["inline"].split())
+        quick_words = len(reports["quick"].split())
+        detailed_words = len(reports["detailed"].split())
+
+        # Inline should be shortest (1 sentence, ~15-30 words)
+        assert 10 <= inline_words <= 40, f"Inline should be 10-40 words, got {inline_words}"
+
+        # Quick should be medium (3-5 sentences, ~50-100 words)
+        assert 40 <= quick_words <= 150, f"Quick should be 40-150 words, got {quick_words}"
+
+        # Detailed should be longest (>100 words)
+        assert detailed_words >= 80, f"Detailed should be >=80 words, got {detailed_words}"
+
+        # Verify ordering: inline < quick < detailed
+        assert inline_words < quick_words, "Inline should be shorter than quick"
+        assert quick_words < detailed_words, "Quick should be shorter than detailed"
