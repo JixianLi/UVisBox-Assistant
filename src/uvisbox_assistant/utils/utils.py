@@ -6,13 +6,13 @@ from uvisbox_assistant import config
 
 def is_data_tool(tool_name: str) -> bool:
     """Check if a tool name corresponds to a data tool."""
-    from uvisbox_assistant.data_tools import DATA_TOOLS
+    from uvisbox_assistant.tools.data_tools import DATA_TOOLS
     return tool_name in DATA_TOOLS
 
 
 def is_vis_tool(tool_name: str) -> bool:
     """Check if a tool name corresponds to a vis tool."""
-    from uvisbox_assistant.vis_tools import VIS_TOOLS
+    from uvisbox_assistant.tools.vis_tools import VIS_TOOLS
     return tool_name in VIS_TOOLS
 
 
@@ -27,10 +27,10 @@ def get_tool_type(tool_name: str) -> str:
         Tool type: "data", "vis", "statistics", "analyzer", or "unknown"
     """
     # Import tool registries
-    from uvisbox_assistant.data_tools import DATA_TOOLS
-    from uvisbox_assistant.vis_tools import VIS_TOOLS
-    from uvisbox_assistant.statistics_tools import STATISTICS_TOOLS
-    from uvisbox_assistant.analyzer_tools import ANALYZER_TOOLS
+    from uvisbox_assistant.tools.data_tools import DATA_TOOLS
+    from uvisbox_assistant.tools.vis_tools import VIS_TOOLS
+    from uvisbox_assistant.tools.statistics_tools import STATISTICS_TOOLS
+    from uvisbox_assistant.tools.analyzer_tools import ANALYZER_TOOLS
 
     if tool_name in DATA_TOOLS:
         return "data"

@@ -285,7 +285,6 @@ After completing the environment setup:
 
 - **README.md** - Project overview and features
 - **TESTING.md** - Testing strategies and guidelines
-- **CONTRIBUTING.md** - Contribution guidelines
-- **CLAUDE.md** - Implementation details for AI agents
+- **CONTRIBUTING.md** - Contribution guidelines and development setup
 
 That's it! No `.env` files needed. Your environment is ready for UVisBox-Assistant v0.1.0.

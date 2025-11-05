@@ -5,6 +5,136 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-11-05
+
+### Added
+
+**Comprehensive Test Coverage Infrastructure** - 89.29% overall coverage with 345 total tests
+
+**Test Expansion:**
+- **277 unit tests** (0 API calls) - up from 77
+  - Added 200+ new unit tests across all core modules
+  - Comprehensive coverage for core/, tools/, session/, errors/, utils/
+  - Mock-based testing for error paths and edge cases
+  - 100% coverage: routing.py, state.py, hybrid_control.py, logger.py, utils.py, error_tracking.py
+
+- **53 integration tests** (~100 API calls)
+  - **Layer 1**: Tool interface tests (21 tests) - Direct tool-to-UVisBox interface verification
+    - Tests all 6 visualization modules with real UVisBox
+    - Tests statistics tool output structure
+    - Catches KEY_NOT_FOUND and API changes immediately
+  - **Layer 2**: E2E pipeline tests (15 tests) - Complete user workflow verification
+    - Tests all 6 visualization types end-to-end
+    - Tests full analyzer pipeline (inline, quick, detailed)
+    - Tests multi-turn workflows and session management
+    - Verifies backward compatibility for users
+  - Existing tests: analyzer_tool (3), hybrid_control (4), error_handling (6), session_management (3)
+
+- **15 E2E tests** (~30 API calls)
+  - matplotlib_behavior (3 tests)
+  - analysis_workflows (12 tests)
+
+**Coverage Achievements:**
+```
+Overall: 89.29%
+
+Key modules:
+- vis_tools.py:        96.69% ✅
+- data_tools.py:       92.47% ✅
+- statistics_tools.py: 92.92% ✅
+- command_parser.py:   94.44% ✅
+- routing.py:         100.00% ✅
+- state.py:           100.00% ✅
+- hybrid_control.py:  100.00% ✅
+```
+
+**Coverage Infrastructure:**
+- `.coveragerc` configuration file with exclusion rules
+- HTML coverage reports (`htmlcov/index.html`)
+- Test runner `--coverage` flag for all test categories
+- Mock-based testing strategy for error paths
+- Documentation in TESTING.md
+
+**Documentation:**
+- Simplified TESTING.md from 819 to 438 lines (-47%)
+- Clear structure: Quick Start, Test Structure, Test Roles, Code Coverage
+- Removed rate limit references (kept 429 error handling)
+- Added TDD workflow guidance for adding/modifying/removing features
+- Two-layer integration test explanation
+
+### Changed
+
+**Project Restructure** - Feature-based directory architecture for improved code organization
+
+**Directory Structure:**
+- Reorganized 21 Python files from flat structure into 6 feature-based subdirectories:
+  - `core/` - LangGraph workflow orchestration (graph, nodes, routing, state)
+  - `tools/` - Data generation, visualization, statistics, and analysis tools
+  - `session/` - User interaction and session management (conversation, hybrid control, command parser)
+  - `llm/` - LLM configuration and model setup
+  - `errors/` - Error handling infrastructure (tracking, interpretation)
+  - `utils/` - Utilities and logging
+
+**Backward Compatibility:**
+- Root `__init__.py` re-exports all public APIs for backward compatibility
+- Legacy imports (e.g., `from uvisbox_assistant import ConversationSession`) continue working
+- New structured imports also supported (e.g., `from uvisbox_assistant.session import ConversationSession`)
+- Git history fully preserved using `git mv` for all file moves
+
+**Benefits:**
+- Clear feature boundaries and single responsibility per directory
+- Improved discoverability for new developers (3-4 files per directory vs 21 in one)
+- Better scalability for future feature additions
+- Reduced cognitive load
+- Zero functional changes (pure structural refactoring)
+
+**Testing:**
+- ✅ All 345 tests pass (277 unit, 53 integration, 15 e2e)
+- ✅ Backward compatibility verified with Layer 2 integration tests
+- ✅ Import updates automated across 25 files (57 imports)
+
+**Migration Tools:**
+- `scripts/update_imports.py` - Automated import updater with dry-run mode
+- `scripts/verify_compatibility.py` - Backward compatibility verification
+
+### Technical Details
+
+**Test Organization:**
+```
+tests/
+├── unit/          277 tests (0 API calls, < 10 seconds)
+├── integration/    53 tests (~100 API calls, 3-5 minutes)
+├── e2e/            15 tests (~30 API calls, 2-3 minutes)
+└── interactive/    Manual testing (24+ scenarios)
+```
+
+**Coverage Configuration:**
+- Source: `src/uvisbox_assistant`
+- Omit: Entry points, `__init__.py`, test files
+- Precision: 2 decimal places
+- Exclude lines: Debug code, abstract methods, defensive code
+
+**Key Test Improvements:**
+- Mock-based testing reaches 90%+ coverage (vs 60-70% without)
+- All error handling paths tested
+- Edge cases covered (empty data, boundary values, malformed inputs)
+- UVisBox API changes detected immediately via Layer 1 tests
+
+### Performance
+
+- Unit tests: < 10 seconds (277 tests, 0 API calls)
+- Integration tests: 3-5 minutes (53 tests, ~100 API calls)
+- E2E tests: 2-3 minutes (15 tests, ~30 API calls)
+- Total test suite: 8-10 minutes (345 tests, ~130 API calls)
+- Coverage report generation: < 15 seconds
+
+### Backward Compatibility
+
+- ✅ Fully backward compatible
+- ✅ No breaking changes to APIs or commands
+- ✅ Layer 2 integration tests verify user-facing workflows
+- ✅ All existing tests pass after restructure
+
 ## [0.3.0] - 2025-11-04
 
 ### Added
@@ -48,7 +178,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Documentation:**
 - **`docs/ANALYSIS_EXAMPLES.md`**: 400+ lines covering all workflows, formats, examples
 - **Outlier detection clarification**: Explains depth-based detection vs. percentile bands
-- **Updated all docs**: CLAUDE.md, README.md, API.md, TESTING.md with v0.3.0 info
+- **Updated all docs**: README.md, API.md, TESTING.md with v0.3.0 info
 
 ### Changed
 
@@ -352,7 +482,6 @@ For existing users upgrading from 0.1.x:
   - `README.md` - Project overview and quick start
   - `docs/USER_GUIDE.md` - Detailed styling examples and workflows
   - `docs/API.md` - Complete API reference
-  - `CLAUDE.md` - Implementation details for AI agents
   - `TESTING.md` - Comprehensive testing strategies
   - `CONTRIBUTING.md` - Contribution guidelines
   - `LICENSE` - MIT License

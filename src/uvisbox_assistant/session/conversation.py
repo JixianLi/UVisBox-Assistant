@@ -2,12 +2,12 @@
 
 from typing import Optional, Dict, List
 from datetime import datetime
-from uvisbox_assistant.state import GraphState, create_initial_state
-from uvisbox_assistant.graph import graph_app
-from uvisbox_assistant.hybrid_control import execute_simple_command, is_hybrid_eligible
-from uvisbox_assistant.error_tracking import ErrorRecord
-from uvisbox_assistant.output_control import set_session, vprint
-from uvisbox_assistant.error_interpretation import interpret_uvisbox_error, format_error_with_hint
+from uvisbox_assistant.core.state import GraphState, create_initial_state
+from uvisbox_assistant.core.graph import graph_app
+from uvisbox_assistant.session.hybrid_control import execute_simple_command, is_hybrid_eligible
+from uvisbox_assistant.errors.error_tracking import ErrorRecord
+from uvisbox_assistant.utils.output_control import set_session, vprint
+from uvisbox_assistant.errors.error_interpretation import interpret_uvisbox_error, format_error_with_hint
 from langchain_core.messages import HumanMessage, AIMessage
 
 
@@ -225,7 +225,7 @@ class ConversationSession:
 
     def clear(self):
         """Clear session data and temporary files."""
-        from uvisbox_assistant.data_tools import clear_session
+        from uvisbox_assistant.tools.data_tools import clear_session
 
         # Clear temp files
         result = clear_session()

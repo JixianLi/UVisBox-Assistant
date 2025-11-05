@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
-from uvisbox_assistant.graph import run_graph
-from uvisbox_assistant.state import GraphState
+from uvisbox_assistant.core.graph import run_graph
+from uvisbox_assistant.core.state import GraphState
 from pathlib import Path
 
 
@@ -130,7 +130,7 @@ def execute_option(option: int, state: GraphState = None) -> GraphState:
     
     elif option == 24:
         # Clear temp files
-        from uvisbox_assistant.utils import cleanup_temp_files
+        from uvisbox_assistant.utils.utils import cleanup_temp_files
         print("\n🧹 Clearing temporary files...")
         cleanup_temp_files()
         return None

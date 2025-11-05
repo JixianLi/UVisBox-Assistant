@@ -1,11 +1,11 @@
 """LangGraph workflow definition for UVisBox-Assistant"""
 from langgraph.graph import StateGraph, END
-from uvisbox_assistant.state import GraphState
-from uvisbox_assistant.nodes import (
+from uvisbox_assistant.core.state import GraphState
+from uvisbox_assistant.core.nodes import (
     call_model, call_data_tool, call_vis_tool,
     call_statistics_tool, call_analyzer_tool
 )
-from uvisbox_assistant.routing import route_after_model, route_after_tool
+from uvisbox_assistant.core.routing import route_after_model, route_after_tool
 
 
 def create_graph():
@@ -107,7 +107,7 @@ def run_graph(user_input: str, initial_state: dict = None) -> GraphState:
     Returns:
         Final state after graph execution
     """
-    from uvisbox_assistant.state import create_initial_state
+    from uvisbox_assistant.core.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)
@@ -134,7 +134,7 @@ def stream_graph(user_input: str, initial_state: dict = None):
     Yields:
         State updates as they occur
     """
-    from uvisbox_assistant.state import create_initial_state
+    from uvisbox_assistant.core.state import create_initial_state
 
     if initial_state is None:
         state = create_initial_state(user_input)

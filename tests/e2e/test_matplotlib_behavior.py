@@ -47,8 +47,8 @@ def test_multiple_vis_calls():
     print("TEST: Multiple Vis Tool Calls")
     print("="*70)
 
-    from uvisbox_assistant.vis_tools import plot_functional_boxplot
-    from uvisbox_assistant.data_tools import generate_ensemble_curves
+    from uvisbox_assistant.tools.vis_tools import plot_functional_boxplot
+    from uvisbox_assistant.tools.data_tools import generate_ensemble_curves
 
     # Generate data
     print("  Generating first dataset...")

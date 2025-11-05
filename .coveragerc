@@ -1,0 +1,50 @@
+# Coverage.py configuration for UVisBox-Assistant
+
+[run]
+source = src/uvisbox_assistant
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */site-packages/*
+    */__init__.py
+    */main.py
+    */__main__.py
+
+[report]
+# Show missing lines in the terminal report
+show_missing = True
+
+# Precision for coverage percentage
+precision = 2
+
+# Exclude lines from coverage (e.g., defensive code, debugging)
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code
+    def __repr__
+    if self\.debug
+    if debug
+
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+
+    # Don't complain about abstract methods
+    @(abc\.)?abstractmethod
+
+[html]
+directory = htmlcov
+title = UVisBox-Assistant Coverage Report
+
+[paths]
+source =
+    src/uvisbox_assistant
+    */site-packages/uvisbox_assistant

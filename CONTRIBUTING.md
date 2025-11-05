@@ -16,9 +16,8 @@ Thank you for your interest in contributing to UVisBox-Assistant! This document 
 UVisBox-Assistant is a natural language interface for the UVisBox uncertainty visualization library. Before contributing, please:
 
 1. Read the [README.md](README.md) to understand the project
-2. Review [CLAUDE.md](CLAUDE.md) for implementation details
-3. Check [existing issues](https://github.com/yourusername/uvisbox_assistant/issues) to avoid duplicates
-4. Familiarize yourself with the [testing guide](TESTING.md)
+2. Check [existing issues](https://github.com/yourusername/uvisbox_assistant/issues) to avoid duplicates
+3. Familiarize yourself with the [testing guide](TESTING.md)
 
 ## Development Setup
 
@@ -200,7 +199,6 @@ python tests/utils/run_all_tests.py
 
 2. **Update documentation** if needed:
    - README.md for user-facing changes
-   - CLAUDE.md for implementation changes
    - docs/API.md for API changes
    - docs/USER_GUIDE.md for new features
 
@@ -372,8 +370,8 @@ test(unit): add command parser tests for outliers styling
 ## Questions?
 
 - Open an issue for questions
-- Check [CLAUDE.md](CLAUDE.md) for implementation details
 - Review [docs/](docs/) for API and user guides
+- Check [TESTING.md](TESTING.md) for testing guidelines
 
 ## License
 

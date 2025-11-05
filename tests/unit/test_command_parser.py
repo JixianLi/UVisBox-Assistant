@@ -6,7 +6,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from uvisbox_assistant.command_parser import parse_simple_command, apply_command_to_params
+from uvisbox_assistant.session.command_parser import parse_simple_command, apply_command_to_params
 
 
 def test_parse_colormap():

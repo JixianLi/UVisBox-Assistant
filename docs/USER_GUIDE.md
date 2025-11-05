@@ -599,5 +599,5 @@ Happy visualizing! 🎨📊
 
 For more details:
 - **API Reference**: See `API.md` for complete parameter documentation
-- **Developer Guide**: See `CLAUDE.md` for implementation details
 - **Testing**: See `TESTING.md` for testing strategies
+- **Contributing**: See `CONTRIBUTING.md` for development guidelines

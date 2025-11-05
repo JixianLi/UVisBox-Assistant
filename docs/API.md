@@ -1007,5 +1007,5 @@ Functions for interpreting and enhancing error messages.
 
 For more information:
 - **User Guide**: See `USER_GUIDE.md` for styling examples and workflows
-- **Developer Guide**: See `CLAUDE.md` for implementation details
 - **Testing**: See `TESTING.md` for testing strategies
+- **Contributing**: See `CONTRIBUTING.md` for development guidelines
