@@ -164,3 +164,34 @@ class TestStreamGraph:
         assert results[0] == {"node_1": {"data": "update1"}}
         assert results[1] == {"node_2": {"data": "update2"}}
         assert results[2] == {"node_3": {"data": "update3"}}
+
+    @patch('uvisbox_assistant.core.graph.graph_app')
+    def test_stream_graph_yields_state_updates_as_dict(self, mock_graph_app):
+        """Test stream_graph yields state updates as dictionaries."""
+        from langchain_core.messages import HumanMessage, AIMessage
+
+        # Setup mock to return generator with state updates
+        mock_updates = [
+            {'messages': [HumanMessage(content='msg1')]},
+            {'messages': [HumanMessage(content='msg1'), AIMessage(content='resp1')]}
+        ]
+        mock_graph_app.stream.return_value = iter(mock_updates)
+
+        results = list(stream_graph("test"))
+
+        assert len(results) == 2
+        assert results[0] == mock_updates[0]
+        assert results[1] == mock_updates[1]
+
+    @patch('uvisbox_assistant.core.graph.graph_app')
+    def test_stream_graph_with_initial_state_parameter(self, mock_graph_app):
+        """Test stream_graph with initial_state parameter."""
+        mock_graph_app.stream.return_value = iter([{'messages': []}])
+
+        initial_state = create_initial_state("first")
+        results = list(stream_graph("second", initial_state=initial_state))
+
+        assert mock_graph_app.stream.called
+        call_args = mock_graph_app.stream.call_args[0][0]
+        # Should have 2 messages: initial + new
+        assert len(call_args["messages"]) == 2
