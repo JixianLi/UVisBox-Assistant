@@ -46,15 +46,10 @@ class TestAnalyzerToolSchemas:
         assert "compute_functional_boxplot_statistics FIRST" in schema["description"]
 
         params = schema["parameters"]["properties"]
-        # statistics are injected from state, not passed as parameter
-        assert "analysis_type" in params
+        # No parameters needed - statistics are injected from state and all reports are generated at once
+        assert len(params) == 0
 
-        # Verify enum values
-        assert "inline" in params["analysis_type"]["enum"]
-        assert "quick" in params["analysis_type"]["enum"]
-        assert "detailed" in params["analysis_type"]["enum"]
-
-        # Verify no required parameters (analysis_type has default)
+        # Verify no required parameters
         assert len(schema["parameters"]["required"]) == 0
 
 
@@ -221,32 +216,13 @@ class TestValidateProcessedStatistics:
 class TestGenerateReportErrorHandling:
     """Test error handling without LLM calls."""
 
-    def test_invalid_analysis_type(self):
-        """Test error with invalid analysis type."""
-        summary = {
-            "data_shape": {"n_curves": 30, "n_points": 100},
-            "median": {
-                "trend": "increasing",
-                "overall_slope": 0.5,
-                "fluctuation_level": 0.2,
-                "smoothness_score": 0.8,
-                "value_range": (0.0, 10.0)
-            },
-            "bands": {"band_widths": {}},
-            "outliers": {"count": 0},
-            "method": "fbd"
-        }
-
-        result = generate_uncertainty_report(summary, "invalid_type")
-
-        assert result["status"] == "error"
-        assert "Invalid analysis_type" in result["message"]
-
     def test_invalid_summary_structure(self):
         """Test error with invalid summary structure."""
         invalid_summary = {"incomplete": "data"}
 
-        result = generate_uncertainty_report(invalid_summary, "quick")
+        result = generate_uncertainty_report(invalid_summary)
 
         assert result["status"] == "error"
         assert "Invalid processed_statistics" in result["message"]
+        # Verify "reports" not in result (since it failed)
+        assert "reports" not in result

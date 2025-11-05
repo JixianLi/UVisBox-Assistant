@@ -421,9 +421,12 @@ class TestCallAnalyzerTool:
         mock_tool_func = MagicMock()
         mock_tool_func.return_value = {
             "status": "success",
-            "message": "Report generated",
-            "report": "This ensemble shows moderate uncertainty.",
-            "analysis_type": "quick"
+            "message": "Generated all uncertainty reports",
+            "reports": {
+                "inline": "This ensemble shows moderate uncertainty.",
+                "quick": "The data shows moderate uncertainty with consistent median trend.",
+                "detailed": "Full analysis report here..."
+            }
         }
         mock_analyzer_tools.__contains__.return_value = True
         mock_analyzer_tools.__getitem__.return_value = mock_tool_func
@@ -435,7 +438,7 @@ class TestCallAnalyzerTool:
             content="",
             tool_calls=[{
                 "name": "generate_uncertainty_report",
-                "args": {"analysis_type": "quick"},
+                "args": {},
                 "id": "test_id"
             }]
         )
@@ -446,8 +449,10 @@ class TestCallAnalyzerTool:
 
         # Verify success handling
         assert "messages" in result
-        assert "analysis_report" in result
-        assert "analysis_type" in result
+        assert "analysis_reports" in result
+        assert result["analysis_reports"]["inline"] == "This ensemble shows moderate uncertainty."
+        assert result["analysis_reports"]["quick"] == "The data shows moderate uncertainty with consistent median trend."
+        assert result["analysis_reports"]["detailed"] == "Full analysis report here..."
 
     @patch('uvisbox_assistant.core.nodes.ANALYZER_TOOLS')
     def test_injects_statistics_into_analyzer(self, mock_analyzer_tools):

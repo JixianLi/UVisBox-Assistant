@@ -26,11 +26,8 @@ class TestGraphStateExtensions:
         assert "processed_statistics" in state
         assert state["processed_statistics"] is None
 
-        assert "analysis_report" in state
-        assert state["analysis_report"] is None
-
-        assert "analysis_type" in state
-        assert state["analysis_type"] is None
+        assert "analysis_reports" in state
+        assert state["analysis_reports"] is None
 
     def test_initial_state_preserves_existing_fields(self):
         """Verify existing fields still present."""
@@ -168,13 +165,18 @@ class TestAnalysisStateUpdate:
         """Verify analysis state update."""
         state = create_initial_state("test")
 
-        report = "This ensemble shows moderate uncertainty."
-        analysis_type = "quick"
+        reports = {
+            "inline": "This ensemble shows moderate uncertainty.",
+            "quick": "Quick analysis here.",
+            "detailed": "Detailed analysis here."
+        }
 
-        updates = update_state_with_analysis(state, report, analysis_type)
+        updates = update_state_with_analysis(state, reports)
 
-        assert updates["analysis_report"] == report
-        assert updates["analysis_type"] == analysis_type
+        assert updates["analysis_reports"] == reports
+        assert updates["analysis_reports"]["inline"] == "This ensemble shows moderate uncertainty."
+        assert updates["analysis_reports"]["quick"] == "Quick analysis here."
+        assert updates["analysis_reports"]["detailed"] == "Detailed analysis here."
         assert updates["error_count"] == 0
 
     def test_resets_error_count(self):
@@ -182,5 +184,10 @@ class TestAnalysisStateUpdate:
         state = create_initial_state("test")
         state["error_count"] = 2
 
-        updates = update_state_with_analysis(state, "report", "inline")
+        reports = {
+            "inline": "Test inline",
+            "quick": "Test quick",
+            "detailed": "Test detailed"
+        }
+        updates = update_state_with_analysis(state, reports)
         assert updates["error_count"] == 0
