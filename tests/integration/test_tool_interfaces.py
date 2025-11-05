@@ -367,7 +367,7 @@ class TestStatisticsToolInterface:
         bands = proc_stats["bands"]
         assert "band_widths" in bands
         assert "widest_regions" in bands
-        assert "overall_uncertainty_score" in bands
+        assert "overall_msd" in bands
         assert "num_bands" in bands
         assert isinstance(bands["band_widths"], dict)
         assert isinstance(bands["widest_regions"], list)

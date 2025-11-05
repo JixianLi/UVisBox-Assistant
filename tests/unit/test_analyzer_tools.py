@@ -112,7 +112,7 @@ class TestValidateProcessedStatistics:
             "bands": {
                 "band_widths": {},
                 "widest_regions": [],
-                "overall_uncertainty_score": 0.3,
+                "overall_msd": 0.3,
                 "num_bands": 2
             },
             "outliers": {

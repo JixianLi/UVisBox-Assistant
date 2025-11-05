@@ -35,7 +35,7 @@ def valid_processed_statistics():
                 }
             },
             "widest_regions": [(45, 55), (80, 90)],
-            "overall_uncertainty_score": 0.35,
+            "overall_msd": 0.35,
             "num_bands": 2
         },
         "outliers": {
@@ -174,7 +174,7 @@ class TestMultiReportGeneration:
             },
             "bands": {
                 "band_widths": [0.5, 1.0, 1.5],
-                "overall_uncertainty": 0.3
+                "overall_msd": 0.3
             },
             "outliers": {
                 "count": 2,
@@ -218,7 +218,7 @@ class TestMultiReportGeneration:
             },
             "bands": {
                 "band_widths": [0.5, 1.0, 1.5],
-                "overall_uncertainty": 0.3
+                "overall_msd": 0.3
             },
             "outliers": {
                 "count": 2,

@@ -36,13 +36,13 @@ Statistical Summary:
 
 Guidelines:
 - 3-5 sentences maximum
-- Cover: overall uncertainty level, median behavior, band characteristics
+- Cover: overall MSD (mean squared difference to median), median behavior, band characteristics
 - Include specific numbers from the summary
 - No recommendations or prescriptions
 - Descriptive only
 
 Structure:
-1. Overall uncertainty assessment (1 sentence)
+1. Overall MSD assessment (1 sentence)
 2. Median curve characteristics (1 sentence)
 3. Band/variation characteristics (1-2 sentences)
 4. Outliers if present (1 sentence)
@@ -69,7 +69,7 @@ Structure your report with these sections:
 [Describe trend, fluctuation, smoothness, value range]
 
 ## Band Characteristics
-[Describe band widths, widest regions, overall uncertainty score]
+[Describe band widths, widest regions, overall MSD (mean squared difference to median)]
 
 ## Outlier Analysis
 [Describe outlier count, similarity to median, clustering]

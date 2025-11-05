@@ -108,7 +108,9 @@ def _group_consecutive_indices(indices: np.ndarray) -> List[Tuple[int, int]]:
 
 def _analyze_percentile_bands(
     percentile_bands: Dict[str, Tuple[np.ndarray, np.ndarray]],
-    percentiles: List[float]
+    percentiles: List[float],
+    median: Optional[np.ndarray] = None,
+    curves: Optional[np.ndarray] = None
 ) -> Dict:
     """
     Analyze percentile band characteristics.
@@ -116,18 +118,20 @@ def _analyze_percentile_bands(
     Computes:
     - Band widths (mean, max, min for each band)
     - Widest regions (where uncertainty is highest)
-    - Inter-band gaps (proximity between different percentile levels)
+    - Overall MSD (Mean Squared Difference to median)
 
     Args:
         percentile_bands: Dict mapping band names to (bottom, top) curve tuples
                          e.g., {"25_percentile_band": (bottom_array, top_array)}
         percentiles: List of percentile values (e.g., [25, 50, 90, 100])
+        median: Optional median curve for MSD calculation
+        curves: Optional array of all curves (shape: N x D) for MSD calculation
 
     Returns:
         Dict with:
         - band_widths: Dict[str, Dict] with mean/max/min widths per band
         - widest_region_indices: List of (start, end) tuples for high-variation regions
-        - overall_uncertainty_score: float (0-1, higher = more uncertain)
+        - overall_msd: float (Mean Squared Difference to median)
     """
     band_widths = {}
     all_widths = []
@@ -154,20 +158,19 @@ def _analyze_percentile_bands(
     else:
         widest_regions = []
 
-    # Overall uncertainty score: mean normalized band width
-    if all_widths:
-        mean_combined_width = np.mean(combined_widths)
-        # Normalize by data range (estimate from outermost band)
-        outermost_band = list(percentile_bands.values())[-1]
-        data_range = np.ptp(outermost_band[1])  # peak-to-peak of top curve
-        uncertainty_score = mean_combined_width / data_range if data_range > 0 else 0.0
+    # Compute overall MSD (Mean Squared Difference to median)
+    if median is not None and curves is not None:
+        # MSD at each x-coordinate
+        msd_values = np.mean((curves - median) ** 2, axis=0)  # MSD at each x
+        overall_msd = float(np.mean(msd_values))  # Mean of MSD values
     else:
-        uncertainty_score = 0.0
+        # Fallback to 0.0 if median/curves not provided
+        overall_msd = 0.0
 
     return {
         "band_widths": band_widths,
         "widest_regions": widest_regions,
-        "overall_uncertainty_score": float(uncertainty_score),
+        "overall_msd": float(overall_msd),
         "num_bands": len(percentile_bands)
     }
 
@@ -313,7 +316,7 @@ def compute_functional_boxplot_statistics(
             percentiles.append(pct)
         percentiles.sort()
 
-        band_analysis = _analyze_percentile_bands(percentile_bands, percentiles)
+        band_analysis = _analyze_percentile_bands(percentile_bands, percentiles, median=median, curves=curves)
 
         # Analyze outliers
         outlier_analysis = _analyze_outliers(outliers, median, sorted_curves)

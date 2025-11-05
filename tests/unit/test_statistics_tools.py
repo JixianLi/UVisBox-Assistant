@@ -153,17 +153,25 @@ class TestAnalyzePercentileBands:
         assert band_stats["max_width"] == 2.0
         assert band_stats["min_width"] == 1.0
 
-    def test_uncertainty_score(self):
-        """Test overall uncertainty score."""
+    def test_msd_score(self):
+        """Test overall MSD (Mean Squared Difference to median)."""
         bottom = np.array([0.0, 0.0, 0.0])
         top = np.array([1.0, 1.0, 1.0])
         bands = {"90_percentile_band": (bottom, top)}
         percentiles = [90]
 
-        result = _analyze_percentile_bands(bands, percentiles)
+        # Create test median and curves
+        median = np.array([0.5, 0.5, 0.5])
+        curves = np.array([
+            [0.0, 0.0, 0.0],
+            [1.0, 1.0, 1.0],
+            [0.5, 0.5, 0.5]
+        ])
 
-        # Uncertainty score should be normalized
-        assert 0.0 <= result["overall_uncertainty_score"] <= 1.0
+        result = _analyze_percentile_bands(bands, percentiles, median=median, curves=curves)
+
+        # MSD should be non-negative
+        assert result["overall_msd"] >= 0.0
 
     def test_widest_regions(self):
         """Test widest region detection."""
