@@ -259,7 +259,11 @@ def load_npy(filepath: str) -> Dict[str, str]:
                 "message": f"File not found: {filepath}"
             }
 
-        data = np.load(filepath)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, data, error_msg = load_array(filepath)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         return {
             "status": "success",
