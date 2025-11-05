@@ -64,11 +64,10 @@ def create_initial_state(user_message: str) -> GraphState:
         tool_execution_sequence=[],
         last_error_tool=None,
         last_error_id=None,
-        # NEW: Initialize analysis state (v0.3.0)
+        # NEW: Initialize analysis state (v0.3.2)
         raw_statistics=None,
         processed_statistics=None,
-        analysis_report=None,
-        analysis_type=None
+        analysis_reports=None
     )
 
 
