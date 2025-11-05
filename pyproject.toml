@@ -44,6 +44,9 @@ addopts = [
     "--strict-markers",
     "--tb=short",
 ]
+markers = [
+    "e2e: End-to-end integration tests",
+]
 
 [tool.black]
 line-length = 100
