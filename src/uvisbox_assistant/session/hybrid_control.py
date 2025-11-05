@@ -1,7 +1,7 @@
 """Hybrid control system for fast parameter updates."""
 
 from typing import Optional, Dict, Tuple
-from uvisbox_assistant.session.command_parser import parse_simple_command, apply_command_to_params
+from uvisbox_assistant.session.command_parser import parse_simple_command, apply_command_to_params, SimpleCommand
 from uvisbox_assistant.tools.vis_tools import VIS_TOOLS
 from uvisbox_assistant.utils.output_control import vprint
 
@@ -11,16 +11,16 @@ def execute_simple_command(
     current_state: dict
 ) -> Tuple[bool, Optional[dict], Optional[str]]:
     """
-    Try to execute a command as a simple parameter update.
+    Try to execute a command as a simple parameter update or report retrieval.
 
     Args:
         command_str: User's command string
-        current_state: Current conversation state with last_vis_params
+        current_state: Current conversation state with last_vis_params and analysis_reports
 
     Returns:
         Tuple of (success, result, message)
         - success: True if command was handled, False if needs full graph
-        - result: Result from vis tool execution (if applicable)
+        - result: Result from operation (updated_params dict OR report_text str)
         - message: Status message
     """
     # Try to parse as simple command
@@ -29,6 +29,11 @@ def execute_simple_command(
     if command is None:
         return False, None, "Not a simple command"
 
+    # Route to appropriate handler
+    if command.param_name == 'report_type':
+        return execute_report_retrieval(command, current_state)
+
+    # Existing visualization parameter update logic continues below...
     # Need existing vis params to update
     last_vis_params = current_state.get("last_vis_params")
 
@@ -77,6 +82,40 @@ def execute_simple_command(
         return True, updated_params, f"Updated {command.param_name} to {command.value}"
     else:
         return False, None, f"Error updating: {result.get('message')}"
+
+
+def execute_report_retrieval(
+    command: SimpleCommand,
+    current_state: dict
+) -> Tuple[bool, Optional[str], Optional[str]]:
+    """
+    Retrieve a specific report type from state.
+
+    Args:
+        command: Parsed simple command with param_name='report_type'
+        current_state: Current conversation state
+
+    Returns:
+        Tuple of (success, report_text, message)
+        - success: True if report retrieved, False if not available
+        - report_text: The report content (str)
+        - message: Status message
+    """
+    if command.param_name != 'report_type':
+        return False, None, "Not a report retrieval command"
+
+    analysis_reports = current_state.get("analysis_reports")
+
+    if not analysis_reports:
+        return False, None, "No analysis reports available yet"
+
+    report_type = command.value
+    report_text = analysis_reports.get(report_type)
+
+    if not report_text:
+        return False, None, f"Report type '{report_type}' not found"
+
+    return True, report_text, f"Retrieved {report_type} report"
 
 
 def is_hybrid_eligible(user_input: str) -> bool:
