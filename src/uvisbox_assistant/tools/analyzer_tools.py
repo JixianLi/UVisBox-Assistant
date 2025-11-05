@@ -146,11 +146,10 @@ def validate_processed_statistics(summary: dict) -> Tuple[bool, Optional[str]]:
 
 
 def generate_uncertainty_report(
-    processed_statistics: dict,
-    analysis_type: str = "quick"
+    processed_statistics: dict
 ) -> Dict:
     """
-    Generate natural language uncertainty analysis report.
+    Generate natural language uncertainty analysis reports for all three formats.
 
     Uses LLM to interpret statistical summaries and generate reports in three formats:
     - inline: 1 sentence summary of uncertainty level
@@ -159,23 +158,14 @@ def generate_uncertainty_report(
 
     Args:
         processed_statistics: Structured dict from compute_functional_boxplot_statistics
-        analysis_type: "inline" | "quick" | "detailed" (default: "quick")
 
     Returns:
         Dict with:
         - status: "success" or "error"
         - message: User-friendly confirmation
-        - report: Generated text report
-        - analysis_type: Echo of requested type
+        - reports: Dictionary with all three report types {"inline": "...", "quick": "...", "detailed": "..."}
     """
     try:
-        # Validate analysis_type
-        if analysis_type not in ["inline", "quick", "detailed"]:
-            return {
-                "status": "error",
-                "message": f"Invalid analysis_type: {analysis_type}. Must be 'inline', 'quick', or 'detailed'."
-            }
-
         # Validate input structure
         is_valid, error_msg = validate_processed_statistics(processed_statistics)
         if not is_valid:
@@ -184,12 +174,8 @@ def generate_uncertainty_report(
                 "message": f"Invalid processed_statistics: {error_msg}"
             }
 
-        # Convert statistics summary to JSON string for prompt
+        # Convert statistics summary to JSON string for prompts
         statistics_json = json.dumps(processed_statistics, indent=2)
-
-        # Get appropriate prompt template
-        prompt_template = _get_prompt_for_analysis_type(analysis_type)
-        prompt = prompt_template.format(statistics_json=statistics_json)
 
         # Create Gemini model (no tools needed for text generation)
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -197,42 +183,53 @@ def generate_uncertainty_report(
         model = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash-lite",
             google_api_key=config.GEMINI_API_KEY,
-            temperature=0.3  # Slight creativity for natural language, but mostly deterministic
+            temperature=0.3  # Slight creativity for natural language
         )
 
-        # Generate report
-        response = model.invoke([HumanMessage(content=prompt)])
+        # Generate all three report types
+        reports = {}
+        word_counts = {}
 
-        # Extract report text
-        report_text = response.content.strip()
+        for analysis_type in ["inline", "quick", "detailed"]:
+            # Get appropriate prompt template
+            prompt_template = _get_prompt_for_analysis_type(analysis_type)
+            prompt = prompt_template.format(statistics_json=statistics_json)
 
-        # Validate output length based on type
-        word_count = len(report_text.split())
-        if analysis_type == "inline" and word_count > 40:
-            # Inline should be very short
-            return {
-                "status": "error",
-                "message": f"Inline report too long ({word_count} words). Expected ~15-30 words."
-            }
-        elif analysis_type == "quick" and word_count > 150:
-            # Quick should be brief
-            return {
-                "status": "error",
-                "message": f"Quick report too long ({word_count} words). Expected 50-100 words."
-            }
+            # Generate report
+            response = model.invoke([HumanMessage(content=prompt)])
+            report_text = response.content.strip()
+
+            # Validate output length
+            word_count = len(report_text.split())
+
+            if analysis_type == "inline" and word_count > 40:
+                return {
+                    "status": "error",
+                    "message": f"Inline report too long ({word_count} words). Expected ~15-30 words."
+                }
+            elif analysis_type == "quick" and word_count > 150:
+                return {
+                    "status": "error",
+                    "message": f"Quick report too long ({word_count} words). Expected 50-100 words."
+                }
+
+            reports[analysis_type] = report_text
+            word_counts[analysis_type] = word_count
+
+        # Format summary message
+        summary = f"inline: {word_counts['inline']} words, quick: {word_counts['quick']} words, detailed: {word_counts['detailed']} words"
 
         return {
             "status": "success",
-            "message": f"Generated {analysis_type} uncertainty report ({word_count} words)",
-            "report": report_text,
-            "analysis_type": analysis_type
+            "message": f"Generated all uncertainty reports ({summary})",
+            "reports": reports
         }
 
     except Exception as e:
         tb_str = traceback.format_exc()
         return {
             "status": "error",
-            "message": f"Error generating report: {str(e)}",
+            "message": f"Error generating reports: {str(e)}",
             "_error_details": {
                 "exception": e,
                 "traceback": tb_str
