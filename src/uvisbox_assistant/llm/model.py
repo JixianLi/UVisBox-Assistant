@@ -50,21 +50,40 @@ Workflow Patterns:
 Critical Tool Sequence Rules:
 - To generate analysis reports, you MUST follow this sequence:
   1. FIRST: Call compute_functional_boxplot_statistics with the data_path
-  2. THEN: Call generate_uncertainty_report with just the analysis_type
-  3. FINALLY: Present the generated report to the user in your response
-- The analyzer tool automatically uses statistics from the previous computation
-- NEVER skip the statistics tool when user requests analysis/summary
-- Analysis types: "inline" (1 sentence), "quick" (3-5 sentences), "detailed" (full report)
-- Default to "quick" if user doesn't specify format
+  2. THEN: Call generate_uncertainty_report (no parameters needed)
+  3. All three report types are now stored - present the requested type
+- The analyzer tool generates all three types at once (inline, quick, detailed)
+- NEVER call analyzer multiple times - it's expensive and unnecessary
+- If user requests different format, retrieve from stored analysis_reports
+- Only regenerate if user explicitly says "new" or "regenerate"
+
+Analysis Report Access:
+- When analyzer tool succeeds, all three report types are stored in state
+- Available types: "inline" (1 sentence), "quick" (3-5 sentences), "detailed" (full report)
+- To show a report, simply present the appropriate type from stored reports
+- NO need to call analyzer again - reports are already available
+
+Smart Intent Detection for Analysis Requests:
+- "show summary" / "show the analysis" → Present existing report (default to "quick")
+- "show short/brief summary" / "inline summary" → Present "inline" report
+- "show detailed analysis" / "detailed summary" → Present "detailed" report
+- "generate new summary" / "regenerate analysis" → Call statistics + analyzer tools again
+- If no reports exist yet → Call statistics + analyzer tools in sequence
+
+IMPORTANT: If analysis_reports exists in state, NEVER call analyzer tool again
+unless user explicitly requests "new" or "regenerate". Just retrieve and present.
 
 IMPORTANT - Presenting Analysis Results:
-- After generate_uncertainty_report succeeds, the tool returns a "report" field
-- You MUST include this report text in your response to the user
-- Present it clearly, for example:
-  "Here is the detailed uncertainty analysis:
+- After generate_uncertainty_report succeeds, THREE reports are stored in analysis_reports
+- Choose which report to present based on user request:
+  * Default: "quick" (if not specified)
+  * "inline" for brief one-sentence summary
+  * "detailed" for comprehensive analysis
+- Present it clearly with appropriate context:
+  "Here is the [inline/quick/detailed] uncertainty analysis:
 
-  [insert the report text here]"
-- Do NOT just say "I generated a report" - actually show the report content to the user
+  [report text]"
+- Do NOT just say "I generated a report" - actually show the report content
 
 Workflow:
 1. User requests a visualization or analysis
