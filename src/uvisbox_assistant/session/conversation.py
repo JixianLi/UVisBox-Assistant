@@ -61,22 +61,41 @@ class ConversationSession:
 
         # Try hybrid control first (only if we have existing state)
         if self.state and is_hybrid_eligible(user_message):
-            success, updated_params, message = execute_simple_command(
+            success, result, message = execute_simple_command(
                 user_message,
                 self.state
             )
 
             if success:
-                # Update state directly without graph execution
-                self.state["last_vis_params"] = updated_params
-                self.state["error_count"] = 0
+                vprint(f"[HYBRID] {message}")
 
-                # Add messages to maintain conversation history
-                self.state["messages"].append(HumanMessage(content=user_message))
-                self.state["messages"].append(AIMessage(content=message))
+                # Check if result is a report (string) or vis params (dict)
+                if isinstance(result, str):
+                    # Report retrieval - format and return as AI message
+                    # Extract report type from message (e.g., "Retrieved inline report")
+                    report_type = message.split()[1]  # Gets "inline", "quick", or "detailed"
+                    response_text = f"Here is the {report_type} uncertainty analysis:\n\n{result}"
 
-                vprint(f"[HYBRID] Fast path executed: {message}")
-                return self.state
+                    # Create AI message and update state
+                    ai_message = AIMessage(content=response_text)
+                    self.state["messages"].append(HumanMessage(content=user_message))
+                    self.state["messages"].append(ai_message)
+
+                    return self.state
+                else:
+                    # Visualization parameter update - existing logic
+                    self.state["last_vis_params"] = result
+
+                    # Create user message
+                    user_msg = HumanMessage(content=user_message)
+                    self.state["messages"].append(user_msg)
+
+                    # Create AI message
+                    ai_response = AIMessage(content=message)
+                    self.state["messages"].append(ai_response)
+
+                    self.turn_count += 1
+                    return self.state
 
         # Fall back to full graph execution
         if self.state is None:
