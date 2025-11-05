@@ -1,3 +1,6 @@
+# ABOUTME: Unit tests for utils/utils.py
+# ABOUTME: Validates utility functions with comprehensive mocking (0 API calls)
+
 """Unit tests for utils/utils.py (0 API calls)."""
 
 import sys
