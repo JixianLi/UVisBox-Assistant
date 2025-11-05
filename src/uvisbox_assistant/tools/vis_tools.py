@@ -194,7 +194,11 @@ def plot_curve_boxplot(
         if not Path(data_path).exists():
             return {"status": "error", "message": f"Data file not found: {data_path}"}
 
-        curves = np.load(data_path)
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, curves, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
         # Handle 2D array (functional/1D curves): add x-coordinates to convert to 3D array
         if curves.ndim == 2:
