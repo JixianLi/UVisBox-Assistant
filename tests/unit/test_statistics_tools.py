@@ -245,7 +245,7 @@ class TestComputeFunctionalBoxplotStatistics:
         assert result["status"] == "error"
         assert "2D array" in result["message"]
 
-    @patch('uvisbox_assistant.statistics_tools.functional_boxplot_summary_statistics')
+    @patch('uvisbox_assistant.tools.statistics_tools.functional_boxplot_summary_statistics')
     def test_successful_computation(self, mock_uvisbox, tmp_path):
         """Test successful statistics computation with mocked UVisBox."""
         # Create test data
@@ -295,7 +295,7 @@ class TestComputeFunctionalBoxplotStatistics:
         assert "outliers" in summary
         assert "count" in summary["outliers"]
 
-    @patch('uvisbox_assistant.statistics_tools.functional_boxplot_summary_statistics')
+    @patch('uvisbox_assistant.tools.statistics_tools.functional_boxplot_summary_statistics')
     def test_no_numpy_arrays_in_output(self, mock_uvisbox, tmp_path):
         """Verify no numpy arrays in processed_statistics."""
         # Create test data

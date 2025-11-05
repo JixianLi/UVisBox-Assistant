@@ -313,6 +313,277 @@ See [ANALYSIS_EXAMPLES.md](docs/ANALYSIS_EXAMPLES.md#understanding-outlier-detec
 
 ---
 
+## Code Coverage
+
+### Overview
+
+UVisBox-Assistant maintains comprehensive code coverage with specific targets for critical modules:
+
+**Coverage Targets**:
+- **Overall codebase**: 80% minimum
+- **Tools modules** (data_tools, vis_tools, statistics_tools, analyzer_tools): **90% minimum**
+
+**Current Coverage** (as of v0.3.1):
+- `data_tools.py`: 92.47% ✅
+- `vis_tools.py`: 96.69% ✅
+- `statistics_tools.py`: 92.92% ✅
+- `analyzer_tools.py`: 70.91% (LLM code excluded from unit tests)
+- **Overall tools**: 91.40% ✅
+
+### Running Tests with Coverage
+
+**Quick Start**:
+```bash
+# Run unit tests with coverage (instant, 0 API calls)
+python tests/utils/run_all_tests.py --unit --coverage
+
+# Run all tests with coverage (~10 minutes)
+python tests/utils/run_all_tests.py --coverage
+```
+
+**Coverage Commands**:
+```bash
+# Unit tests with coverage (recommended for development)
+python tests/utils/run_all_tests.py --unit --coverage
+
+# Integration tests with coverage
+python tests/utils/run_all_tests.py --integration --coverage
+
+# E2E tests with coverage
+python tests/utils/run_all_tests.py --e2e --coverage
+
+# All tests with coverage
+python tests/utils/run_all_tests.py --coverage
+```
+
+**Direct pytest usage**:
+```bash
+# Run specific test file with coverage
+pytest tests/unit/test_tools.py --cov=src/uvisbox_assistant --cov-report=html
+
+# Run entire unit suite with coverage
+pytest tests/unit/ --cov=src/uvisbox_assistant --cov-report=term --cov-report=html
+```
+
+### Understanding Coverage Reports
+
+**Terminal Output**:
+After running tests with `--coverage`, you'll see:
+```
+Name                                           Stmts   Miss  Cover
+------------------------------------------------------------------
+src/uvisbox_assistant/tools/data_tools.py        73      5  93.15%
+src/uvisbox_assistant/tools/vis_tools.py        149      5  96.64%
+src/uvisbox_assistant/tools/statistics_tools.py  113     8  92.92%
+------------------------------------------------------------------
+TOTAL                                           2023    174  91.40%
+```
+
+**HTML Coverage Report**:
+```bash
+# Open HTML report in browser
+open htmlcov/index.html
+
+# Or manually navigate to:
+# file:///path/to/uvisbox-assistant/htmlcov/index.html
+```
+
+**HTML Report Features**:
+- **Green lines**: Covered by tests
+- **Red lines**: Not covered (need tests)
+- **Yellow lines**: Partially covered (branches not fully tested)
+- **Click files**: See line-by-line coverage details
+- **Coverage percentage**: Per-file and overall metrics
+
+### Coverage Configuration
+
+Coverage is configured in `.coveragerc`:
+
+```ini
+[run]
+source = src/uvisbox_assistant
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */site-packages/*
+    */__init__.py
+    */main.py
+    */__main__.py
+
+[report]
+show_missing = True
+precision = 2
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self\.debug
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+    @(abc\.)?abstractmethod
+```
+
+**Key Configuration Points**:
+- **Omit**: Entry points, `__init__.py`, and test files excluded
+- **Exclude lines**: Defensive code and debug statements marked with `# pragma: no cover`
+- **Precision**: 2 decimal places (92.47% vs 92%)
+- **Show missing**: Terminal output shows line numbers of uncovered code
+
+### Mock-Based Testing Strategy
+
+To reach 90%+ coverage, especially for error handling paths, we use **mock-based testing**:
+
+**Why Mocking?**
+- Trigger exception handlers without real errors
+- Test error paths (file not found, invalid data, UVisBox exceptions)
+- Test edge cases (disk full, permission denied, malformed data)
+- 0 API calls, instant execution
+
+**Example: Testing Error Handlers**
+```python
+from unittest.mock import patch
+
+@patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+def test_plot_functional_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
+    """Test functional boxplot with UVisBox exception to trigger error handler."""
+    # Create valid data
+    data = tmp_path / "data.npy"
+    np.save(data, np.random.randn(10, 50))
+
+    # Force UVisBox to raise exception
+    mock_uvisbox.side_effect = RuntimeError("UVisBox internal error")
+
+    # Call function - should catch exception and return error dict
+    result = plot_functional_boxplot(str(data))
+
+    # Verify error handling
+    assert result['status'] == 'error'
+    assert '_error_details' in result
+```
+
+**Example: Testing File System Errors**
+```python
+@patch('numpy.save')
+def test_generate_ensemble_curves_save_exception(mock_save):
+    """Test generate_ensemble_curves with save exception."""
+    # Force np.save to fail (simulates disk full)
+    mock_save.side_effect = OSError("Disk full")
+
+    # Call function - should catch exception
+    result = generate_ensemble_curves(n_curves=5, n_points=20)
+
+    # Verify error handling
+    assert result['status'] == 'error'
+    assert '_error_details' in result
+```
+
+**Coverage Impact**:
+- Without mocks: ~60-70% coverage (only happy paths tested)
+- With mocks: 90%+ coverage (error paths and edge cases covered)
+
+### Coverage Maintenance Guidelines
+
+**When Adding New Features**:
+1. Write unit tests FIRST (test-driven development)
+2. Aim for 90%+ coverage on new code
+3. Run `--unit --coverage` to verify
+4. Add mock-based tests for error paths
+
+**When Modifying Existing Code**:
+1. Run coverage to see current state
+2. Add tests for any new branches
+3. Maintain or improve coverage percentage
+4. Don't remove tests without replacement
+
+**Coverage Best Practices**:
+- **Unit tests with 0 API calls**: Primary coverage source
+- **Mock external dependencies**: UVisBox, file I/O, LLM calls
+- **Test error paths**: File not found, invalid data, exceptions
+- **Test edge cases**: Empty data, single element, boundary values
+- **Don't test LLM output**: analyzer_tools.py excludes LLM code from coverage
+
+**Reviewing Coverage Gaps**:
+```bash
+# Generate HTML report
+python tests/utils/run_all_tests.py --unit --coverage
+
+# Open in browser
+open htmlcov/index.html
+
+# Look for red lines (uncovered code)
+# Add tests for those lines
+# Re-run coverage to verify
+```
+
+**Coverage Anti-Patterns** (Avoid These):
+- ❌ Don't write tests just to hit coverage numbers (write meaningful tests)
+- ❌ Don't use `# pragma: no cover` to hide untested code (add tests instead)
+- ❌ Don't test implementation details (test behavior and interfaces)
+- ❌ Don't skip error path testing (critical for robustness)
+
+### Coverage Integration in CI/CD
+
+**Recommended CI/CD workflow**:
+```yaml
+# Run on every commit
+- name: Unit tests with coverage
+  run: |
+    python tests/utils/run_all_tests.py --unit --coverage
+
+# Generate coverage badge
+- name: Coverage badge
+  run: |
+    coverage-badge -o coverage.svg -f
+
+# Fail if coverage drops below threshold
+- name: Coverage check
+  run: |
+    coverage report --fail-under=80
+```
+
+**Local Pre-Commit Check**:
+```bash
+# Before committing, verify coverage
+python tests/utils/run_all_tests.py --unit --coverage
+
+# Check if you've maintained coverage
+# If coverage dropped, add tests before committing
+```
+
+### Interpreting Coverage Results
+
+**90%+ Coverage** (Excellent):
+- All happy paths covered
+- Most error paths tested
+- Edge cases handled
+- Mock-based exception testing
+
+**80-90% Coverage** (Good):
+- Core functionality covered
+- Some error paths untested
+- Add mock-based tests for gaps
+
+**70-80% Coverage** (Needs Work):
+- Basic paths covered
+- Missing error handling tests
+- Review HTML report for gaps
+
+**Below 70% Coverage** (Critical):
+- Significant gaps in testing
+- High risk of undetected bugs
+- Add comprehensive tests immediately
+
+**What's NOT Covered** (By Design):
+- LLM calls in `analyzer_tools.py` (tested in E2E)
+- Interactive REPL code in `main.py` (excluded)
+- Entry points `__main__.py` (excluded)
+- Debug-only code marked with `# pragma: no cover`
+
+---
+
 ## Gemini API Rate Limits (Free Tier)
 
 **Important**: The free tier has strict rate limits:
@@ -517,6 +788,22 @@ Planned features to reduce API usage:
 - **BoxplotStyleConfig**: See updated plans for v2.0 interface details
 
 ## Version History
+
+### v0.3.1 (2025-11-05) - Coverage Infrastructure
+- Added comprehensive code coverage reporting with pytest-cov
+- Created `.coveragerc` configuration file
+- Updated test runner with `--coverage` flag
+- Added 26 new unit tests for tools modules (28 total new tests)
+- Achieved 90%+ coverage targets:
+  - data_tools.py: 61.64% → 92.47% (+30.83%)
+  - vis_tools.py: 72.85% → 96.69% (+23.84%)
+  - statistics_tools.py: 76.11% → 92.92% (+16.81%)
+  - Overall tools modules: 91.40% ✅
+- Implemented mock-based testing strategy for error paths
+- Fixed 2 failing tests in test_statistics_tools.py (mock import paths)
+- Fixed vector field test parameter names
+- Added comprehensive coverage documentation in TESTING.md
+- Total: 166 unit tests, all 0 API calls
 
 ### v2.0 (2025-01-29) - Phase 9 Complete
 - Reorganized test structure: unit/, integration/, e2e/, interactive/

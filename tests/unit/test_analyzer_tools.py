@@ -177,6 +177,46 @@ class TestValidateProcessedStatistics:
         assert is_valid is False
         assert "median" in error_msg.lower()
 
+    def test_missing_band_widths(self):
+        """Test validation fails when bands is missing band_widths."""
+        summary = {
+            "data_shape": {"n_curves": 30, "n_points": 100},
+            "median": {
+                "trend": "increasing",
+                "overall_slope": 0.5,
+                "fluctuation_level": 0.2,
+                "smoothness_score": 0.8,
+                "value_range": (0.0, 10.0)
+            },
+            "bands": {},  # Missing band_widths
+            "outliers": {"count": 0},
+            "method": "fbd"
+        }
+
+        is_valid, error_msg = validate_processed_statistics(summary)
+        assert is_valid is False
+        assert "band_widths" in error_msg.lower()
+
+    def test_missing_outlier_count(self):
+        """Test validation fails when outliers is missing count."""
+        summary = {
+            "data_shape": {"n_curves": 30, "n_points": 100},
+            "median": {
+                "trend": "increasing",
+                "overall_slope": 0.5,
+                "fluctuation_level": 0.2,
+                "smoothness_score": 0.8,
+                "value_range": (0.0, 10.0)
+            },
+            "bands": {"band_widths": {}},
+            "outliers": {},  # Missing count
+            "method": "fbd"
+        }
+
+        is_valid, error_msg = validate_processed_statistics(summary)
+        assert is_valid is False
+        assert "count" in error_msg.lower()
+
 
 class TestGenerateReportErrorHandling:
     """Test error handling without LLM calls."""
