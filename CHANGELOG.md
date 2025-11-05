@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2025-11-05
+
+### Added
+- Multi-report generation: Analyzer now generates all three report types (inline, quick, detailed) in a single call
+- Hybrid control for instant report switching: Users can switch between report types with commands like "inline summary", "quick summary", "detailed summary"
+- Smart intent detection: Model distinguishes between "show summary" (retrieve existing) and "generate new summary" (regenerate)
+
+### Changed
+- State structure: `analysis_report` (str) + `analysis_type` (str) → `analysis_reports` (Dict[str, str])
+- Analyzer tool signature: Removed `analysis_type` parameter (always generates all three)
+- System prompt: Updated workflow descriptions and tool usage instructions for multi-report system
+
+### Fixed
+- **Issue #1**: Users can now request different summary types after initial generation without "cannot regenerate" errors
+- Report regeneration: Users couldn't switch between inline/quick/detailed summaries after first request
+
+### Technical Details
+- `generate_uncertainty_report()` now returns `{"reports": {"inline": "...", "quick": "...", "detailed": "..."}}`
+- Hybrid control patterns: "inline summary", "show quick summary", "detailed summary" for instant retrieval
+- State field `analysis_reports` persists across conversation turns until statistics regenerated
+
 ## [0.3.1] - 2025-11-05
 
 ### Added
