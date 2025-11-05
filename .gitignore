@@ -1,6 +1,7 @@
 # Temporary files
 temp/
 tmp_dev/
+.worktrees/
 
 # AI coding agent temporary verification files (organized but not tracked)
 reports/
