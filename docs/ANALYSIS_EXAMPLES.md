@@ -478,4 +478,4 @@ For the mathematical definition of band depth and outlier detection:
 - [User Guide](USER_GUIDE.md) - Complete usage documentation
 - [API Reference](API.md) - Full API documentation
 - [Testing Guide](../TESTING.md) - Testing strategies and examples
-- [CLAUDE.md](../CLAUDE.md) - Development guidelines
+- [Contributing Guide](../CONTRIBUTING.md) - Development and contribution guidelines

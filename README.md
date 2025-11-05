@@ -249,7 +249,6 @@ See `TESTING.md` for comprehensive testing guide.
 - **User Guide**: `docs/USER_GUIDE.md` - Detailed styling control examples
 - **API Reference**: `docs/API.md` - Complete BoxplotStyleConfig documentation
 - **Analysis Examples**: `docs/ANALYSIS_EXAMPLES.md` - Uncertainty analysis workflows and report formats (v0.3.0)
-- **Developer Guide**: `CLAUDE.md` - Implementation details and architecture
 - **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
 
 ## License

@@ -178,7 +178,7 @@ tests/
 **Documentation:**
 - **`docs/ANALYSIS_EXAMPLES.md`**: 400+ lines covering all workflows, formats, examples
 - **Outlier detection clarification**: Explains depth-based detection vs. percentile bands
-- **Updated all docs**: CLAUDE.md, README.md, API.md, TESTING.md with v0.3.0 info
+- **Updated all docs**: README.md, API.md, TESTING.md with v0.3.0 info
 
 ### Changed
 
@@ -482,7 +482,6 @@ For existing users upgrading from 0.1.x:
   - `README.md` - Project overview and quick start
   - `docs/USER_GUIDE.md` - Detailed styling examples and workflows
   - `docs/API.md` - Complete API reference
-  - `CLAUDE.md` - Implementation details for AI agents
   - `TESTING.md` - Comprehensive testing strategies
   - `CONTRIBUTING.md` - Contribution guidelines
   - `LICENSE` - MIT License
