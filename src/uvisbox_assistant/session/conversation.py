@@ -6,7 +6,7 @@ from uvisbox_assistant.core.state import GraphState, create_initial_state
 from uvisbox_assistant.core.graph import graph_app
 from uvisbox_assistant.session.hybrid_control import execute_simple_command, is_hybrid_eligible
 from uvisbox_assistant.errors.error_tracking import ErrorRecord
-from uvisbox_assistant.utils.output_control import set_session, vprint
+from uvisbox_assistant.utils.output_control import set_session, vprint, get_current_session
 from uvisbox_assistant.errors.error_interpretation import interpret_uvisbox_error, format_error_with_hint
 from langchain_core.messages import HumanMessage, AIMessage
 

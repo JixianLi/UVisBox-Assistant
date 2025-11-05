@@ -21,6 +21,11 @@ def set_session(session) -> None:
     _current_session = session
 
 
+def get_current_session():
+    """Get the current session for error recording."""
+    return _current_session
+
+
 def vprint(message: str, force: bool = False) -> None:
     """
     Print message only if verbose mode is enabled.
