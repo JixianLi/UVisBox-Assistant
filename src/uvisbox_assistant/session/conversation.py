@@ -115,64 +115,7 @@ class ConversationSession:
             # Clean up marker
             del self.state["_auto_fixed_error_id"]
 
-        # Process tool messages to record errors
-        self._process_tool_errors()
-
         return self.state
-
-    def _process_tool_errors(self):
-        """Process tool messages to detect and record errors."""
-        if not self.state:
-            return
-
-        from langchain_core.messages import ToolMessage
-
-        for message in self.state["messages"]:
-            if isinstance(message, ToolMessage):
-                try:
-                    import json
-                    # Try to parse message content as JSON
-                    if isinstance(message.content, str):
-                        try:
-                            content = json.loads(message.content)
-                        except json.JSONDecodeError:
-                            # Content might be dict-like string representation
-                            import ast
-                            try:
-                                content = ast.literal_eval(message.content)
-                            except (ValueError, SyntaxError):
-                                continue
-                    else:
-                        content = message.content
-
-                    # Check if this is an error message
-                    if isinstance(content, dict) and content.get("status") == "error":
-                        # Check if we have error details
-                        if "_error_details" in content:
-                            error_details = content["_error_details"]
-                            error = error_details.get("exception")
-                            traceback_str = error_details.get("traceback", "")
-
-                            # Only record if we haven't already recorded this error
-                            # (avoid duplicates on multiple send() calls with same state)
-                            tool_name = getattr(message, 'name', 'unknown_tool')
-
-                            # Record error with interpretation
-                            if error:
-                                error_record = self.record_error(
-                                    tool_name=tool_name,
-                                    error=error,
-                                    traceback_str=traceback_str,
-                                    user_message=content.get("message", str(error)),
-                                    auto_fixed=False
-                                )
-
-                                # Store error ID in state for auto-fix detection
-                                self.state["_pending_error_id"] = error_record.error_id
-
-                except Exception:
-                    # Silently skip malformed messages
-                    pass
 
     def get_last_response(self) -> str:
         """
