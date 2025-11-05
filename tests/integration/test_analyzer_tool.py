@@ -57,20 +57,20 @@ class TestInlineReportGeneration:
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_processed_statistics,
-            analysis_type="inline"
+            valid_processed_statistics
         )
 
         assert result["status"] == "success"
-        assert "report" in result
-        assert result["analysis_type"] == "inline"
+        assert "reports" in result
+        assert isinstance(result["reports"], dict)
+        assert "inline" in result["reports"]
 
         # Verify report is short (1 sentence ~15-30 words)
-        word_count = len(result["report"].split())
+        word_count = len(result["reports"]["inline"].split())
         assert 10 <= word_count <= 40, f"Inline report should be ~15-30 words, got {word_count}"
 
         # Verify descriptive content
-        report_lower = result["report"].lower()
+        report_lower = result["reports"]["inline"].lower()
         # Should mention uncertainty level
         assert any(word in report_lower for word in ["uncertainty", "variation", "ensemble"])
 
@@ -83,20 +83,20 @@ class TestQuickReportGeneration:
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_processed_statistics,
-            analysis_type="quick"
+            valid_processed_statistics
         )
 
         assert result["status"] == "success"
-        assert "report" in result
-        assert result["analysis_type"] == "quick"
+        assert "reports" in result
+        assert isinstance(result["reports"], dict)
+        assert "quick" in result["reports"]
 
         # Verify report is brief (3-5 sentences, ~50-100 words)
-        word_count = len(result["report"].split())
+        word_count = len(result["reports"]["quick"].split())
         assert 30 <= word_count <= 150, f"Quick report should be ~50-100 words, got {word_count}"
 
         # Verify mentions key components
-        report_lower = result["report"].lower()
+        report_lower = result["reports"]["quick"].lower()
         assert "median" in report_lower or "trend" in report_lower
         assert "band" in report_lower or "percentile" in report_lower
 
@@ -109,16 +109,16 @@ class TestDetailedReportGeneration:
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_processed_statistics,
-            analysis_type="detailed"
+            valid_processed_statistics
         )
 
         assert result["status"] == "success"
-        assert "report" in result
-        assert result["analysis_type"] == "detailed"
+        assert "reports" in result
+        assert isinstance(result["reports"], dict)
+        assert "detailed" in result["reports"]
 
         # Verify report is comprehensive (multiple sections)
-        report = result["report"]
+        report = result["reports"]["detailed"]
         word_count = len(report.split())
         assert word_count >= 100, f"Detailed report should be substantial, got {word_count} words"
 
@@ -137,22 +137,24 @@ class TestReportNoRecommendations:
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
-            valid_processed_statistics,
-            analysis_type="detailed"
+            valid_processed_statistics
         )
 
         assert result["status"] == "success"
+        assert "reports" in result
+        assert isinstance(result["reports"], dict)
 
-        # Check for prescriptive language (should NOT be present)
-        report_lower = result["report"].lower()
-        prescriptive_words = [
-            "should", "must", "recommend", "suggest",
+        # Check for prescriptive language in detailed report (should NOT be present)
+        report_lower = result["reports"]["detailed"].lower()
+        # Check for prescriptive phrases (not just individual words like "suggest" which can be descriptive)
+        prescriptive_phrases = [
+            "should", "must", "recommend that", "i suggest",
             "need to", "you should", "consider", "improve"
         ]
 
-        for word in prescriptive_words:
-            assert word not in report_lower, \
-                f"Report should be descriptive only, found prescriptive word: {word}"
+        for phrase in prescriptive_phrases:
+            assert phrase not in report_lower, \
+                f"Report should be descriptive only, found prescriptive phrase: {phrase}"
 
 
 class TestMultiReportGeneration:
