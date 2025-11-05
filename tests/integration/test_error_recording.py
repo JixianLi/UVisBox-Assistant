@@ -49,13 +49,13 @@ def test_data_tool_errors_recorded():
     """Test that DATA TOOL errors are recorded in error history."""
     session = ConversationSession()
 
-    # Create a state with a tool call that will fail (invalid parameters)
+    # Create a state with a tool call that will fail (invalid output path)
     state = create_initial_state("test")
     ai_message = AIMessage(
         content="",
         tool_calls=[{
-            "name": "generate_ar2_curves",
-            "args": {"n_curves": 0},  # Invalid: must be > 0
+            "name": "generate_ensemble_curves",
+            "args": {"output_path": "/nonexistent/directory/output.npy"},  # Invalid path
             "id": "test_call_2"
         }]
     )
@@ -69,7 +69,7 @@ def test_data_tool_errors_recorded():
 
     # Verify error details
     error = session.error_history[-1]
-    assert "generate_ar2_curves" in error.tool_name or "DATA TOOL" in error.tool_name.upper()
+    assert "generate_ensemble_curves" in error.tool_name or "DATA TOOL" in error.tool_name.upper()
 
 
 def test_statistics_tool_errors_recorded(corrupted_npy_file):
