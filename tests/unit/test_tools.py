@@ -42,6 +42,116 @@ import matplotlib.pyplot as plt
 # ============================================================================
 
 
+# ============================================================================
+# Visualization Tools - Mocked Unit Tests
+# ============================================================================
+
+class TestPlotFunctionalBoxplot:
+    """Unit tests for plot_functional_boxplot (0 UVisBox calls)."""
+
+    @patch('pathlib.Path.exists')
+    @patch('matplotlib.pyplot.pause')
+    @patch('matplotlib.pyplot.show')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_default_percentiles_applied(self, mock_load_array, mock_show, mock_pause, mock_exists):
+        """Test percentiles=None applies default [25, 50, 90, 100]."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+
+        # Mock functional_boxplot by injecting it into the module
+        with patch.dict('sys.modules', {'uvisbox': MagicMock(), 'uvisbox.Modules': MagicMock(), 'uvisbox.Core.CommonInterface': MagicMock()}):
+            import uvisbox_assistant.tools.vis_tools as vis_tools_module
+            mock_uvisbox = MagicMock()
+            vis_tools_module.functional_boxplot = mock_uvisbox
+            vis_tools_module.BoxplotStyleConfig = MagicMock()
+
+            # Act
+            result = plot_functional_boxplot(data_path="curves.npy")
+
+            # Assert
+            assert result['status'] == 'success'
+            assert result['_vis_params']['percentiles'] == [25, 50, 90, 100]
+
+    @patch('pathlib.Path.exists')
+    @patch('matplotlib.pyplot.pause')
+    @patch('matplotlib.pyplot.show')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_custom_percentiles_preserved(self, mock_load_array, mock_show, mock_pause, mock_exists):
+        """Test custom percentiles are not overridden."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+
+        with patch.dict('sys.modules', {'uvisbox': MagicMock(), 'uvisbox.Modules': MagicMock(), 'uvisbox.Core.CommonInterface': MagicMock()}):
+            import uvisbox_assistant.tools.vis_tools as vis_tools_module
+            mock_uvisbox = MagicMock()
+            vis_tools_module.functional_boxplot = mock_uvisbox
+            vis_tools_module.BoxplotStyleConfig = MagicMock()
+
+            # Act
+            result = plot_functional_boxplot(
+                data_path="curves.npy",
+                percentiles=[10, 50, 90]
+            )
+
+            # Assert
+            assert result['status'] == 'success'
+            assert result['_vis_params']['percentiles'] == [10, 50, 90]
+
+    @patch('pathlib.Path.exists')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_data_loading_error_propagated(self, mock_load_array, mock_exists):
+        """Test load_array error returns error dict."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: curves.npy")
+
+        # Act
+        result = plot_functional_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+
+    @patch('pathlib.Path.exists')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_wrong_shape_validation(self, mock_load_array, mock_exists):
+        """Test 3D array rejected with error message."""
+        # Arrange - return 3D array instead of required 2D
+        mock_exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50, 3), None)
+
+        # Act
+        result = plot_functional_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '2D' in result['message'] or 'shape' in result['message'].lower()
+
+    @patch('pathlib.Path.exists')
+    @patch('matplotlib.pyplot.pause')
+    @patch('matplotlib.pyplot.show')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_show, mock_pause, mock_exists):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+
+        with patch.dict('sys.modules', {'uvisbox': MagicMock(), 'uvisbox.Modules': MagicMock(), 'uvisbox.Core.CommonInterface': MagicMock()}):
+            import uvisbox_assistant.tools.vis_tools as vis_tools_module
+            mock_uvisbox = MagicMock(side_effect=RuntimeError("UVisBox internal error"))
+            vis_tools_module.functional_boxplot = mock_uvisbox
+            vis_tools_module.BoxplotStyleConfig = MagicMock()
+
+            # Act
+            result = plot_functional_boxplot(data_path="curves.npy")
+
+            # Assert
+            assert result['status'] == 'error'
+            assert 'error' in result['message'].lower()
+            assert '_error_details' in result
 
 
 # Mocked exception tests to trigger error handlers
