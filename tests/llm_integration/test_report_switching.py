@@ -3,6 +3,8 @@
 import pytest
 from uvisbox_assistant.session.conversation import ConversationSession
 
+pytestmark = pytest.mark.llm_subset_analysis
+
 
 class TestReportSwitchingWorkflow:
     """Test users can switch between report types after initial generation"""
