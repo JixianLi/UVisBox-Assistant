@@ -152,6 +152,24 @@ class TestPlotCurveBoxplot:
     @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_default_percentiles_applied(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test percentiles=None applies default [25, 50, 90, 100]."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['percentiles'] == [25, 50, 90, 100]
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
     def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test load_array error returns error dict."""
         # Arrange
