@@ -58,38 +58,43 @@ Feature development follows this pipeline:
 
 ### Test Categories
 
-| Category | Count | API Calls | When to Run |
+| Category | Count | LLM Calls | When to Run |
 |----------|-------|-----------|-------------|
 | Unit | 277 | 0 | Every code review |
-| Integration L1 | 21 | ~70 | Minimal subset during iteration |
-| Integration L2 | 15 | ~30 | Minimal subset during iteration |
-| E2E | 15 | ~30 | Acceptance test stage only |
+| Integration (UVisBox Interface) | 21 | 0 | Every code review |
+| Integration (LLM Integration) | 15 | ~40 | Minimal subset during iteration |
+| E2E | 15 | ~60 | Acceptance test stage only |
 
 **API Budget Rule**: Run ONLY minimal integration tests during iterative development. Run full test suite only at acceptance stage.
 
 ### Test Runner
 ```bash
 # During development (no API calls)
-poetry run python tests/utils/run_all_tests.py --unit-only
+python tests/test.py --pre-planning
 
 # Minimal integration (specific feature)
-poetry run pytest tests/integration/test_tool_interfaces.py::TestDataTools -v
+python tests/test.py --iterative --llm-subset=analyzer
 
 # Acceptance stage (all tests)
-poetry run python tests/utils/run_all_tests.py
+python tests/test.py --acceptance
 ```
 
 ### Integration Test Layers
 
-**Layer 1** (`test_tool_interfaces.py`): Tool -> UVisBox interface validation
+**UVisBox Interface** (`uvisbox_interface/`): Tool -> UVisBox interface validation
 - Tests actual UVisBox function calls with real data
 - Verifies parameter passing, error handling
-- ~70 API calls total
+- 0 LLM calls
 
-**Layer 2** (`test_e2e_pipelines.py`): Complete workflows through Gemini
+**LLM Integration** (`llm_integration/`): Individual LLM-powered features
+- Tests specific components that require LLM calls
+- Verifies analyzer, routing, error handling, session management
+- ~40 LLM calls total
+
+**E2E** (`e2e/`): Complete workflows through Gemini
 - Tests full graph execution with LLM
 - Verifies routing, state management, multi-turn conversations
-- ~30 API calls total
+- ~60 LLM calls total
 
 ## Code Organization
 
@@ -127,11 +132,11 @@ except Exception as e:
 
 ## External Dependencies
 
-**UVisBox**: Source at `/Users/jixianli/projects/UVisBox`
-- Interface may change; always run `tests/integration/test_tool_interfaces.py` after UVisBox updates
+**UVisBox**: Source dependency project (see `.claude-local.md` for local path)
+- Interface may change; always run `python tests/test.py --pre-planning` after UVisBox updates
 - 6 visualization functions wrapped: functional_boxplot, curve_boxplot, probabilistic_marching_squares, uncertainty_lobes, contour_boxplot, squid_glyph_2D
 
-**Python**: Conda environment `agent` at `/Users/jixianli/miniforge3/envs/agent/bin/python`
+**Python**: Conda environment `agent` (see `.claude-local.md` for local path)
 
 **Package Management**: Poetry (all dev packages in `[tool.poetry.group.dev.dependencies]`)
 
@@ -140,7 +145,7 @@ except Exception as e:
 **Add a new visualization tool**:
 1. Wrap UVisBox function in `src/uvisbox_assistant/tools/vis_tools.py`
 2. Add to tool definitions in `src/uvisbox_assistant/llm/model.py`
-3. Add integration test in `tests/integration/test_tool_interfaces.py`
+3. Add integration test in `tests/uvisbox_interface/test_tool_interfaces.py`
 4. Update API.md
 
 **Modify LangGraph workflow**:

@@ -51,4 +51,4 @@ venv/
 
 # claude
 .claude/
-CLAUDE.md
+.claude-local.md
