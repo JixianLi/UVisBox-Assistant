@@ -27,31 +27,81 @@ def parse_llm_subsets(subset_str):
     return markers
 
 
-def build_pytest_command(args):
-    """Build pytest command based on arguments."""
-    cmd = [sys.executable, "-m", "pytest"]
+def build_pytest_commands(args):
+    """Build pytest command(s) based on arguments.
 
-    # Determine test paths and markers
-    test_paths = []
-    markers = []
+    Returns a list of commands to run. Multiple commands are needed when
+    we need to run unmarked tests + marked tests separately.
+    """
+    base_cmd = [sys.executable, "-m", "pytest"]
+    commands = []
 
     if args.pre_planning:
         # Run unit + uvisbox_interface (0 LLM calls)
-        test_paths = ["tests/unit/", "tests/uvisbox_interface/"]
+        cmd = base_cmd.copy()
+        cmd.extend(["tests/unit/", "tests/uvisbox_interface/"])
+        cmd.append("-v")
+        if args.coverage:
+            cmd.extend([
+                "--cov=src/uvisbox_assistant",
+                "--cov-report=term",
+                "--cov-report=html"
+            ])
+        commands.append(cmd)
 
     elif args.iterative:
         # Run unit + LLM subset
-        test_paths = ["tests/unit/"]
         markers = parse_llm_subsets(args.llm_subset)
+
+        # First command: run unit tests (no marker filter)
+        cmd1 = base_cmd.copy()
+        cmd1.extend(["tests/unit/", "-v"])
+        if args.coverage:
+            cmd1.extend(["--cov=src/uvisbox_assistant", "--cov-append"])
+        commands.append(cmd1)
+
+        # Second command: run marked tests from llm_integration/ and e2e/
+        if markers:
+            cmd2 = base_cmd.copy()
+            marker_expr = " or ".join(markers)
+            cmd2.extend(["tests/llm_integration/", "tests/e2e/", "-m", marker_expr, "-v"])
+            if args.coverage:
+                cmd2.extend(["--cov=src/uvisbox_assistant", "--cov-append",
+                           "--cov-report=term", "--cov-report=html"])
+            commands.append(cmd2)
 
     elif args.code_review:
         # Run unit + uvisbox_interface + LLM subset
-        test_paths = ["tests/unit/", "tests/uvisbox_interface/"]
         markers = parse_llm_subsets(args.llm_subset)
+
+        # First command: run unit and uvisbox_interface tests
+        cmd1 = base_cmd.copy()
+        cmd1.extend(["tests/unit/", "tests/uvisbox_interface/", "-v"])
+        if args.coverage:
+            cmd1.extend(["--cov=src/uvisbox_assistant", "--cov-append"])
+        commands.append(cmd1)
+
+        # Second command: run marked tests
+        if markers:
+            cmd2 = base_cmd.copy()
+            marker_expr = " or ".join(markers)
+            cmd2.extend(["tests/llm_integration/", "tests/e2e/", "-m", marker_expr, "-v"])
+            if args.coverage:
+                cmd2.extend(["--cov=src/uvisbox_assistant", "--cov-append",
+                           "--cov-report=term", "--cov-report=html"])
+            commands.append(cmd2)
 
     elif args.acceptance:
         # Run everything
-        test_paths = ["tests/"]
+        cmd = base_cmd.copy()
+        cmd.extend(["tests/", "-v"])
+        if args.coverage:
+            cmd.extend([
+                "--cov=src/uvisbox_assistant",
+                "--cov-report=term",
+                "--cov-report=html"
+            ])
+        commands.append(cmd)
 
     else:
         # No mode specified - this shouldn't happen due to passthrough logic
@@ -59,26 +109,7 @@ def build_pytest_command(args):
         print("Or provide direct pytest arguments")
         sys.exit(1)
 
-    # Add test paths
-    cmd.extend(test_paths)
-
-    # Add markers
-    if markers:
-        marker_expr = " or ".join(markers)
-        cmd.extend(["-m", marker_expr])
-
-    # Add coverage if requested
-    if args.coverage:
-        cmd.extend([
-            "--cov=src/uvisbox_assistant",
-            "--cov-report=term",
-            "--cov-report=html"
-        ])
-
-    # Add verbosity
-    cmd.append("-v")
-
-    return cmd
+    return commands
 
 
 def main():
@@ -153,16 +184,33 @@ def main():
         print("Example: python tests/test.py --code-review --llm-subset=analyzer")
         sys.exit(1)
 
-    # Build pytest command
-    cmd = build_pytest_command(args)
+    # Build pytest commands
+    cmds = build_pytest_commands(args)
 
-    # Add pytest passthrough args
+    # Add pytest passthrough args to all commands
     if pytest_args:
-        cmd.extend(pytest_args)
+        for cmd in cmds:
+            # Insert passthrough args before -v (which is always last or second-to-last)
+            # Find -v and insert before it
+            if "-v" in cmd:
+                v_index = cmd.index("-v")
+                cmd[v_index:v_index] = pytest_args
+            else:
+                cmd.extend(pytest_args)
 
-    # Run pytest
-    result = subprocess.run(cmd)
-    sys.exit(result.returncode)
+    # Run pytest commands in sequence
+    # If any command fails, stop and return that exit code
+    for i, cmd in enumerate(cmds):
+        if len(cmds) > 1:
+            print(f"\n{'='*70}")
+            print(f"Running command {i+1}/{len(cmds)}...")
+            print(f"{'='*70}\n")
+
+        result = subprocess.run(cmd)
+        if result.returncode != 0:
+            sys.exit(result.returncode)
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":
