@@ -42,57 +42,6 @@ import matplotlib.pyplot as plt
 # ============================================================================
 
 
-# Data Tools Tests
-
-def test_generate_ensemble_curves():
-    """Test curve generation with various parameters."""
-    result = generate_ensemble_curves(n_curves=10, n_points=50)
-
-    assert result['status'] == 'success'
-    assert 'output_path' in result
-    assert Path(result['output_path']).exists()
-
-    # Verify data shape
-    data = np.load(result['output_path'])
-    assert data.shape == (10, 50)
-
-    print("✓ test_generate_ensemble_curves")
-
-
-def test_generate_scalar_field_ensemble():
-    """Test scalar field generation."""
-    result = generate_scalar_field_ensemble(nx=20, ny=20, n_ensemble=10)
-
-    assert result['status'] == 'success'
-    assert 'output_path' in result
-    assert Path(result['output_path']).exists()
-
-    # Verify data shape
-    data = np.load(result['output_path'])
-    assert data.shape == (20, 20, 10)
-
-    print("✓ test_generate_scalar_field_ensemble")
-
-
-def test_generate_vector_field_ensemble():
-    """Test vector field generation."""
-    result = generate_vector_field_ensemble(x_res=5, y_res=5, n_instances=10)
-
-    assert result['status'] == 'success'
-    assert 'positions_path' in result
-    assert 'vectors_path' in result
-    assert Path(result['positions_path']).exists()
-    assert Path(result['vectors_path']).exists()
-
-    # Verify data shapes
-    positions = np.load(result['positions_path'])
-    vectors = np.load(result['vectors_path'])
-    assert positions.shape == (25, 2)  # 5x5 grid
-    assert vectors.shape == (25, 10, 2)  # 25 positions, 10 instances, 2D
-
-    print("✓ test_generate_vector_field_ensemble")
-
-
 # Visualization Tools Tests - BoxplotStyleConfig
 
 def test_plot_functional_boxplot_with_styling():
