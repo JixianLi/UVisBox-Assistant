@@ -113,29 +113,29 @@ src/uvisbox_assistant/
 
 ### Test Categories
 
-UVisBox-Assistant uses a category-based test structure:
+UVisBox-Assistant uses a 4-category test structure (v0.3.4):
 
 1. **Unit Tests** (`tests/unit/`):
-   - 0 API calls
+   - 0 LLM calls
    - Fast execution (< 15 seconds)
-   - Test individual functions in isolation
-   - No LLM dependencies
+   - Test individual functions in isolation with mocking
+   - Examples: routing logic, command parsing, tool functions
 
-2. **Integration Tests** (`tests/integration/`):
-   - 15-25 API calls per file
-   - Test component interactions
-   - Verify workflow execution
-   - Include error handling tests
+2. **UVisBox Interface Tests** (`tests/uvisbox_interface/`):
+   - 0 LLM calls, calls real UVisBox functions
+   - Verify tool → UVisBox integration
+   - Catch API structure changes and KEY_NOT_FOUND bugs
+   - Examples: tool_interfaces.py, csv_loading.py
 
-3. **E2E Tests** (`tests/e2e/`):
-   - 20-30 API calls per file
-   - Test complete scenarios
-   - Verify end-to-end functionality
+3. **LLM Integration Tests** (`tests/llm_integration/`):
+   - ~40 LLM calls total
+   - Test specific LLM-powered features
+   - Examples: analyzer, routing, error handling, session management
 
-4. **Interactive Tests** (`tests/interactive/`):
-   - User-paced testing
-   - Manual verification
-   - Menu-driven exploration
+4. **E2E Tests** (`tests/e2e/`):
+   - ~60 LLM calls total
+   - Test complete workflows from data generation to visualization
+   - One file per visualization type (functional_boxplot, curve_boxplot, etc.)
 
 ### Writing Tests
 
@@ -150,20 +150,28 @@ def test_command_parser():
     assert cmd.median_color == "blue"
 ```
 
-**Example integration test**:
+**Example UVisBox interface test**:
 ```python
-def test_hybrid_control():
-    """Test hybrid control for fast parameter updates."""
-    from uvisbox_assistant.conversation import ConversationSession
+def test_functional_boxplot_interface():
+    """Test functional boxplot calls UVisBox correctly."""
+    from uvisbox_assistant.tools.vis_tools import plot_functional_boxplot
+
+    result = plot_functional_boxplot(data_path="test_data.npy")
+    assert result["status"] == "success"
+    assert "figure_path" in result
+```
+
+**Example LLM integration test**:
+```python
+@pytest.mark.llm_subset_analyzer
+def test_analyzer_generates_report():
+    """Test analyzer generates uncertainty report."""
+    from uvisbox_assistant.session.conversation import ConversationSession
 
     session = ConversationSession()
-    # Generate data
-    state = session.send("Generate 30 curves and plot")
-    # Update parameter
-    state = session.send("median color blue")
-    # Verify update
-    assert "median_color" in state["last_vis_params"]
-    assert state["last_vis_params"]["median_color"] == "blue"
+    state = session.send("Generate statistics and create a quick report")
+    assert "analysis_reports" in state
+    assert "quick" in state["analysis_reports"]
 ```
 
 ### Running Tests
