@@ -1,4 +1,4 @@
-"""Integration tests for error recording in tool nodes."""
+"""Unit tests for error recording in tool nodes."""
 
 import pytest
 import numpy as np
