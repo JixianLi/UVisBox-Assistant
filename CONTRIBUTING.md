@@ -169,18 +169,33 @@ def test_hybrid_control():
 ### Running Tests
 
 ```bash
-# Unit tests only (fast, 0 API calls)
-python tests/utils/run_all_tests.py --unit
+# Before feature planning - verify UVisBox interface
+python tests/test.py --pre-planning
 
-# Integration tests (moderate API usage)
-python tests/utils/run_all_tests.py --integration
+# During development - test specific feature
+python tests/test.py --iterative --llm-subset=analyzer
 
-# E2E tests (higher API usage)
-python tests/utils/run_all_tests.py --e2e
+# Before code review - comprehensive check
+python tests/test.py --code-review --llm-subset=analyzer,routing
 
-# All tests
-python tests/utils/run_all_tests.py
+# Before merge - full acceptance
+python tests/test.py --acceptance
 ```
+
+### Test a Specific File
+
+```bash
+python tests/test.py tests/unit/test_config.py
+python tests/test.py tests/llm_integration/test_analyzer.py::test_specific
+```
+
+### With Coverage
+
+```bash
+python tests/test.py --pre-planning --coverage
+```
+
+See [TESTING.md](TESTING.md) for comprehensive testing guide.
 
 ### Rate Limit Considerations
 
@@ -194,7 +209,7 @@ python tests/utils/run_all_tests.py
 
 1. **Run tests**:
    ```bash
-   python tests/utils/run_all_tests.py --unit
+   python tests/test.py --pre-planning
    ```
 
 2. **Update documentation** if needed:
