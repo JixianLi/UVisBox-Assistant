@@ -51,6 +51,12 @@ markers = [
     "llm_subset_error_handling: error handling LLM integration tests",
     "llm_subset_hybrid_control: hybrid control LLM integration tests",
     "llm_subset_session: session management LLM integration tests",
+    "llm_subset_functional_boxplot: functional boxplot e2e tests",
+    "llm_subset_curve_boxplot: curve boxplot e2e tests",
+    "llm_subset_contour_boxplot: contour boxplot e2e tests",
+    "llm_subset_probabilistic_ms: probabilistic marching squares e2e tests",
+    "llm_subset_uncertainty_lobes: uncertainty lobes e2e tests",
+    "llm_subset_squid_glyph: squid glyph e2e tests",
 ]
 
 [tool.black]
