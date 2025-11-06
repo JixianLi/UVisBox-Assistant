@@ -46,6 +46,7 @@ addopts = [
 ]
 markers = [
     "e2e: End-to-end integration tests",
+    "llm_subset_analysis: Analysis workflow LLM integration tests",
 ]
 
 [tool.black]
