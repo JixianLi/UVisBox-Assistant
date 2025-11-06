@@ -34,7 +34,7 @@ python tests/test.py --pre-planning --coverage
 tests/
 ├── test.py                     # Pipeline-aware test runner
 │
-├── unit/                       # 277 tests, 0 LLM calls
+├── unit/                       # ~291 tests, 0 UVisBox calls
 │   ├── test_command_parser.py      # Hybrid command parsing
 │   ├── test_routing.py             # Graph routing logic
 │   ├── test_tools.py               # Data/vis tool functions
@@ -69,13 +69,15 @@ tests/
 
 | Category | Tests | LLM Calls | Duration |
 |----------|-------|-----------|----------|
-| **Unit** | 277 | 0 | < 10 seconds |
+| **Unit** | ~291 | 0 (no UVisBox) | < 5 seconds |
 | **UVisBox Interface** | 23 | 0 | < 30 seconds |
 | **LLM Integration** | ~20 | ~40 | 2-3 minutes |
 | **E2E** | ~30 | ~60 | 3-5 minutes |
 | **Total** | ~350 | ~100 | 8-10 minutes |
 
 **Note**: LLM call estimates are approximate and may vary by ±20%.
+
+**Unit Test Independence**: All unit tests mock external dependencies (UVisBox, file I/O, LLM). They can run without UVisBox installed, making them ideal for fast iteration and CI environments.
 
 ---
 
