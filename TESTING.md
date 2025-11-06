@@ -3,17 +3,27 @@
 ## Quick Start
 
 ```bash
-# Run all tests with automatic delays (~10 minutes, ~100 API calls)
-python tests/utils/run_all_tests.py
+# Pre-planning: Verify UVisBox interface (0 LLM calls)
+python tests/test.py --pre-planning
 
-# Run unit tests only (instant, 0 API calls)
-python tests/utils/run_all_tests.py --unit
+# Iterative development: Unit + specific LLM subset
+python tests/test.py --iterative --llm-subset=analyzer
 
-# Quick sanity check (30 seconds, 1-2 API calls)
-python tests/test_simple.py
+# Smoke test: Critical path only (~3 LLM calls)
+python tests/test.py --iterative --llm-subset=smoke
 
-# Run with coverage report
-python tests/utils/run_all_tests.py --unit --coverage
+# Code review checkpoint: Full interface + LLM subset
+python tests/test.py --code-review --llm-subset=analyzer,routing
+
+# Acceptance: All tests (~100 LLM calls)
+python tests/test.py --acceptance
+
+# Direct test selection (pytest-style)
+python tests/test.py tests/unit/test_config.py
+python tests/test.py tests/llm_integration/test_analyzer.py::test_specific
+
+# With coverage
+python tests/test.py --pre-planning --coverage
 ```
 
 ---
@@ -22,56 +32,162 @@ python tests/utils/run_all_tests.py --unit --coverage
 
 ```
 tests/
-├── test_simple.py              # Quick sanity check (1-2 API calls)
+├── test.py                     # Pipeline-aware test runner
 │
-├── unit/                       # 277 tests, 0 API calls
+├── unit/                       # 277 tests, 0 LLM calls
 │   ├── test_command_parser.py      # Hybrid command parsing
-│   ├── test_command_handlers.py    # Command handler logic
-│   ├── test_config.py              # Configuration validation
 │   ├── test_routing.py             # Graph routing logic
-│   ├── test_state_extensions.py    # State management
 │   ├── test_tools.py               # Data/vis tool functions
-│   ├── test_statistics_tools.py    # Statistics computation
-│   ├── test_analyzer_tools.py      # Report generation
-│   ├── test_error_tracking.py      # Error tracking system
-│   ├── test_error_interpretation.py # Error message interpretation
-│   └── test_output_control.py      # Verbose mode control
+│   └── [... other unit tests]
 │
-├── integration/                # 53 tests, ~100 API calls
-│   ├── test_tool_interfaces.py     # Layer 1: Tool-to-UVisBox interface (21 tests)
-│   ├── test_e2e_pipelines.py       # Layer 2: Complete user workflows (15 tests)
-│   ├── test_analyzer_tool.py       # Analyzer with LLM (3 tests)
-│   ├── test_hybrid_control.py      # Fast parameter updates (4 tests)
-│   ├── test_error_handling.py      # Error recovery (6 tests)
-│   └── test_session_management.py  # Session lifecycle (3 tests)
+├── uvisbox_interface/          # 23 tests, 0 LLM calls, calls UVisBox
+│   ├── test_tool_interfaces.py     # Tool → UVisBox interface validation
+│   └── test_csv_loading.py         # CSV loading with real data
 │
-├── e2e/                        # 15 tests, ~30 API calls
-│   ├── test_matplotlib_behavior.py # Non-blocking visualization (3 tests)
-│   └── test_analysis_workflows.py  # Analysis pipelines (12 tests)
+├── llm_integration/            # ~20 tests, ~40 LLM calls
+│   ├── test_analyzer.py            # Analyzer with LLM
+│   ├── test_error_handling.py      # Error recovery
+│   ├── test_session.py             # Session management
+│   ├── test_hybrid_control.py      # Hybrid control workflows
+│   └── test_report_switching.py    # Report format switching
 │
-├── interactive/                # Manual testing
-│   └── interactive_test.py         # Menu-driven testing (24+ scenarios)
+├── e2e/                        # ~30 tests, ~60 LLM calls
+│   ├── test_functional_boxplot.py  # Functional boxplot workflows
+│   ├── test_curve_boxplot.py       # Curve boxplot workflows
+│   ├── test_contour_boxplot.py     # Contour boxplot workflows
+│   ├── test_probabilistic_ms.py    # PMS workflows
+│   ├── test_uncertainty_lobes.py   # Uncertainty lobes workflows
+│   ├── test_squid_glyph.py         # Squid glyph workflows
+│   ├── test_analysis_workflows.py  # Analysis pipelines
+│   └── test_matplotlib_behavior.py # Visualization behavior
 │
-└── utils/
-    └── run_all_tests.py        # Test runner with categories
+├── conftest.py
+└── __init__.py
 ```
 
-### API Call Estimates
+### LLM Call Estimates
 
-| Category | Tests | API Calls | Duration |
+| Category | Tests | LLM Calls | Duration |
 |----------|-------|-----------|----------|
 | **Unit** | 277 | 0 | < 10 seconds |
-| **Integration** | 53 | ~100 | 3-5 minutes |
-| **E2E** | 15 | ~30 | 2-3 minutes |
-| **Total** | 345 | ~130 | 8-10 minutes |
+| **UVisBox Interface** | 23 | 0 | < 30 seconds |
+| **LLM Integration** | ~20 | ~40 | 2-3 minutes |
+| **E2E** | ~30 | ~60 | 3-5 minutes |
+| **Total** | ~350 | ~100 | 8-10 minutes |
 
-**Note**: API call estimates are approximate. Actual usage depends on model behavior and may vary by ±20%.
+**Note**: LLM call estimates are approximate and may vary by ±20%.
+
+---
+
+## Development Pipeline Stages
+
+### 1. Pre-Planning (Before Feature Planning)
+
+**Purpose**: Verify UVisBox interface is stable before planning new features.
+
+```bash
+python tests/test.py --pre-planning
+```
+
+**Must pass before:**
+- Creating implementation plans
+- Starting feature development
+
+**If fails:**
+- STOP feature planning
+- Create patch version for interface fixes only
+- Resume after `--pre-planning` passes
+
+### 2. Iterative Development (During Development)
+
+**Purpose**: Fast iteration with minimal LLM budget.
+
+```bash
+# Working on analyzer
+python tests/test.py --iterative --llm-subset=analyzer
+
+# Working on squid glyph
+python tests/test.py --iterative --llm-subset=squid_glyph
+
+# Multiple subsets
+python tests/test.py --iterative --llm-subset=analyzer,routing
+
+# Smoke test only
+python tests/test.py --iterative --llm-subset=smoke
+```
+
+**Run after**: Each code change
+
+### 3. Code Review Checkpoints (Before Review)
+
+**Purpose**: Verify implementation before requesting review.
+
+```bash
+python tests/test.py --code-review --llm-subset=analyzer
+```
+
+**Run before:**
+- Requesting code review
+- Moving to next task in plan
+
+### 4. Acceptance (Before Merge)
+
+**Purpose**: Final validation with full test suite.
+
+```bash
+python tests/test.py --acceptance
+```
+
+**Run before:**
+- Merging to main
+- Creating release
+
+**Budget**: ~100 LLM calls, 8-10 minutes
+
+---
+
+## LLM Subset Reference
+
+### Component-Based Subsets
+
+| Subset | Marker | Tests | LLM Calls |
+|--------|--------|-------|-----------|
+| `analyzer` | `llm_subset_analyzer` | Analyzer tests | ~5 |
+| `routing` | `llm_subset_routing` | Routing tests | ~5 |
+| `error_handling` | `llm_subset_error_handling` | Error recovery | ~5 |
+| `session` | `llm_subset_session` | Session management | ~3 |
+| `hybrid_control` | `llm_subset_hybrid_control` | Hybrid control | ~3 |
+
+### Workflow-Based Subsets
+
+| Subset | Marker | Tests | LLM Calls |
+|--------|--------|-------|-----------|
+| `analysis` | `llm_subset_analysis` | Analysis workflows | ~10 |
+
+### Visualization Type Subsets
+
+| Subset | Marker | Tests | LLM Calls |
+|--------|--------|-------|-----------|
+| `functional_boxplot` | `llm_subset_functional_boxplot` | Functional boxplot | ~8 |
+| `curve_boxplot` | `llm_subset_curve_boxplot` | Curve boxplot | ~8 |
+| `contour_boxplot` | `llm_subset_contour_boxplot` | Contour boxplot | ~8 |
+| `probabilistic_ms` | `llm_subset_probabilistic_ms` | PMS | ~8 |
+| `uncertainty_lobes` | `llm_subset_uncertainty_lobes` | Uncertainty lobes | ~8 |
+| `squid_glyph` | `llm_subset_squid_glyph` | Squid glyph | ~8 |
+
+### Special Subsets
+
+| Subset | Marker | Tests | LLM Calls |
+|--------|--------|-------|-----------|
+| `smoke` | `smoke` | Critical path only | ~3 |
+
+**Combine subsets**: `--llm-subset=analyzer,routing,smoke`
 
 ---
 
 ## Test Roles
 
-### Unit Tests (0 API Calls)
+### Unit Tests (0 LLM Calls)
 **Purpose**: Test individual functions and logic in isolation without external dependencies.
 
 **Responsibilities**:
@@ -98,30 +214,20 @@ def test_generate_ensemble_curves_with_valid_params():
     assert data.shape == (10, 50)
 ```
 
-### Integration Tests (~2-3 API Calls per Test)
-**Purpose**: Test interactions between components and with external dependencies (UVisBox, LLM).
+### UVisBox Interface Tests (0 LLM Calls, Calls UVisBox)
+**Purpose**: Test tool → UVisBox integration without LLM involvement.
 
 **Responsibilities**:
-- Tool-to-UVisBox interface correctness
-- Complete user workflows (data → vis → analysis)
-- Multi-turn conversations
-- Session state management
-- Error recovery across components
+- Verify tools call UVisBox functions correctly
+- Validate parameter passing to UVisBox
+- Test with real UVisBox library
+- Catch UVisBox API changes early
+- Test error handling for UVisBox failures
 
-**Two-layer structure**:
-- **Layer 1** (`test_tool_interfaces.py`): Direct tool functions with real UVisBox
-  - Catches UVisBox API changes (e.g., KEY_NOT_FOUND bugs)
-  - Verifies exact return structures
-- **Layer 2** (`test_e2e_pipelines.py`): Complete workflows through model
-  - Verifies backward compatibility for users
-  - Tests all 6 visualization types
-  - Tests full analyzer pipeline
-
-**When to add integration tests**:
-- **New workflow**: Add E2E test for complete user journey
-- **New UVisBox module**: Add Layer 1 interface test
-- **API change**: Update Layer 1 tests to match new interface
-- **Breaking change detection**: Layer 1 fails → update tools → Layer 2 passes = backward compatible
+**When to add interface tests**:
+- **New UVisBox function**: Add test when wrapping new UVisBox visualization
+- **UVisBox update**: Run after updating UVisBox dependency
+- **Parameter changes**: Add test when modifying tool parameters
 
 **Example**:
 ```python
@@ -135,26 +241,52 @@ def test_functional_boxplot_interface():
     assert result['_vis_params']['_tool_name'] == 'plot_functional_boxplot'
 ```
 
-### E2E Tests (~2-3 API Calls per Test)
+### LLM Integration Tests (~2 LLM Calls per Test)
+**Purpose**: Test specific LLM-powered features in isolation.
+
+**Responsibilities**:
+- Test analyzer report generation
+- Test routing decisions with LLM
+- Test error recovery workflows
+- Test session state management with LLM
+- Test hybrid control mode
+
+**When to add LLM integration tests**:
+- **New LLM feature**: Add test for specific LLM-powered functionality
+- **Routing change**: Add test when modifying graph routing logic
+- **Error handling**: Add test when improving error recovery
+
+**Example**:
+```python
+def test_analyzer_basic(session):
+    """Test basic analyzer functionality."""
+    session.send("Generate curves and analyze")
+
+    response = session.get_last_response()
+    assert len(response) > 100  # Substantial report
+    assert "median" in response.lower()
+```
+
+### E2E Tests (~2 LLM Calls per Test)
 **Purpose**: Test complete user scenarios from natural language input to final output.
 
 **Responsibilities**:
 - Complete analysis workflows
+- Full visualization pipelines
+- Multi-turn conversations
 - Real LLM report generation
 - Matplotlib non-blocking behavior
-- Multi-turn analysis conversations
 - Report format validation (inline/quick/detailed)
 
 **When to add E2E tests**:
-- **New feature**: Add test for complete user-facing workflow
+- **New visualization type**: Add test for complete workflow
 - **New analysis type**: Add test for new report format
 - **Before release**: Run full E2E suite to verify everything works
 
 **Example**:
 ```python
-def test_full_analyzer_pipeline():
+def test_full_analyzer_pipeline(session):
     """Test data → vis → analyze workflow."""
-    session = ConversationSession()
     session.send("Generate curves, plot boxplot, detailed report")
 
     response = session.get_last_response()
@@ -163,29 +295,14 @@ def test_full_analyzer_pipeline():
     assert "outlier" in response.lower()
 ```
 
-### Interactive Tests (Manual)
-**Purpose**: Menu-driven manual testing for exploratory verification.
-
-**Responsibilities**:
-- Visual verification of plots
-- User experience testing
-- Edge case exploration
-- Debugging specific scenarios
-
-**When to use**:
-- Visual verification needed
-- Testing new UI features
-- Debugging specific user reports
-- Pre-release exploratory testing
-
 ---
 
 ## Code Coverage
 
-### Current Coverage (v0.3.1)
+### Current Coverage (v0.3.4)
 
 ```
-Overall: 89.29%
+Overall: ~89%
 
 Key modules:
 - vis_tools.py:        96.69% ✅
@@ -200,7 +317,7 @@ Key modules:
 **Run coverage report**:
 ```bash
 # Generate coverage report
-python tests/utils/run_all_tests.py --unit --coverage
+python tests/test.py --pre-planning --coverage
 
 # View HTML report
 open htmlcov/index.html
@@ -231,7 +348,7 @@ tools/vis_tools.py        151      5  96.69%
 - Click files to see line-by-line coverage
 
 **What's NOT covered** (by design):
-- LLM calls in analyzer_tools.py (tested in E2E)
+- LLM calls in analyzer_tools.py (tested in LLM integration/E2E)
 - Interactive REPL in main.py (manual testing)
 - Entry points __main__.py
 - Debug code marked with `# pragma: no cover`
@@ -241,11 +358,11 @@ tools/vis_tools.py        151      5  96.69%
 **When adding new features**:
 1. Write unit tests first (TDD)
 2. Aim for 90%+ coverage on new code
-3. Run `--unit --coverage` to verify
+3. Run `--pre-planning --coverage` to verify
 4. Add mock-based tests for error paths
 
 **When modifying existing code**:
-1. Check current coverage: `python tests/utils/run_all_tests.py --unit --coverage`
+1. Check current coverage: `python tests/test.py --pre-planning --coverage`
 2. Add tests for new branches
 3. Maintain or improve coverage percentage
 4. Don't remove tests without replacement
@@ -253,7 +370,7 @@ tools/vis_tools.py        151      5  96.69%
 **Finding coverage gaps**:
 ```bash
 # Generate report
-python tests/utils/run_all_tests.py --unit --coverage
+python tests/test.py --pre-planning --coverage
 
 # Open HTML report
 open htmlcov/index.html
@@ -293,59 +410,68 @@ Please retry in 17.461429122s
 **Solution**: Wait the specified time (e.g., 17s) plus a buffer (60s total recommended).
 
 **Prevention**:
-- Use `python tests/utils/run_all_tests.py` (automatic delays)
-- Run unit tests first (0 API calls)
-- Add 60s delay between heavy test runs
+- Use `python tests/test.py` with appropriate mode
+- Run unit tests first (0 LLM calls)
+- Use `--llm-subset` to limit LLM budget during iteration
+- Add delay between heavy test runs
 
 ---
 
 ## Test Runner Usage
 
-### Categories
+### Pipeline Modes
 
 ```bash
-# All tests (automatic delays)
-python tests/utils/run_all_tests.py
+# Pre-planning: Unit + UVisBox interface (0 LLM calls)
+python tests/test.py --pre-planning
 
-# Unit tests only (instant)
-python tests/utils/run_all_tests.py --unit
+# Iterative: Unit + LLM subset (requires --llm-subset)
+python tests/test.py --iterative --llm-subset=analyzer
 
-# Integration tests only
-python tests/utils/run_all_tests.py --integration
+# Code review: Unit + UVisBox interface + LLM subset
+python tests/test.py --code-review --llm-subset=analyzer
 
-# E2E tests only
-python tests/utils/run_all_tests.py --e2e
+# Acceptance: All tests (~100 LLM calls)
+python tests/test.py --acceptance
+```
 
-# Quick validation (unit + sanity check)
-python tests/utils/run_all_tests.py --quick
+### Direct Test Selection
+
+```bash
+# Run specific test file
+python tests/test.py tests/unit/test_config.py -v
+
+# Run specific test
+python tests/test.py tests/unit/test_config.py::test_temp_dir_exists -v
+
+# Run specific test class
+python tests/test.py tests/e2e/test_functional_boxplot.py::TestFunctionalBoxplotPipeline -v
 ```
 
 ### With Coverage
 
 ```bash
-# Unit tests with coverage (recommended)
-python tests/utils/run_all_tests.py --unit --coverage
+# Pre-planning with coverage (recommended)
+python tests/test.py --pre-planning --coverage
 
-# All tests with coverage
-python tests/utils/run_all_tests.py --coverage
-
-# Integration tests with coverage
-python tests/utils/run_all_tests.py --integration --coverage
+# Acceptance with coverage
+python tests/test.py --acceptance --coverage
 ```
 
-### Individual Test Files
+### LLM Subset Selection
 
 ```bash
-# Unit tests
-python -m pytest tests/unit/test_tools.py -v
-python tests/unit/test_statistics_tools.py
+# Single subset
+python tests/test.py --iterative --llm-subset=smoke
 
-# Integration tests
-python -m pytest tests/integration/test_tool_interfaces.py -v
-python tests/integration/test_e2e_pipelines.py
+# Multiple subsets
+python tests/test.py --iterative --llm-subset=analyzer,routing,smoke
 
-# E2E tests
-python tests/e2e/test_analysis_workflows.py
+# Component-based
+python tests/test.py --code-review --llm-subset=analyzer,error_handling
+
+# Visualization-based
+python tests/test.py --iterative --llm-subset=functional_boxplot,curve_boxplot
 ```
 
 ---
@@ -355,29 +481,35 @@ python tests/e2e/test_analysis_workflows.py
 ### During Active Development
 1. **Run unit tests** after code changes (instant feedback):
    ```bash
-   python tests/utils/run_all_tests.py --unit
+   python tests/test.py tests/unit/
    ```
 
-2. **Run coverage** to verify new code is tested:
+2. **Run subset tests** for feature being developed:
    ```bash
-   python tests/utils/run_all_tests.py --unit --coverage
+   python tests/test.py --iterative --llm-subset=analyzer
    ```
 
-### Before Committing
-1. **Run quick sanity check**:
+3. **Run coverage** to verify new code is tested:
    ```bash
-   python tests/test_simple.py
+   python tests/test.py --pre-planning --coverage
    ```
 
-2. **Run full test suite** (if time permits):
+### Before Requesting Code Review
+1. **Run code review checkpoint**:
    ```bash
-   python tests/utils/run_all_tests.py
+   python tests/test.py --code-review --llm-subset=<relevant-subset>
    ```
 
-### Before Release
-1. **Run all tests with coverage**:
+2. **Verify coverage maintained**:
    ```bash
-   python tests/utils/run_all_tests.py --coverage
+   python tests/test.py --pre-planning --coverage
+   open htmlcov/index.html
+   ```
+
+### Before Merging
+1. **Run full acceptance test**:
+   ```bash
+   python tests/test.py --acceptance
    ```
 
 2. **Verify coverage meets targets**:
@@ -397,7 +529,7 @@ python tests/e2e/test_analysis_workflows.py
 Run from project root:
 ```bash
 cd /path/to/uvisbox-assistant
-python tests/test_simple.py
+python tests/test.py --pre-planning
 ```
 
 ### Test Failures
@@ -405,17 +537,33 @@ python tests/test_simple.py
 2. Verify conda environment `agent` is active
 3. Verify UVisBox is installed
 4. Run unit tests first to isolate issue
+5. Check if UVisBox interface changed (run `--pre-planning`)
 
 ### Coverage Gaps
-1. Generate HTML report: `python tests/utils/run_all_tests.py --unit --coverage`
+1. Generate HTML report: `python tests/test.py --pre-planning --coverage`
 2. Open `htmlcov/index.html`
 3. Find red lines (uncovered code)
 4. Add tests for those lines
 5. Re-run coverage to verify
 
+### LLM Budget Errors
+If you see "resource exhausted" errors:
+1. Use smaller subsets: `--llm-subset=smoke`
+2. Wait 60s between test runs
+3. Use `--iterative` during development (unit + minimal LLM)
+4. Save `--acceptance` for final validation only
+
 ---
 
 ## Version History
+
+### v0.3.4 (2025-11-05)
+- Complete test redesign with 4-category structure
+- New test.py runner with pipeline modes
+- LLM subset markers for granular budget control
+- Reorganized tests: unit/, uvisbox_interface/, llm_integration/, e2e/
+- Added smoke test markers for critical path
+- Total: ~350 tests (277 unit, 23 interface, ~20 LLM integration, ~30 e2e)
 
 ### v0.3.1 (2025-11-05)
 - Added comprehensive integration tests for backward compatibility
