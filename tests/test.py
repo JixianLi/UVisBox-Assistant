@@ -114,7 +114,21 @@ def build_pytest_commands(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Pipeline-aware test runner for UVisBox-Assistant"
+        description="Pipeline-aware test runner for UVisBox-Assistant",
+        epilog="""
+Examples:
+  # Pipeline modes
+  python tests/test.py --pre-planning
+  python tests/test.py --iterative --llm-subset=analyzer
+  python tests/test.py --code-review --llm-subset=analyzer,routing
+  python tests/test.py --acceptance
+
+  # Direct pytest passthrough (no mode required)
+  python tests/test.py tests/unit/test_config.py
+  python tests/test.py tests/unit/test_config.py::test_specific -v
+  python tests/test.py -k test_analyzer
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
     # Pipeline modes
