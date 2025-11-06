@@ -611,6 +611,148 @@ class TestPlotSquidGlyph2D:
         mock_uvisbox.assert_called_once()
 
 
+# ============================================================================
+# Data Tools - Mocked Unit Tests
+# ============================================================================
+
+class TestGenerateEnsembleCurves:
+    """Unit tests for generate_ensemble_curves (0 file I/O)."""
+
+    @patch('numpy.save')
+    def test_save_exception_handled(self, mock_save):
+        """Test numpy.save exception caught and returned as error dict."""
+        # Arrange
+        mock_save.side_effect = OSError("Disk full")
+
+        # Act
+        result = generate_ensemble_curves(n_curves=5, n_points=20)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'Error generating curves' in result['message']
+        assert '_error_details' in result
+        mock_save.assert_called_once()
+
+
+class TestGenerateScalarField:
+    """Unit tests for generate_scalar_field_ensemble (0 file I/O)."""
+
+    @patch('numpy.save')
+    def test_save_exception_handled(self, mock_save):
+        """Test numpy.save exception caught and returned as error dict."""
+        # Arrange
+        mock_save.side_effect = OSError("Permission denied")
+
+        # Act
+        result = generate_scalar_field_ensemble(nx=10, ny=10, n_ensemble=3)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'Error generating scalar field' in result['message']
+        assert '_error_details' in result
+        mock_save.assert_called_once()
+
+
+class TestGenerateVectorField:
+    """Unit tests for generate_vector_field_ensemble (0 file I/O)."""
+
+    @patch('numpy.save')
+    def test_save_exception_handled(self, mock_save):
+        """Test numpy.save exception caught and returned as error dict."""
+        # Arrange
+        mock_save.side_effect = IOError("Cannot write to disk")
+
+        # Act
+        result = generate_vector_field_ensemble(x_res=5, y_res=5, n_instances=5)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'Error generating vector field' in result['message']
+        assert '_error_details' in result
+        # Exception raised on first save call (positions)
+        assert mock_save.call_count == 1
+
+
+class TestLoadCSV:
+    """Unit tests for load_csv_to_numpy (0 file I/O)."""
+
+    @patch('pathlib.Path.exists')
+    def test_file_not_found_error(self, mock_exists):
+        """Test file not found returns error dict."""
+        # Arrange
+        mock_exists.return_value = False
+
+        # Act
+        result = load_csv_to_numpy(filepath="nonexistent.csv")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'File not found' in result['message']
+        assert 'nonexistent.csv' in result['message']
+        mock_exists.assert_called_once()
+
+    @patch('pandas.read_csv')
+    @patch('pathlib.Path.exists')
+    def test_pandas_exception_handled(self, mock_exists, mock_read_csv):
+        """Test pandas exception caught and returned as error dict."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_read_csv.side_effect = ValueError("Pandas parsing error")
+
+        # Act
+        result = load_csv_to_numpy(filepath="test.csv")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'Error loading CSV' in result['message']
+        assert '_error_details' in result
+        mock_read_csv.assert_called_once_with("test.csv")
+
+
+class TestClearSession:
+    """Unit tests for clear_session (0 file I/O)."""
+
+    @patch('pathlib.Path.glob')
+    @patch('pathlib.Path.exists')
+    def test_clears_temp_files(self, mock_exists, mock_glob):
+        """Test clear_session removes temporary files."""
+        # Arrange
+        mock_exists.return_value = True
+        mock_file1 = MagicMock()
+        mock_file1.name = "uva_test1.npy"
+        mock_file1.unlink = MagicMock()
+        mock_file2 = MagicMock()
+        mock_file2.name = "uva_test2.npy"
+        mock_file2.unlink = MagicMock()
+        mock_glob.return_value = [mock_file1, mock_file2]
+
+        # Act
+        result = clear_session()
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['files_removed'] == 2
+        assert 'uva_test1.npy' in result['files']
+        assert 'uva_test2.npy' in result['files']
+        mock_file1.unlink.assert_called_once()
+        mock_file2.unlink.assert_called_once()
+
+    @patch('pathlib.Path.exists')
+    def test_no_temp_dir_returns_success(self, mock_exists):
+        """Test clear_session with no temp directory returns success."""
+        # Arrange
+        mock_exists.return_value = False
+
+        # Act
+        result = clear_session()
+
+        # Assert
+        assert result['status'] == 'success'
+        assert 'No temp directory found' in result['message']
+        assert result['files_removed'] == 0
+        mock_exists.assert_called_once()
+
+
 # Mocked exception tests to trigger error handlers
 
 @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
