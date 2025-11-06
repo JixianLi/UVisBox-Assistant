@@ -223,26 +223,20 @@ See `requirements.txt`:
 
 ## Development
 
-### Running Tests
+### Testing
 
 ```bash
-# Quick sanity check
-python tests/test_simple.py
+# Quick validation (0 LLM calls, < 30 seconds)
+python tests/test.py --pre-planning
 
-# Unit tests (0 API calls, fast)
-python tests/utils/run_all_tests.py --unit
+# Smoke test (minimal LLM usage, ~3 calls)
+python tests/test.py --iterative --llm-subset=smoke
 
-# Integration tests (includes BoxplotStyleConfig params)
-python tests/utils/run_all_tests.py --integration
-
-# E2E tests (full styling coverage)
-python tests/utils/run_all_tests.py --e2e
-
-# All tests
-python tests/utils/run_all_tests.py
+# Full test suite (~100 LLM calls, 8-10 minutes)
+python tests/test.py --acceptance
 ```
 
-See `TESTING.md` for comprehensive testing guide.
+See [TESTING.md](TESTING.md) for details.
 
 ## Documentation
 
