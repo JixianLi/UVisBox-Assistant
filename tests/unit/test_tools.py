@@ -49,10 +49,11 @@ import matplotlib.pyplot as plt
 class TestPlotFunctionalBoxplot:
     """Unit tests for plot_functional_boxplot (0 UVisBox calls)."""
 
-    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
-    def test_default_percentiles_applied(self, mock_load_array, mock_path, mock_uvisbox):
+    def test_default_percentiles_applied(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test percentiles=None applies default [25, 50, 90, 100]."""
         # Arrange
         mock_path.return_value.exists.return_value = True
@@ -66,10 +67,11 @@ class TestPlotFunctionalBoxplot:
         assert result['_vis_params']['percentiles'] == [25, 50, 90, 100]
         mock_uvisbox.assert_called_once()
 
-    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
-    def test_custom_percentiles_preserved(self, mock_load_array, mock_path, mock_uvisbox):
+    def test_custom_percentiles_preserved(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test custom percentiles are not overridden."""
         # Arrange
         mock_path.return_value.exists.return_value = True
@@ -86,10 +88,11 @@ class TestPlotFunctionalBoxplot:
         assert result['_vis_params']['percentiles'] == [10, 50, 90]
         mock_uvisbox.assert_called_once()
 
-    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
-    def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox):
+    def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test load_array error returns error dict."""
         # Arrange
         mock_path.return_value.exists.return_value = True
@@ -103,10 +106,11 @@ class TestPlotFunctionalBoxplot:
         assert "File not found" in result['message']
         mock_uvisbox.assert_not_called()
 
-    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
-    def test_wrong_shape_validation(self, mock_load_array, mock_path, mock_uvisbox):
+    def test_wrong_shape_validation(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test 3D array rejected with error message."""
         # Arrange - return 3D array instead of required 2D
         mock_path.return_value.exists.return_value = True
@@ -120,10 +124,11 @@ class TestPlotFunctionalBoxplot:
         assert '2D' in result['message'] or 'shape' in result['message'].lower()
         mock_uvisbox.assert_not_called()
 
-    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
     @patch('uvisbox_assistant.tools.vis_tools.Path')
     @patch('uvisbox_assistant.utils.data_loading.load_array')
-    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox):
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
         """Test UVisBox exception caught and returned as error dict."""
         # Arrange
         mock_path.return_value.exists.return_value = True
@@ -140,9 +145,457 @@ class TestPlotFunctionalBoxplot:
         mock_uvisbox.assert_called_once()
 
 
+class TestPlotCurveBoxplot:
+    """Unit tests for plot_curve_boxplot (0 UVisBox calls)."""
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test load_array error returns error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: curves.npy")
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_2d_curves_accepted(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test 2D curves (n_curves, n_points) are accepted."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['_tool_name'] == 'plot_curve_boxplot'
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_3d_curves_accepted(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test 3D curves (n_curves, n_points, 3) are accepted."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50, 3), None)
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['_tool_name'] == 'plot_curve_boxplot'
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_wrong_shape_validation(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test 1D array rejected with error message."""
+        # Arrange - return 1D array
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(50), None)
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert 'shape' in result['message'].lower()
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(10, 50), None)
+        mock_uvisbox.side_effect = ValueError("Invalid curve data")
+
+        # Act
+        result = plot_curve_boxplot(data_path="curves.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+
+class TestPlotContourBoxplot:
+    """Unit tests for plot_contour_boxplot (0 UVisBox calls)."""
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.contour_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_explicit_isovalue_used(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test explicit isovalue parameter is used."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20, 10), None)
+
+        # Act
+        result = plot_contour_boxplot(data_path="field.npy", isovalue=0.3)
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['isovalue'] == 0.3
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.contour_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test load_array error returns error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: field.npy")
+
+        # Act
+        result = plot_contour_boxplot(data_path="field.npy", isovalue=0.5)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.contour_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_wrong_shape_validation(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test 2D array rejected with error message."""
+        # Arrange - return 2D array instead of required 3D
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20), None)
+
+        # Act
+        result = plot_contour_boxplot(data_path="field.npy", isovalue=0.5)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '3D' in result['message'] or 'shape' in result['message'].lower()
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.BoxplotStyleConfig', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.contour_boxplot', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox, mock_config):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20, 10), None)
+        mock_uvisbox.side_effect = RuntimeError("Contour extraction failed")
+
+        # Act
+        result = plot_contour_boxplot(data_path="field.npy", isovalue=0.5)
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+
+class TestPlotProbabilisticMarchingSquares:
+    """Unit tests for plot_probabilistic_marching_squares (0 UVisBox calls)."""
+
+    @patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_default_isovalue_applied(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test isovalue=None applies default 0.5."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20, 10), None)
+
+        # Act
+        result = plot_probabilistic_marching_squares(data_path="field.npy")
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['isovalue'] == 0.5
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_data_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test load_array error returns error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: field.npy")
+
+        # Act
+        result = plot_probabilistic_marching_squares(data_path="field.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_wrong_shape_validation(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test 2D array rejected with error message."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20), None)
+
+        # Act
+        result = plot_probabilistic_marching_squares(data_path="field.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '3D' in result['message'] or 'shape' in result['message'].lower()
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (True, np.random.rand(20, 20, 10), None)
+        mock_uvisbox.side_effect = ValueError("Marching squares failed")
+
+        # Act
+        result = plot_probabilistic_marching_squares(data_path="field.npy")
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+
+class TestPlotUncertaintyLobes:
+    """Unit tests for plot_uncertainty_lobes (0 UVisBox calls)."""
+
+    @patch('uvisbox_assistant.tools.vis_tools.uncertainty_lobes', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_default_percentiles_applied(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test percentile1/percentile2 defaults to 90/50."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)
+        vectors = np.random.rand(25, 10, 2)
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+
+        # Act
+        result = plot_uncertainty_lobes(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['percentile1'] == 90
+        assert result['_vis_params']['percentile2'] == 50
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.uncertainty_lobes', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_vectors_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test vectors load error returns error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: vectors.npy")
+
+        # Act
+        result = plot_uncertainty_lobes(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.uncertainty_lobes', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_shape_mismatch_exception(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test UVisBox exception when shapes mismatch."""
+        # Arrange - mismatched shapes will cause UVisBox to throw exception
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)  # 25 positions
+        vectors = np.random.rand(30, 10, 2)  # 30 vectors (mismatch!)
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+        mock_uvisbox.side_effect = ValueError("Shape mismatch")
+
+        # Act
+        result = plot_uncertainty_lobes(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.uncertainty_lobes', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)
+        vectors = np.random.rand(25, 10, 2)
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+        mock_uvisbox.side_effect = RuntimeError("UVisBox error")
+
+        # Act
+        result = plot_uncertainty_lobes(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+
+class TestPlotSquidGlyph2D:
+    """Unit tests for plot_squid_glyph_2D (0 UVisBox calls)."""
+
+    @patch('uvisbox_assistant.tools.vis_tools.squid_glyph_2D', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_default_percentile_applied(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test percentile defaults to 95."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)
+        vectors = np.random.rand(25, 10, 2)
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+
+        # Act
+        result = plot_squid_glyph_2D(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'success'
+        assert result['_vis_params']['percentile'] == 95
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.squid_glyph_2D', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_vectors_loading_error_propagated(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test vectors load error returns error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        mock_load_array.return_value = (False, None, "File not found: vectors.npy")
+
+        # Act
+        result = plot_squid_glyph_2D(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert "File not found" in result['message']
+        mock_uvisbox.assert_not_called()
+
+    @patch('uvisbox_assistant.tools.vis_tools.squid_glyph_2D', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_shape_mismatch_exception(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test UVisBox exception when shapes mismatch."""
+        # Arrange - mismatched shapes will cause UVisBox to throw exception
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)
+        vectors = np.random.rand(30, 10, 2)  # Mismatch
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+        mock_uvisbox.side_effect = ValueError("Shape mismatch")
+
+        # Act
+        result = plot_squid_glyph_2D(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+    @patch('uvisbox_assistant.tools.vis_tools.squid_glyph_2D', create=True)
+    @patch('uvisbox_assistant.tools.vis_tools.Path')
+    @patch('uvisbox_assistant.utils.data_loading.load_array')
+    def test_uvisbox_exception_handled(self, mock_load_array, mock_path, mock_uvisbox):
+        """Test UVisBox exception caught and returned as error dict."""
+        # Arrange
+        mock_path.return_value.exists.return_value = True
+        positions = np.random.rand(25, 2)
+        vectors = np.random.rand(25, 10, 2)
+        mock_load_array.side_effect = [
+            (True, vectors, None),
+            (True, positions, None)
+        ]
+        mock_uvisbox.side_effect = RuntimeError("Glyph generation failed")
+
+        # Act
+        result = plot_squid_glyph_2D(
+            vectors_path="vectors.npy",
+            positions_path="positions.npy"
+        )
+
+        # Assert
+        assert result['status'] == 'error'
+        assert '_error_details' in result
+        mock_uvisbox.assert_called_once()
+
+
 # Mocked exception tests to trigger error handlers
 
-@patch('uvisbox_assistant.tools.vis_tools.functional_boxplot')
+@patch('uvisbox_assistant.tools.vis_tools.functional_boxplot', create=True)
 def test_plot_functional_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     """Test functional boxplot with UVisBox exception to trigger error handler."""
     # Create valid data
@@ -160,7 +613,7 @@ def test_plot_functional_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     print("✓ test_plot_functional_boxplot_uvisbox_exception")
 
 
-@patch('uvisbox_assistant.tools.vis_tools.curve_boxplot')
+@patch('uvisbox_assistant.tools.vis_tools.curve_boxplot', create=True)
 def test_plot_curve_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     """Test curve boxplot with UVisBox exception."""
     data = tmp_path / "data.npy"
@@ -175,7 +628,7 @@ def test_plot_curve_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     print("✓ test_plot_curve_boxplot_uvisbox_exception")
 
 
-@patch('uvisbox_assistant.tools.vis_tools.contour_boxplot')
+@patch('uvisbox_assistant.tools.vis_tools.contour_boxplot', create=True)
 def test_plot_contour_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     """Test contour boxplot with UVisBox exception."""
     data = tmp_path / "data.npy"
@@ -190,7 +643,7 @@ def test_plot_contour_boxplot_uvisbox_exception(mock_uvisbox, tmp_path):
     print("✓ test_plot_contour_boxplot_uvisbox_exception")
 
 
-@patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares')
+@patch('uvisbox_assistant.tools.vis_tools.probabilistic_marching_squares', create=True)
 def test_plot_probabilistic_marching_squares_uvisbox_exception(mock_uvisbox, tmp_path):
     """Test probabilistic marching squares with UVisBox exception."""
     data = tmp_path / "data.npy"
