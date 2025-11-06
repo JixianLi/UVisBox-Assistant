@@ -328,7 +328,7 @@ class TestStatisticsToolInterface:
     def test_returns_expected_structure(self, curves_2d):
         """Verify complete structure of statistics output.
 
-        This test would catch the KEY_NOT_FOUND bug mentioned by Jesse.
+        This test would catch the KEY_NOT_FOUND bug mentioned by Jixian.
         """
         result = compute_functional_boxplot_statistics(
             data_path=curves_2d,
