@@ -1,3 +1,5 @@
+# ABOUTME: End-to-end tests for contour boxplot workflows.
+# ABOUTME: Tests complete workflows from data generation to visualization (uses ~8 LLM calls).
 """End-to-end tests for contour boxplot workflows."""
 
 import pytest
