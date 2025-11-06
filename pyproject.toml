@@ -45,6 +45,7 @@ addopts = [
     "--tb=short",
 ]
 markers = [
+    "smoke: critical path smoke tests (~3 LLM calls)",
     "e2e: End-to-end integration tests",
     "llm_subset_analysis: Analysis workflow LLM integration tests",
     "llm_subset_analyzer: analyzer LLM integration tests",

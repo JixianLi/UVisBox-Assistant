@@ -27,8 +27,9 @@ def wait_for_rate_limit():
 class TestFunctionalBoxplotPipeline:
     """Test data → functional_boxplot pipeline."""
 
+    @pytest.mark.smoke
     def test_generate_and_visualize(self, session):
-        """Complete workflow: generate curves and plot functional boxplot."""
+        """Smoke test: Complete workflow - generate curves and plot functional boxplot."""
         wait_for_rate_limit()
 
         session.send("Generate 30 curves and plot functional boxplot")

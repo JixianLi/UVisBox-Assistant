@@ -54,8 +54,9 @@ def valid_processed_statistics():
 class TestInlineReportGeneration:
     """Test inline report generation."""
 
+    @pytest.mark.smoke
     def test_inline_report_success(self, valid_processed_statistics):
-        """Test successful inline report generation."""
+        """Smoke test: Basic analyzer functionality."""
         time.sleep(2)  # Rate limit delay
 
         result = generate_uncertainty_report(
