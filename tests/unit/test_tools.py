@@ -28,6 +28,19 @@ import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
 
+# ============================================================================
+# Unit Tests for data_tools and vis_tools (0 UVisBox calls)
+#
+# These tests mock all external dependencies (UVisBox, file I/O) to test
+# wrapper logic in isolation:
+# - Default parameter application
+# - Validation logic
+# - Error handling and propagation
+# - Return structure correctness
+#
+# Real UVisBox integration is tested in tests/uvisbox_interface/
+# ============================================================================
+
 
 # Data Tools Tests
 
