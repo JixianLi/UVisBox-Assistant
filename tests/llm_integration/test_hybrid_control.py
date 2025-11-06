@@ -3,8 +3,11 @@
 import sys
 import time
 import matplotlib.pyplot as plt
+import pytest
 
 from uvisbox_assistant.session.conversation import ConversationSession
+
+pytestmark = pytest.mark.llm_subset_hybrid_control
 
 
 def test_hybrid_parameter_update():

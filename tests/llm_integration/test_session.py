@@ -6,6 +6,9 @@ from pathlib import Path
 from uvisbox_assistant import config
 import sys
 import time
+import pytest
+
+pytestmark = pytest.mark.llm_subset_session
 
 
 def test_clear_session():

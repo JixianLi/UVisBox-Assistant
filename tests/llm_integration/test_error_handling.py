@@ -6,6 +6,9 @@ from uvisbox_assistant.core.graph import run_graph, graph_app
 from uvisbox_assistant.core.routing import route_after_tool
 from uvisbox_assistant.core.state import create_initial_state
 import matplotlib.pyplot as plt
+import pytest
+
+pytestmark = pytest.mark.llm_subset_error_handling
 
 
 def test_file_not_found():

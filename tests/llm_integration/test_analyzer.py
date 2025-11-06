@@ -4,6 +4,8 @@ import pytest
 import time
 from uvisbox_assistant.tools.analyzer_tools import generate_uncertainty_report
 
+pytestmark = pytest.mark.llm_subset_analyzer
+
 
 @pytest.fixture
 def valid_processed_statistics():
