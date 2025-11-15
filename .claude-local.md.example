@@ -1,9 +1,0 @@
-# Local Machine Configuration
-
-This file contains machine-specific paths. Copy to `.claude-local.md` and update with your paths.
-
-**UVisBox Source Path**: `/path/to/UVisBox`
-
-**Python Path**: `/path/to/conda/envs/agent/bin/python`
-
-**Conda Environment**: `agent`
