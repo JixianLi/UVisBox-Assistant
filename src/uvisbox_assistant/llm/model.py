@@ -1,6 +1,8 @@
 """Language model setup for UVisBox-Assistant"""
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage
+import ollama
 from uvisbox_assistant import config
 import os
 
@@ -187,9 +189,18 @@ def create_model_with_tools(tools: list, temperature: float = 0.0):
     Returns:
         Model instance with tools bound
     """
-    model = ChatGoogleGenerativeAI(
-        model=config.MODEL_NAME,
-        google_api_key=config.GEMINI_API_KEY,
+    # model = ChatGoogleGenerativeAI(
+    #     model=config.MODEL_NAME,
+    #     google_api_key=config.GEMINI_API_KEY,
+    #     temperature=temperature,
+    # )
+
+    print("Using Ollama model:", config.OLLAMA_MODEL_NAME)
+    print("Ollama API URL:", config.OLLAMA_API_URL)
+
+    model = ChatOllama(
+        model=config.OLLAMA_MODEL_NAME,
+        base_url=config.OLLAMA_API_URL,
         temperature=temperature,
     )
 

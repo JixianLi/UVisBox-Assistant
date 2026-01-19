@@ -51,7 +51,8 @@ from uvisbox_assistant.errors.error_tracking import ErrorRecord
 
 # Configuration (root)
 from uvisbox_assistant.config import (
-    GEMINI_API_KEY,
+    OLLAMA_MODEL_NAME,
+    OLLAMA_API_URL,
     TEMP_DIR,
     TEST_DATA_DIR,
     LOG_DIR,
@@ -85,7 +86,8 @@ __all__ = [
     # Error Tracking
     "ErrorRecord",
     # Config
-    "GEMINI_API_KEY",
+    "OLLAMA_MODEL_NAME",
+    "OLLAMA_API_URL",
     "TEMP_DIR",
     "TEST_DATA_DIR",
     "LOG_DIR",
