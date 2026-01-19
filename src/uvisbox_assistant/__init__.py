@@ -49,15 +49,8 @@ from uvisbox_assistant.tools.analyzer_tools import (
 # Error tracking (from errors/, v0.1.2)
 from uvisbox_assistant.errors.error_tracking import ErrorRecord
 
-# Configuration (root)
-from uvisbox_assistant.config import (
-    OLLAMA_MODEL_NAME,
-    OLLAMA_API_URL,
-    TEMP_DIR,
-    TEST_DATA_DIR,
-    LOG_DIR,
-    DEFAULT_VIS_PARAMS,
-)
+# Configuration (re-export module to avoid duplication)
+from uvisbox_assistant import config
 
 __all__ = [
     # Core
@@ -86,12 +79,7 @@ __all__ = [
     # Error Tracking
     "ErrorRecord",
     # Config
-    "OLLAMA_MODEL_NAME",
-    "OLLAMA_API_URL",
-    "TEMP_DIR",
-    "TEST_DATA_DIR",
-    "LOG_DIR",
-    "DEFAULT_VIS_PARAMS",
+    "config",
 ]
 
 __version__ = "0.3.1"

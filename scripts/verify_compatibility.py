@@ -34,8 +34,9 @@ def test_legacy_imports():
     # Error tracking
     from uvisbox_assistant import ErrorRecord
 
-    # Config
-    from uvisbox_assistant import TEMP_DIR, TEST_DATA_DIR
+    # Config (now accessed via config module)
+    from uvisbox_assistant import config
+    _ = config.TEMP_DIR, config.TEST_DATA_DIR
 
     print("✓ All legacy imports successful!")
     return True
