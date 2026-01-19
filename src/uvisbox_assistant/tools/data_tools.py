@@ -14,27 +14,29 @@ def load_csv_to_numpy(
     Load a CSV file and save as numpy array.
 
     Args:
-        filepath: Path to input CSV file
+        filepath: Path to input CSV file (absolute, relative, or bare filename)
         output_path: Path for output .npy file (auto-generated if None)
 
     Returns:
         Dict with status, output_path, message, and shape info
     """
     try:
-        # Validate input
-        if not Path(filepath).exists():
+        # Resolve path with unified path handling
+        from uvisbox_assistant.utils.data_loading import resolve_data_path
+        success, resolved_path, error_msg = resolve_data_path(filepath)
+        if not success:
             return {
                 "status": "error",
-                "message": f"File not found: {filepath}"
+                "message": error_msg
             }
 
         # Load CSV
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(resolved_path)
         data = df.to_numpy()
 
         # Generate output path if needed
         if output_path is None:
-            filename = Path(filepath).stem
+            filename = resolved_path.stem
             output_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}{filename}.npy"
 
         # Save as .npy
@@ -247,27 +249,27 @@ def load_npy(filepath: str) -> Dict[str, str]:
     Load and validate a .npy file.
 
     Args:
-        filepath: Path to .npy file
+        filepath: Path to .npy file (absolute, relative, or bare filename)
 
     Returns:
         Dict with status, filepath, shape, dtype
     """
     try:
-        if not Path(filepath).exists():
-            return {
-                "status": "error",
-                "message": f"File not found: {filepath}"
-            }
+        from uvisbox_assistant.utils.data_loading import load_array, resolve_data_path
 
-        from uvisbox_assistant.utils.data_loading import load_array
+        # Resolve path first to get the actual file location
+        success, resolved_path, error_msg = resolve_data_path(filepath)
+        if not success:
+            return {"status": "error", "message": error_msg}
 
-        success, data, error_msg = load_array(filepath)
+        # Load the data
+        success, data, error_msg = load_array(str(resolved_path))
         if not success:
             return {"status": "error", "message": error_msg}
 
         return {
             "status": "success",
-            "output_path": filepath,
+            "output_path": str(resolved_path),
             "message": f"Loaded array with shape {data.shape}",
             "shape": data.shape,
             "dtype": str(data.dtype)
@@ -473,7 +475,7 @@ DATA_TOOL_SCHEMAS = [
             "properties": {
                 "filepath": {
                     "type": "string",
-                    "description": "Path to the CSV file to load"
+                    "description": "Path to the CSV file. Can be: (1) absolute path, (2) relative path from working directory, or (3) bare filename (will check test_data/ directory automatically)"
                 }
             },
             "required": ["filepath"]
@@ -559,7 +561,7 @@ DATA_TOOL_SCHEMAS = [
             "properties": {
                 "filepath": {
                     "type": "string",
-                    "description": "Path to the .npy file"
+                    "description": "Path to the .npy file. Can be: (1) absolute path, (2) relative path from working directory, or (3) bare filename (will check test_data/ directory automatically)"
                 }
             },
             "required": ["filepath"]

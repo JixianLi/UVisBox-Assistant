@@ -30,7 +30,7 @@ START -> model -> [conditional routing]
 
 1. **Full Graph Mode**: Multi-turn conversations through Gemini (slow, flexible)
 2. **Hybrid Control Mode**: Direct parameter updates via `command_parser.py` (fast, no API calls)
-   - Handles 16 quick command patterns (e.g., "median color blue", "show outliers")
+   - Handles 19 quick command patterns (e.g., "median color blue", "show outliers", "vmin 0.0", "vmax 10.0")
    - Bypasses full graph for simple parameter changes
 
 ### Tool Response Pattern

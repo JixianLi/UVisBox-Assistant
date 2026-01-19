@@ -113,15 +113,27 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
     if match:
         return SimpleCommand('method', match.group(1))
 
-    # Pattern 15: "inline summary" / "show inline summary"
+    # Pattern 15: "vmin <number>"
+    match = re.match(r'vmin\s+(-?\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('vmin', value)
+
+    # Pattern 16: "vmax <number>"
+    match = re.match(r'vmax\s+(-?\d+\.?\d*)', text)
+    if match:
+        value = float(match.group(1))
+        return SimpleCommand('vmax', value)
+
+    # Pattern 17: "inline summary" / "show inline summary"
     if text in ['show inline summary', 'inline summary']:
         return SimpleCommand('report_type', 'inline')
 
-    # Pattern 16: "quick summary" / "show quick summary"
+    # Pattern 18: "quick summary" / "show quick summary"
     if text in ['show quick summary', 'quick summary']:
         return SimpleCommand('report_type', 'quick')
 
-    # Pattern 17: "detailed summary" / "show detailed summary"
+    # Pattern 19: "detailed summary" / "show detailed summary"
     if text in ['show detailed summary', 'detailed summary']:
         return SimpleCommand('report_type', 'detailed')
 
@@ -161,6 +173,8 @@ def apply_command_to_params(command: SimpleCommand, current_params: dict) -> dic
         'scale': 'scale',
         'alpha': 'alpha',
         'method': 'method',
+        'vmin': 'vmin',
+        'vmax': 'vmax',
     }
 
     mapping = param_mapping.get(command.param_name, command.param_name)
@@ -198,6 +212,9 @@ if __name__ == "__main__":
         "outliers alpha 1.0",
         "method fbd",
         "method mfbd",
+        "vmin 0.0",
+        "vmax 10.5",
+        "vmin -5.2",
         "generate some curves",  # Should return None
     ]
 

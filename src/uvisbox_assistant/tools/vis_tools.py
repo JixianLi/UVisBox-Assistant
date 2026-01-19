@@ -34,7 +34,9 @@ def plot_functional_boxplot(
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
     outliers_alpha: float = 0.5,
-    method: str = "fbd"
+    method: str = "fbd",
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None
 ) -> Dict[str, str]:
     """
     Create a functional boxplot from curve data with multiple percentile bands.
@@ -52,6 +54,8 @@ def plot_functional_boxplot(
         outliers_width: Width of outlier curves (default: 1.0)
         outliers_alpha: Alpha of outlier curves (default: 0.5)
         method: Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')
+        vmin: Minimum x-axis value for the domain (default: None, auto-determined)
+        vmax: Maximum x-axis value for the domain (default: None, auto-determined)
 
     Returns:
         Dict with status and message
@@ -103,7 +107,9 @@ def plot_functional_boxplot(
             data=curves,
             method=method,
             boxplot_style=style_config,
-            ax=ax
+            ax=ax,
+            vmin=vmin,
+            vmax=vmax
         )
 
         ax.set_title("Functional Boxplot")
@@ -130,7 +136,9 @@ def plot_functional_boxplot(
                 "outliers_color": outliers_color,
                 "outliers_width": outliers_width,
                 "outliers_alpha": outliers_alpha,
-                "method": method
+                "method": method,
+                "vmin": vmin,
+                "vmax": vmax
             }
         }
 
@@ -787,6 +795,14 @@ VIS_TOOL_SCHEMAS = [
                     "description": "Band depth method - 'fbd' (functional band depth) or 'mfbd' (modified functional band depth) (default: 'fbd')",
                     "default": "fbd",
                     "enum": ["fbd", "mfbd"]
+                },
+                "vmin": {
+                    "type": "number",
+                    "description": "Minimum x-axis value for the domain (default: None, auto-determined from data)"
+                },
+                "vmax": {
+                    "type": "number",
+                    "description": "Maximum x-axis value for the domain (default: None, auto-determined from data)"
                 }
             },
             "required": ["data_path"]
