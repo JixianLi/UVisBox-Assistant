@@ -32,6 +32,9 @@ logs/
 .coverage
 htmlcov/
 
+# Test data (local only)
+test_data/sine.npy
+
 # Build
 dist/
 build/
