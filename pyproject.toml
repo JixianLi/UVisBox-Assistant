@@ -9,24 +9,24 @@ packages = [{include = "uvisbox_assistant", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
-langchain = "^0.3.27"
-langchain-google-genai = "^2.1.12"
-langgraph = "^0.2.76"
+langchain = "^1.2.15"
+langchain-google-genai = "^4.2.2"
+langgraph = "^1.1.10"
 numpy = "^2.0"
 matplotlib = "^3.10.7"
-pandas = "^2.3.3"
-langsmith = "^0.4.38"
+pandas = "^3.0.2"
+langsmith = "^0.7.37"
 scikit-learn = "^1.7.2"
-scikit-image = "^0.25.2"
+scikit-image = "^0.26.0"
 scipy = "^1.16.3"
-langchain-ollama = "^0.3.10"
+langchain-ollama = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.4.2"
-pytest-cov = "^4.1.0"
-black = "^24.10.0"
-ruff = "^0.3.7"
-ipython = "^8.37.0"
+pytest = "^9.0.3"
+pytest-cov = "^7.1.0"
+black = "^26.3.1"
+ruff = "^0.15.12"
+ipython = "^9.13.0"
 
 [tool.poetry.scripts]
 uvisbox-assistant = "uvisbox_assistant.__main__:main"
