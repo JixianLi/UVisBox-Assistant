@@ -16,7 +16,8 @@ try:
         probabilistic_marching_cubes,
         uncertainty_lobes,
         contour_boxplot,
-        squid_glyph_2D
+        squid_glyph_2D,
+        uncertainty_tubes,
     )
     from uvisbox.Core.CommonInterface import BoxplotStyleConfig
 except ImportError as e:
@@ -803,6 +804,91 @@ def plot_probabilistic_marching_cubes(
         }
 
 
+def plot_uncertainty_tubes(
+    data_path: str,
+    colormap: str = "viridis",
+    resolution: int = 20,
+    e_proj: float = 2.0,
+    workers: Optional[int] = 1
+)-> Dict[str, str]:
+    """
+    Create uncertainty tube visualization for 3D trajectory ensembles.
+
+    Accepts a 3D array of shape (n_steps, n_starting_locations, n_ensemble_members, 3) representing an ensemble of 3D trajectories.
+
+    Args:
+        data_path: Path to .npy file with shape (n_steps, n_starting_locations, n_ensemble_members, 3)
+        colormap: Colormap for uncertainty tubes (default: "viridis")
+        resolution: Number of points along the tube circumference (default: 20)
+        e_proj: Projection exponent for tube radius superellipse (default: 2.0)
+        workers: Number of parallel workers for band depth computation (default: None)
+
+    Returns:
+        Dict with status and message
+    """    
+    try:
+        if not Path(data_path).exists():
+            return {"status": "error", "message": f"Data file not found: {data_path}"}
+
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, trajectories, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
+
+        # validate that data shape is (n_steps, n_starting_locations, n_ensemble_members, 3)
+        if trajectories.ndim != 4:
+            return {
+                "status": "error",
+                "message": f"Expected 4D array with last dimension 3 (n_steps, n_starting_locations, n_ensemble_members, 3), got shape {trajectories.shape}"
+            }
+
+        # Create PyVista figure for 3D visualization with Tier-2 defaults
+        plotter = pv.Plotter()
+
+        # Call UVisBox uncertainty tubes function
+        uncertainty_tubes(
+            trajectories=trajectories,
+            colormap=colormap,
+            resolution=resolution,
+            e_proj=e_proj,
+            plotter=plotter,
+            n_jobs=workers
+        )
+
+        plotter.add_title("Uncertainty Tubes", font_size=14)
+        plotter.show()
+
+        return {
+            "status": "success",
+            "message": f"Displayed uncertainty tubes for trajectory ensemble with shape {trajectories.shape}",
+            "_vis_params": {
+                "_tool_name": "plot_uncertainty_tubes",
+                "data_path": data_path,
+                "colormap": colormap,
+                "resolution": resolution,
+                "e_proj": e_proj,
+                "workers": workers
+            }
+        }
+
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating uncertainty tubes: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
 # Tool registry
 VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
@@ -812,6 +898,7 @@ VIS_TOOLS = {
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
     "plot_squid_glyph_2D": plot_squid_glyph_2D,
     "plot_contour_boxplot": plot_contour_boxplot,
+    "plot_uncertainty_tubes": plot_uncertainty_tubes
 }
 
 
@@ -1086,6 +1173,40 @@ VIS_TOOL_SCHEMAS = [
                 }
             },
             "required": ["vectors_path", "positions_path"]
+        }
+    },
+    {
+        "name": "plot_uncertainty_tubes",
+        "description": "Create uncertainty tube visualization for 3D trajectory ensembles showing spatial uncertainty along trajectories",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "data_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing 4D trajectory ensemble (n_steps, n_starting_locations, n_ensemble_members, 3)"
+                },
+                "colormap": {
+                    "type": "string",
+                    "description": "Colormap for uncertainty tubes (default: 'viridis')",
+                    "default": "viridis"
+                },
+                "resolution": {
+                    "type": "integer",
+                    "description": "Number of points along the tube circumference (default: 20)",
+                    "default": 20
+                },
+                "e_proj": {
+                    "type": "number",
+                    "description": "Projection exponent for tube radius superellipse (default: 2.0)",
+                    "default": 2.0
+                },
+                "workers": {
+                    "type": "integer",
+                    "description": "Number of parallel workers for band depth computation (default: None)",
+                    "default": 1
+                }
+            },
+            "required": ["data_path"]
         }
     },
     {
