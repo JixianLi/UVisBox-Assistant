@@ -119,14 +119,14 @@ def main():
 Examples:
   # Pipeline modes
   python tests/test.py --pre-planning
-  python tests/test.py --iterative --llm-subset=analyzer
-  python tests/test.py --code-review --llm-subset=analyzer,routing
+  python tests/test.py --iterative --llm-subset=smoke
+  python tests/test.py --code-review --llm-subset=hybrid_control,routing
   python tests/test.py --acceptance
 
   # Direct pytest passthrough (no mode required)
   python tests/test.py tests/unit/test_config.py
   python tests/test.py tests/unit/test_config.py::test_specific -v
-  python tests/test.py -k test_analyzer
+  python tests/test.py -k test_routing
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -157,7 +157,7 @@ Examples:
     parser.add_argument(
         "--llm-subset",
         type=str,
-        help="Comma-separated LLM test subsets (analyzer,routing,smoke,etc)"
+        help="Comma-separated LLM test subsets (smoke,routing,hybrid_control,etc)"
     )
 
     # Coverage
@@ -195,7 +195,7 @@ Examples:
 
     if args.code_review and not args.llm_subset:
         print("Error: --code-review requires --llm-subset")
-        print("Example: python tests/test.py --code-review --llm-subset=analyzer")
+        print("Example: python tests/test.py --code-review --llm-subset=routing")
         sys.exit(1)
 
     # Build pytest commands

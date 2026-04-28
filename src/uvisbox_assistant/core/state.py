@@ -17,11 +17,6 @@ class GraphState(TypedDict):
         tool_execution_sequence: List of tool execution records for auto-fix detection
         last_error_tool: Name of tool that last failed (for auto-fix detection)
         last_error_id: ID of last error (for auto-fix detection)
-
-        # NEW: Uncertainty analysis fields (v0.3.0)
-        raw_statistics: Raw output from functional_boxplot_summary_statistics (numpy arrays)
-        processed_statistics: LLM-friendly structured summary from statistics_tool
-        analysis_reports: Dictionary of all three report types {"inline": "...", "quick": "...", "detailed": "..."}
     """
     # Messages list - appended to over time
     messages: Annotated[List[BaseMessage], operator.add]
@@ -36,11 +31,6 @@ class GraphState(TypedDict):
     tool_execution_sequence: List[Dict]
     last_error_tool: Optional[str]
     last_error_id: Optional[int]
-
-    # NEW: Uncertainty analysis state (v0.3.0)
-    raw_statistics: Optional[dict]
-    processed_statistics: Optional[dict]
-    analysis_reports: Optional[Dict[str, str]]
 
 
 def create_initial_state(user_message: str) -> GraphState:
@@ -64,10 +54,6 @@ def create_initial_state(user_message: str) -> GraphState:
         tool_execution_sequence=[],
         last_error_tool=None,
         last_error_id=None,
-        # NEW: Initialize analysis state (v0.3.2)
-        raw_statistics=None,
-        processed_statistics=None,
-        analysis_reports=None
     )
 
 
@@ -107,40 +93,4 @@ def increment_error_count(state: GraphState) -> dict:
     """
     return {
         "error_count": state.get("error_count", 0) + 1
-    }
-
-
-def update_state_with_statistics(state: GraphState, raw_stats: dict, processed_stats: dict) -> dict:
-    """
-    Update state after successful statistics tool execution.
-
-    Args:
-        state: Current graph state
-        raw_stats: Raw output from functional_boxplot_summary_statistics (numpy arrays)
-        processed_stats: Processed LLM-friendly summary
-
-    Returns:
-        Dict of updates to merge into state
-    """
-    return {
-        "raw_statistics": raw_stats,
-        "processed_statistics": processed_stats,
-        "error_count": 0  # Reset error count on success
-    }
-
-
-def update_state_with_analysis(state: GraphState, reports: Dict[str, str]) -> dict:
-    """
-    Update state after successful analyzer tool execution.
-
-    Args:
-        state: Current graph state
-        reports: Dictionary with all three report types {"inline": "...", "quick": "...", "detailed": "..."}
-
-    Returns:
-        Dict of updates to merge into state
-    """
-    return {
-        "analysis_reports": reports,
-        "error_count": 0  # Reset error count on success
     }

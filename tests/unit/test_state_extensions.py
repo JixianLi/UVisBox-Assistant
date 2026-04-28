@@ -1,4 +1,4 @@
-"""Unit tests for GraphState extensions (0 API calls)."""
+"""Unit tests for GraphState helpers (0 API calls)."""
 
 import pytest
 from uvisbox_assistant.core.state import (
@@ -7,33 +7,16 @@ from uvisbox_assistant.core.state import (
     update_state_with_data,
     update_state_with_vis,
     increment_error_count,
-    update_state_with_statistics,
-    update_state_with_analysis
 )
 
 
-class TestGraphStateExtensions:
-    """Test new GraphState fields."""
+class TestGraphStateBasics:
+    """Test core GraphState fields."""
 
-    def test_initial_state_has_analysis_fields(self):
-        """Verify initial state includes analysis fields."""
-        state = create_initial_state("test message")
-
-        # Check new fields exist and are None
-        assert "raw_statistics" in state
-        assert state["raw_statistics"] is None
-
-        assert "processed_statistics" in state
-        assert state["processed_statistics"] is None
-
-        assert "analysis_reports" in state
-        assert state["analysis_reports"] is None
-
-    def test_initial_state_preserves_existing_fields(self):
+    def test_initial_state_has_required_fields(self):
         """Verify existing fields still present."""
         state = create_initial_state("test message")
 
-        # Existing fields
         assert "messages" in state
         assert "current_data_path" in state
         assert "last_vis_params" in state
@@ -131,63 +114,3 @@ class TestIncrementErrorCount:
 
         updates = increment_error_count(state)
         assert updates["error_count"] == 1
-
-
-class TestStatisticsStateUpdate:
-    """Test update_state_with_statistics helper."""
-
-    def test_updates_statistics_fields(self):
-        """Verify statistics state update."""
-        state = create_initial_state("test")
-
-        raw_stats = {"depths": [0.1, 0.2], "median": [1.0, 2.0]}
-        processed_stats = {"median_trend": "increasing"}
-
-        updates = update_state_with_statistics(state, raw_stats, processed_stats)
-
-        assert updates["raw_statistics"] == raw_stats
-        assert updates["processed_statistics"] == processed_stats
-        assert updates["error_count"] == 0
-
-    def test_resets_error_count(self):
-        """Verify error count reset."""
-        state = create_initial_state("test")
-        state["error_count"] = 3
-
-        updates = update_state_with_statistics(state, {}, {})
-        assert updates["error_count"] == 0
-
-
-class TestAnalysisStateUpdate:
-    """Test update_state_with_analysis helper."""
-
-    def test_updates_analysis_fields(self):
-        """Verify analysis state update."""
-        state = create_initial_state("test")
-
-        reports = {
-            "inline": "This ensemble shows moderate uncertainty.",
-            "quick": "Quick analysis here.",
-            "detailed": "Detailed analysis here."
-        }
-
-        updates = update_state_with_analysis(state, reports)
-
-        assert updates["analysis_reports"] == reports
-        assert updates["analysis_reports"]["inline"] == "This ensemble shows moderate uncertainty."
-        assert updates["analysis_reports"]["quick"] == "Quick analysis here."
-        assert updates["analysis_reports"]["detailed"] == "Detailed analysis here."
-        assert updates["error_count"] == 0
-
-    def test_resets_error_count(self):
-        """Verify error count reset."""
-        state = create_initial_state("test")
-        state["error_count"] = 2
-
-        reports = {
-            "inline": "Test inline",
-            "quick": "Test quick",
-            "detailed": "Test detailed"
-        }
-        updates = update_state_with_analysis(state, reports)
-        assert updates["error_count"] == 0

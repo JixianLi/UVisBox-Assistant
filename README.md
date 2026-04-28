@@ -4,7 +4,7 @@ Natural language interface for the [UVisBox](https://github.com/ouermijudicael/U
 
 ## Overview
 
-UVisBox-Assistant allows you to create uncertainty visualizations using natural language commands. Powered by Google Gemini and LangGraph, it provides an interactive conversational interface for exploring and visualizing uncertainty in scientific data.
+UVisBox-Assistant allows you to create uncertainty visualizations using natural language commands. Powered by a local Ollama LLM and LangGraph, it provides an interactive conversational interface for exploring and visualizing uncertainty in scientific data.
 
 ## Features
 
@@ -13,8 +13,6 @@ UVisBox-Assistant allows you to create uncertainty visualizations using natural 
 - **Fast Parameter Updates**: Quick visualization adjustments without reprocessing
 - **Fine-Grained Control**: Control all BoxplotStyleConfig styling parameters
 - **Multiple Visualization Types**: Functional boxplots, curve boxplots, probabilistic marching squares, contour boxplots, uncertainty lobes, and squid glyphs
-- **Uncertainty Analysis** (v0.3.0): LLM-powered statistical reports with three formats (inline, quick, detailed)
-- **Combined Workflows** (v0.3.0): Generate both visualizations and text analysis in a single conversation
 - **Session Management**: Clean file management and session control
 
 ## Quick Start
@@ -35,35 +33,6 @@ Assistant: [updates outliers to black]
 You: outliers alpha 1.0
 Assistant: [updates outliers transparency]
 ```
-
-### Example: Uncertainty Analysis (v0.3.0)
-
-```
-You: Generate 50 curves and create a quick uncertainty summary
-Assistant: [computes statistics and generates report]
-
-Here is the quick uncertainty analysis:
-
-The ensemble exhibits moderate uncertainty with tightly clustered curves around
-an increasing median trend (slope: 0.45). The 25th-90th percentile bands show
-consistent widths (mean: 2.3 units), with widest regions occurring at x=40-60.
-No outliers detected, indicating high consistency across all ensemble members.
-
-You: Now provide a detailed report
-Assistant: [generates detailed report with sections]
-
-## Median Behavior
-The median curve follows a clear increasing trend...
-...
-
-You: Plot the functional boxplot with blue median
-Assistant: [displays visualization with analysis from previous step]
-```
-
-**Three Report Formats**:
-- **Inline**: 1 sentence summary (~15-30 words)
-- **Quick**: 3-5 sentence overview (~50-100 words)
-- **Detailed**: Full report with sections (~100-300 words)
 
 ## Available Visualizations
 
@@ -140,30 +109,36 @@ For fast parameter updates without full reprocessing:
 ## Installation
 
 ### Prerequisites
-- Python 3.10-3.13
+- Python 3.11-3.13
 - Conda environment (recommended for UVisBox)
-- Google Gemini API key
+- A running [Ollama](https://ollama.com/) instance with a tool-capable model pulled (default: `qwen3-vl:8b`)
 
 ### Setup
 
-1. **Set environment variable**:
+1. **Start Ollama and pull the model** (if not already done):
 ```bash
-export GEMINI_API_KEY="your-api-key-here"
+ollama pull qwen3-vl:8b
 ```
 
-2. **Create and activate environment**:
+2. **Configure connection** (defaults shown — only set these if you need to override):
+```bash
+export OLLAMA_API_URL="http://localhost:11434"
+export OLLAMA_MODEL_NAME="qwen3-vl:8b"
+```
+
+3. **Create and activate environment**:
 ```bash
 conda create -n agent python=3.13
 conda activate agent
 ```
 
-3. **Install dependencies**:
+4. **Install dependencies**:
 ```bash
-pip install -r requirements.txt
+poetry install
 pip install uvisbox
 ```
 
-4. **Run the application**:
+5. **Run the application**:
 ```bash
 python main.py
 # Or: python -m uvisbox_assistant
@@ -173,26 +148,24 @@ python main.py
 
 ```
 uvisbox-assistant/
-├── src/uvisbox_assistant/      # Feature-based architecture (v0.3.1)
-│   ├── __init__.py             # Backward-compatible exports
+├── src/uvisbox_assistant/      # Feature-based architecture
+│   ├── __init__.py             # Public API exports
 │   ├── config.py               # Configuration
 │   ├── main.py                 # Main REPL entry point
 │   ├── core/                   # LangGraph workflow orchestration
-│   │   ├── graph.py            # StateGraph with 5 nodes
-│   │   ├── nodes.py            # Graph nodes (data, vis, statistics, analyzer, model)
+│   │   ├── graph.py            # StateGraph (model, data_tool, vis_tool)
+│   │   ├── nodes.py            # Graph node implementations
 │   │   ├── routing.py          # Conditional routing with circuit breaker
-│   │   └── state.py            # State definitions with analysis fields
+│   │   └── state.py            # State definitions
 │   ├── tools/                  # Data and visualization tools
 │   │   ├── data_tools.py       # Data loading/generation
-│   │   ├── vis_tools.py        # Visualization wrappers (BoxplotStyleConfig)
-│   │   ├── statistics_tools.py # Statistical analysis (v0.3.0)
-│   │   └── analyzer_tools.py   # LLM-powered reports (v0.3.0)
+│   │   └── vis_tools.py        # Visualization wrappers (BoxplotStyleConfig)
 │   ├── session/                # User interaction and session management
-│   │   ├── conversation.py     # Session management with analysis tracking
+│   │   ├── conversation.py     # Session management
 │   │   ├── hybrid_control.py   # Fast parameter updates
-│   │   └── command_parser.py   # Command parsing (16 patterns)
+│   │   └── command_parser.py   # Command parsing
 │   ├── llm/                    # LLM configuration
-│   │   └── model.py            # Gemini model setup
+│   │   └── model.py            # Ollama model setup
 │   ├── errors/                 # Error handling infrastructure
 │   │   ├── error_tracking.py   # Error storage and recording
 │   │   └── error_interpretation.py  # Context-aware error hints
@@ -202,24 +175,24 @@ uvisbox-assistant/
 │       └── utils.py            # Utility functions
 ├── test_data/                  # Sample datasets
 ├── temp/                       # Temporary files (auto-generated)
-├── tests/                      # Test suites (77+ unit tests, 0 API calls)
-├── scripts/                    # Migration and verification scripts
-├── requirements.txt            # Dependencies
+├── tests/                      # Test suites
+├── scripts/                    # Helper scripts
 └── pyproject.toml              # Poetry configuration
 ```
 
 ## Requirements
 
-See `requirements.txt`:
+Managed via Poetry (see `pyproject.toml`):
 
-- `langgraph>=0.2.76`
-- `langchain>=0.3.27`
-- `langchain-google-genai>=2.1.12`
+- `langchain>=1.2.15`
+- `langchain-ollama>=1.1.0`
+- `langgraph>=1.1.10`
 - `uvisbox` (installed separately)
 - `numpy>=2.0`
-- `pandas>=2.3.3`
+- `pandas>=3.0.2`
 - `matplotlib>=3.10.7`
-- `langsmith>=0.4.38`
+- `scikit-learn>=1.7.2`, `scikit-image>=0.26.0`, `scipy>=1.16.3`
+- `langsmith>=0.7.37`
 
 ## Development
 
@@ -232,7 +205,7 @@ python tests/test.py --pre-planning
 # Smoke test (minimal LLM usage, ~3 calls)
 python tests/test.py --iterative --llm-subset=smoke
 
-# Full test suite (~100 LLM calls, 8-10 minutes)
+# Full test suite
 python tests/test.py --acceptance
 ```
 
@@ -242,7 +215,6 @@ See [TESTING.md](TESTING.md) for details.
 
 - **User Guide**: `docs/USER_GUIDE.md` - Detailed styling control examples
 - **API Reference**: `docs/API.md` - Complete BoxplotStyleConfig documentation
-- **Analysis Examples**: `docs/ANALYSIS_EXAMPLES.md` - Uncertainty analysis workflows and report formats (v0.3.0)
 - **Testing Guide**: `TESTING.md` - Comprehensive testing strategies
 
 ## License

@@ -1,10 +1,7 @@
 """Language model setup for UVisBox-Assistant"""
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage
-import ollama
 from uvisbox_assistant import config
-import os
 
 
 def get_system_prompt(file_list: list = None) -> str:
@@ -17,7 +14,7 @@ def get_system_prompt(file_list: list = None) -> str:
     Returns:
         System prompt string
     """
-    base_prompt = """You are UVisBox-Assistant, an AI assistant specialized in visualizing and analyzing uncertainty data using the UVisBox Python library.
+    base_prompt = """You are UVisBox-Assistant, an AI assistant specialized in visualizing uncertainty data using the UVisBox Python library.
 
 ═══════════════════════════════════════════════════════════════════
 1. TOOL CATEGORIES & CAPABILITIES
@@ -25,8 +22,6 @@ def get_system_prompt(file_list: list = None) -> str:
 
 **Data Tools**: Load CSV files, generate synthetic data, manage numpy arrays
 **Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, contour_boxplot, uncertainty_lobes)
-**Statistics Tools**: Compute statistical summaries from functional boxplot data
-**Analyzer Tools**: Generate natural language reports (inline/quick/detailed)
 
 Visualization Types:
 • functional_boxplot: Multiple 1D curves with band depth and percentile bands
@@ -46,64 +41,28 @@ Visualization Types:
 • Sequential execution: tool_1 → receive result → tool_2 → receive result
 • This is a system requirement - parallel tool calls will cause errors
 
-Pattern A - VISUALIZATION ONLY:
+Pattern A - VISUALIZATION:
   Request: "generate curves and plot them"
   Flow: data_tool → vis_tool
 
-Pattern B - ANALYSIS ONLY:
-  Request: "generate curves and analyze uncertainty"
-  Flow: data_tool → statistics_tool → analyzer_tool
-
-Pattern C - VISUALIZATION + ANALYSIS:
-  Request: "generate curves, plot boxplot, and create summary"
-  Flow: data_tool → vis_tool → statistics_tool → analyzer_tool
-
-Pattern D - MULTIPLE VISUALIZATIONS:
+Pattern B - MULTIPLE VISUALIZATIONS:
   Request: "plot both contour boxplot and probabilistic marching squares"
   Flow: vis_tool_1 → vis_tool_2 (SEQUENTIAL, not parallel)
   Implementation: Call first visualization, receive result, then call second visualization
 
-Pattern E - DATA ONLY:
+Pattern C - DATA ONLY:
   Request: "load sine.npy" or "generate 50 curves"
   Flow: data_tool → STOP (confirm data loaded, do NOT auto-visualize)
   IMPORTANT: Only proceed to visualization if user explicitly requests it
 
 Intent Detection (CRITICAL):
-• "load X" / "generate X" without mention of plot/visualize → DATA ONLY (Pattern E)
+• "load X" / "generate X" without mention of plot/visualize → DATA ONLY (Pattern C)
 • "load X and plot" / "generate X and visualize" → Pattern A
 • "plot X" / "visualize X" (data already loaded) → vis_tool only
 • When in doubt, ask user what they want to do with the data
 
 ═══════════════════════════════════════════════════════════════════
-3. ANALYSIS & REPORT MANAGEMENT ⚠️
-═══════════════════════════════════════════════════════════════════
-
-Tool Sequence (CRITICAL):
-  Step 1: compute_functional_boxplot_statistics(data_path)
-  Step 2: generate_uncertainty_report() [no parameters needed]
-  Result: All 3 report types stored in state (inline, quick, detailed)
-
-Report Access & Presentation:
-• When analyzer succeeds, THREE reports are stored: "inline", "quick", "detailed"
-• Default report type: "quick" (3-5 sentences)
-• NEVER call analyzer again if analysis_reports exists in state
-• To show reports, retrieve from state and present with clear formatting:
-
-  "Here is the [type] uncertainty analysis:
-
-  [report content]"
-
-Intent Detection for User Requests:
-  "show summary/analysis" → Present existing "quick" report
-  "show short/brief/inline" → Present "inline" report (1 sentence)
-  "show detailed analysis" → Present "detailed" report
-  "generate new/regenerate" → Call statistics + analyzer tools again
-  No reports exist → Call statistics + analyzer sequence
-
-IMPORTANT: Analyzer is expensive. Only regenerate if user explicitly says "new" or "regenerate".
-
-═══════════════════════════════════════════════════════════════════
-4. ERROR HANDLING & EDGE CASES
+3. ERROR HANDLING & EDGE CASES
 ═══════════════════════════════════════════════════════════════════
 
 When tools fail:
@@ -111,10 +70,9 @@ When tools fail:
 • Ask clarifying questions: "Which file?", "What dimensions?"
 • Suggest alternatives if files don't exist
 • Don't retry failed operations without changes
-• If statistics fail, explain what went wrong before attempting analyzer
 
 ═══════════════════════════════════════════════════════════════════
-5. CONTEXT AWARENESS & STATE MANAGEMENT
+4. CONTEXT AWARENESS & STATE MANAGEMENT
 ═══════════════════════════════════════════════════════════════════
 
 Multi-turn Conversations:
@@ -146,7 +104,7 @@ Default Behavior:
 • Never fabricate file paths
 
 ═══════════════════════════════════════════════════════════════════
-6. ANSWERING PARAMETER QUESTIONS
+5. ANSWERING PARAMETER QUESTIONS
 ═══════════════════════════════════════════════════════════════════
 
 When user asks about visualization parameters:
@@ -180,7 +138,7 @@ Example response for "what parameters did you use?":
 
 def create_model_with_tools(tools: list, temperature: float = 0.0):
     """
-    Create a ChatGoogleGenerativeAI model with tools bound.
+    Create a ChatOllama model with tools bound.
 
     Args:
         tools: List of tool schemas (from data_tools and vis_tools)
@@ -189,12 +147,6 @@ def create_model_with_tools(tools: list, temperature: float = 0.0):
     Returns:
         Model instance with tools bound
     """
-    # model = ChatGoogleGenerativeAI(
-    #     model=config.MODEL_NAME,
-    #     google_api_key=config.GEMINI_API_KEY,
-    #     temperature=temperature,
-    # )
-
     print("Using Ollama model:", config.OLLAMA_MODEL_NAME)
     print("Ollama API URL:", config.OLLAMA_API_URL)
 
@@ -204,7 +156,7 @@ def create_model_with_tools(tools: list, temperature: float = 0.0):
         temperature=temperature,
     )
 
-    # Bind tools using Gemini's function calling
+    # Bind tools using Ollama's function calling
     if tools:
         model_with_tools = model.bind_tools(tools)
         return model_with_tools

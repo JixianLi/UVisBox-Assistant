@@ -25,12 +25,6 @@ def test_legacy_imports():
         plot_curve_boxplot,
     )
 
-    # Statistics tools (v0.3.0)
-    from uvisbox_assistant import compute_functional_boxplot_statistics
-
-    # Analyzer tools (v0.3.0)
-    from uvisbox_assistant import generate_uncertainty_report
-
     # Error tracking
     from uvisbox_assistant import ErrorRecord
 
@@ -51,8 +45,6 @@ def test_new_imports():
     # Tools
     from uvisbox_assistant.tools import generate_ensemble_curves
     from uvisbox_assistant.tools import plot_functional_boxplot
-    from uvisbox_assistant.tools import compute_functional_boxplot_statistics
-    from uvisbox_assistant.tools import generate_uncertainty_report
 
     # Errors
     from uvisbox_assistant.errors import ErrorRecord

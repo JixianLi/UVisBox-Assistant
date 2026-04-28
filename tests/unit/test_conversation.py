@@ -183,9 +183,6 @@ class TestConversationSessionGetContextSummary:
             'messages': [HumanMessage(content='m1'), AIMessage(content='m2')],
             'current_data_path': '/path/to/data.npy',
             'last_vis_params': {'_tool_name': 'plot_test'},
-            'processed_statistics': {'median': {}},
-            'analysis_report': 'Test report',
-            'analysis_type': 'quick',
             'session_files': ['file1.npy', 'file2.npy'],
             'error_count': 1
         }
@@ -195,8 +192,6 @@ class TestConversationSessionGetContextSummary:
 
         assert result['turn_count'] == 5
         assert result['current_data'] == '/path/to/data.npy'
-        assert result['statistics'] == 'computed'
-        assert result['analysis'] == 'quick'
         assert len(result['session_files']) == 2
         assert result['error_count'] == 1
         assert result['message_count'] == 2
@@ -309,50 +304,6 @@ class TestConversationSessionErrorTracking:
 
         assert session.is_error_auto_fixed(1) is True
         assert session.is_error_auto_fixed(2) is False
-
-
-class TestConversationSessionAnalysis:
-    """Test analysis-related methods."""
-
-    def test_get_analysis_summary_returns_none_when_no_analysis(self):
-        """Test returns None when no analysis in state."""
-        session = ConversationSession()
-        session.state = {'messages': []}
-
-        result = session.get_analysis_summary()
-
-        assert result is None
-
-    def test_get_analysis_summary_with_statistics(self):
-        """Test returns summary with statistics."""
-        session = ConversationSession()
-        session.state = {
-            'processed_statistics': {
-                'data_shape': {'n_curves': 100, 'n_points': 50},
-                'median': {'trend': 'increasing'},
-                'outliers': {'count': 3}
-            }
-        }
-
-        result = session.get_analysis_summary()
-
-        assert '100 curves' in result
-        assert '50 points' in result
-        assert 'increasing' in result
-        assert '3' in result
-
-    def test_get_analysis_summary_with_report(self):
-        """Test returns summary with report."""
-        session = ConversationSession()
-        session.state = {
-            'analysis_report': 'This is a detailed analysis report about the data.',
-            'analysis_type': 'detailed'
-        }
-
-        result = session.get_analysis_summary()
-
-        assert 'detailed' in result
-        assert 'This is a detailed' in result
 
 
 def test_get_current_session():

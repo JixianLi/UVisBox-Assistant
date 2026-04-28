@@ -3,7 +3,6 @@ from langgraph.graph import StateGraph, END
 from uvisbox_assistant.core.state import GraphState
 from uvisbox_assistant.core.nodes import (
     call_model, call_data_tool, call_vis_tool,
-    call_statistics_tool, call_analyzer_tool
 )
 from uvisbox_assistant.core.routing import route_after_model, route_after_tool
 
@@ -16,8 +15,6 @@ def create_graph():
         START -> model -> [conditional]
                             ├─> data_tool -> model (loop)
                             ├─> vis_tool -> model (loop)
-                            ├─> statistics_tool -> model (loop)
-                            ├─> analyzer_tool -> model (loop)
                             └─> END (if no tool call)
 
     Returns:
@@ -30,8 +27,6 @@ def create_graph():
     workflow.add_node("model", call_model)
     workflow.add_node("data_tool", call_data_tool)
     workflow.add_node("vis_tool", call_vis_tool)
-    workflow.add_node("statistics_tool", call_statistics_tool)
-    workflow.add_node("analyzer_tool", call_analyzer_tool)
 
     # Set entry point
     workflow.set_entry_point("model")
@@ -43,8 +38,6 @@ def create_graph():
         {
             "data_tool": "data_tool",
             "vis_tool": "vis_tool",
-            "statistics_tool": "statistics_tool",
-            "analyzer_tool": "analyzer_tool",
             "end": END
         }
     )
@@ -61,24 +54,6 @@ def create_graph():
 
     workflow.add_conditional_edges(
         "vis_tool",
-        route_after_tool,
-        {
-            "model": "model",
-            "end": END
-        }
-    )
-
-    workflow.add_conditional_edges(
-        "statistics_tool",
-        route_after_tool,
-        {
-            "model": "model",
-            "end": END
-        }
-    )
-
-    workflow.add_conditional_edges(
-        "analyzer_tool",
         route_after_tool,
         {
             "model": "model",

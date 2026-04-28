@@ -125,18 +125,6 @@ def parse_simple_command(user_input: str) -> Optional[SimpleCommand]:
         value = float(match.group(1))
         return SimpleCommand('vmax', value)
 
-    # Pattern 17: "inline summary" / "show inline summary"
-    if text in ['show inline summary', 'inline summary']:
-        return SimpleCommand('report_type', 'inline')
-
-    # Pattern 18: "quick summary" / "show quick summary"
-    if text in ['show quick summary', 'quick summary']:
-        return SimpleCommand('report_type', 'quick')
-
-    # Pattern 19: "detailed summary" / "show detailed summary"
-    if text in ['show detailed summary', 'detailed summary']:
-        return SimpleCommand('report_type', 'detailed')
-
     # Not a simple command
     return None
 

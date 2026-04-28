@@ -43,13 +43,14 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   poetry install
    pip install uvisbox
    ```
 
-4. **Set environment variable**:
+4. **Configure Ollama** (defaults shown — only override if needed):
    ```bash
-   export GEMINI_API_KEY="your-api-key-here"
+   export OLLAMA_API_URL="http://localhost:11434"
+   export OLLAMA_MODEL_NAME="qwen3-vl:8b"
    ```
 
 5. **Run tests**:
@@ -163,15 +164,16 @@ def test_functional_boxplot_interface():
 
 **Example LLM integration test**:
 ```python
-@pytest.mark.llm_subset_analyzer
-def test_analyzer_generates_report():
-    """Test analyzer generates uncertainty report."""
+@pytest.mark.llm_subset_session
+def test_session_runs_visualization():
+    """Test session executes a visualization workflow."""
     from uvisbox_assistant.session.conversation import ConversationSession
 
     session = ConversationSession()
-    state = session.send("Generate statistics and create a quick report")
-    assert "analysis_reports" in state
-    assert "quick" in state["analysis_reports"]
+    session.send("Generate 30 curves and plot functional boxplot")
+    stats = session.get_stats()
+    assert stats["current_data"] is True
+    assert stats["current_vis"] is True
 ```
 
 ### Running Tests
@@ -181,10 +183,10 @@ def test_analyzer_generates_report():
 python tests/test.py --pre-planning
 
 # During development - test specific feature
-python tests/test.py --iterative --llm-subset=analyzer
+python tests/test.py --iterative --llm-subset=routing
 
 # Before code review - comprehensive check
-python tests/test.py --code-review --llm-subset=analyzer,routing
+python tests/test.py --code-review --llm-subset=hybrid_control,routing
 
 # Before merge - full acceptance
 python tests/test.py --acceptance

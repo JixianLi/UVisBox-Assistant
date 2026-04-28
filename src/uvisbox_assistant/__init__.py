@@ -36,16 +36,6 @@ from uvisbox_assistant.tools.vis_tools import (
     plot_squid_glyph_2D,
 )
 
-# Statistics tools (from tools/, v0.3.0)
-from uvisbox_assistant.tools.statistics_tools import (
-    compute_functional_boxplot_statistics,
-)
-
-# Analyzer tools (from tools/, v0.3.0)
-from uvisbox_assistant.tools.analyzer_tools import (
-    generate_uncertainty_report,
-)
-
 # Error tracking (from errors/, v0.1.2)
 from uvisbox_assistant.errors.error_tracking import ErrorRecord
 
@@ -72,14 +62,10 @@ __all__ = [
     "plot_contour_boxplot",
     "plot_uncertainty_lobes",
     "plot_squid_glyph_2D",
-    # Statistics Tools
-    "compute_functional_boxplot_statistics",
-    # Analyzer Tools
-    "generate_uncertainty_report",
     # Error Tracking
     "ErrorRecord",
     # Config
     "config",
 ]
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"

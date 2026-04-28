@@ -21,8 +21,8 @@ class TestGetSystemPrompt:
         assert 'UVisBox-Assistant' in prompt
         assert 'functional_boxplot' in prompt
         assert 'curve_boxplot' in prompt
-        assert 'statistics_tool' in prompt
-        assert 'analyzer_tool' in prompt
+        assert 'Data Tools' in prompt
+        assert 'Visualization Tools' in prompt
 
     def test_includes_file_list_when_provided(self):
         """Test prompt includes file list."""
@@ -43,20 +43,12 @@ class TestGetSystemPrompt:
         assert 'UVisBox-Assistant' in prompt
 
     def test_includes_workflow_patterns(self):
-        """Test prompt includes all workflow patterns."""
+        """Test prompt includes workflow patterns."""
         prompt = get_system_prompt()
 
-        assert 'VISUALIZATION ONLY' in prompt
-        assert 'TEXT ANALYSIS ONLY' in prompt
-        assert 'COMBINED VISUALIZATION + ANALYSIS' in prompt
-
-    def test_includes_tool_sequence_rules(self):
-        """Test prompt includes critical tool sequence rules."""
-        prompt = get_system_prompt()
-
-        assert 'compute_functional_boxplot_statistics' in prompt
-        assert 'generate_uncertainty_report' in prompt
-        assert 'sequence' in prompt.lower()
+        assert 'VISUALIZATION' in prompt
+        assert 'DATA ONLY' in prompt
+        assert 'MULTIPLE VISUALIZATIONS' in prompt
 
     def test_includes_error_handling_guidance(self):
         """Test prompt includes error handling guidance."""
@@ -69,24 +61,24 @@ class TestGetSystemPrompt:
 class TestCreateModelWithTools:
     """Test create_model_with_tools function."""
 
-    @patch('uvisbox_assistant.llm.model.ChatGoogleGenerativeAI')
-    @patch('uvisbox_assistant.llm.model.config.MODEL_NAME', 'gemini-2.0-flash-lite')
-    @patch('uvisbox_assistant.llm.model.config.GEMINI_API_KEY', 'test-api-key')
+    @patch('uvisbox_assistant.llm.model.ChatOllama')
+    @patch('uvisbox_assistant.llm.model.config.OLLAMA_MODEL_NAME', 'qwen3-vl:8b')
+    @patch('uvisbox_assistant.llm.model.config.OLLAMA_API_URL', 'http://localhost:11434')
     def test_creates_model_with_config(self, mock_model_class):
         """Test model creation with configuration."""
         mock_model = MagicMock()
         mock_model_class.return_value = mock_model
 
         tools = [{'name': 'test_tool'}]
-        result = create_model_with_tools(tools, temperature=0.5)
+        create_model_with_tools(tools, temperature=0.5)
 
         mock_model_class.assert_called_once_with(
-            model='gemini-2.0-flash-lite',
-            google_api_key='test-api-key',
+            model='qwen3-vl:8b',
+            base_url='http://localhost:11434',
             temperature=0.5
         )
 
-    @patch('uvisbox_assistant.llm.model.ChatGoogleGenerativeAI')
+    @patch('uvisbox_assistant.llm.model.ChatOllama')
     def test_binds_tools_when_provided(self, mock_model_class):
         """Test tools are bound to model."""
         mock_model = MagicMock()
@@ -100,7 +92,7 @@ class TestCreateModelWithTools:
         mock_model.bind_tools.assert_called_once_with(tools)
         assert result is mock_bound_model
 
-    @patch('uvisbox_assistant.llm.model.ChatGoogleGenerativeAI')
+    @patch('uvisbox_assistant.llm.model.ChatOllama')
     def test_returns_model_without_tools(self, mock_model_class):
         """Test returns unbound model when no tools."""
         mock_model = MagicMock()
@@ -111,7 +103,7 @@ class TestCreateModelWithTools:
         mock_model.bind_tools.assert_not_called()
         assert result is mock_model
 
-    @patch('uvisbox_assistant.llm.model.ChatGoogleGenerativeAI')
+    @patch('uvisbox_assistant.llm.model.ChatOllama')
     def test_uses_default_temperature(self, mock_model_class):
         """Test uses default temperature of 0.0."""
         mock_model = MagicMock()

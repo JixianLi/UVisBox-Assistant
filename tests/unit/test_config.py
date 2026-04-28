@@ -45,15 +45,10 @@ def test_no_visualization_specific_params():
     assert "method" not in params
 
 
-def test_api_key_configured():
-    """Test that API key is configured."""
-    assert config.GEMINI_API_KEY is not None
-    assert len(config.GEMINI_API_KEY) > 0
-
-
-def test_model_name():
-    """Test model name configuration."""
-    assert config.MODEL_NAME == "gemini-2.0-flash-lite"
+def test_ollama_configured():
+    """Test that Ollama configuration is set."""
+    assert config.OLLAMA_API_URL
+    assert config.OLLAMA_MODEL_NAME
 
 
 if __name__ == "__main__":

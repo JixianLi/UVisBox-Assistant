@@ -24,22 +24,16 @@ def get_tool_type(tool_name: str) -> str:
         tool_name: Name of the tool
 
     Returns:
-        Tool type: "data", "vis", "statistics", "analyzer", or "unknown"
+        Tool type: "data", "vis", or "unknown"
     """
     # Import tool registries
     from uvisbox_assistant.tools.data_tools import DATA_TOOLS
     from uvisbox_assistant.tools.vis_tools import VIS_TOOLS
-    from uvisbox_assistant.tools.statistics_tools import STATISTICS_TOOLS
-    from uvisbox_assistant.tools.analyzer_tools import ANALYZER_TOOLS
 
     if tool_name in DATA_TOOLS:
         return "data"
     elif tool_name in VIS_TOOLS:
         return "vis"
-    elif tool_name in STATISTICS_TOOLS:
-        return "statistics"
-    elif tool_name in ANALYZER_TOOLS:
-        return "analyzer"
     else:
         return "unknown"
 

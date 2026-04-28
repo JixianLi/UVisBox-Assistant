@@ -8,29 +8,26 @@ UVisBox-Assistant (uva) is a LangGraph-powered conversational agent for uncertai
 
 ### LangGraph Workflow
 
-The agent uses a 5-node StateGraph with conditional routing:
+The agent uses a 3-node StateGraph with conditional routing:
 
 ```
 START -> model -> [conditional routing]
               -> data_tool -> model
               -> vis_tool -> model
-              -> statistics_tool -> model
-              -> analyzer_tool -> model
               -> END
 ```
 
 **State Management** (`src/uvisbox_assistant/core/state.py`):
 - `messages`: Accumulated with `operator.add`
 - Single-value fields (overwritten): `current_data_path`, `last_vis_params`
-- Analysis state: `raw_statistics`, `processed_statistics`, `analysis_reports`
 
 **Circuit Breaker**: Stops execution after 3 consecutive tool errors to prevent infinite loops.
 
 ### Dual-Mode Execution
 
-1. **Full Graph Mode**: Multi-turn conversations through Gemini (slow, flexible)
-2. **Hybrid Control Mode**: Direct parameter updates via `command_parser.py` (fast, no API calls)
-   - Handles 19 quick command patterns (e.g., "median color blue", "show outliers", "vmin 0.0", "vmax 10.0")
+1. **Full Graph Mode**: Multi-turn conversations through the LLM (slow, flexible)
+2. **Hybrid Control Mode**: Direct parameter updates via `command_parser.py` (fast, no LLM calls)
+   - Handles quick command patterns (e.g., "median color blue", "show outliers", "vmin 0.0", "vmax 10.0")
    - Bypasses full graph for simple parameter changes
 
 ### Tool Response Pattern
@@ -58,22 +55,22 @@ Feature development follows this pipeline:
 
 ### Test Categories
 
-| Category | Count | LLM Calls | When to Run |
-|----------|-------|-----------|-------------|
-| Unit | 277 | 0 | Every code review |
-| Integration (UVisBox Interface) | 21 | 0 | Every code review |
-| Integration (LLM Integration) | 15 | ~40 | Minimal subset during iteration |
-| E2E | 15 | ~60 | Acceptance test stage only |
+| Category | LLM Calls | When to Run |
+|----------|-----------|-------------|
+| Unit | 0 | Every code review |
+| Integration (UVisBox Interface) | 0 | Every code review |
+| Integration (LLM Integration) | small | Minimal subset during iteration |
+| E2E | larger | Acceptance test stage only |
 
 **API Budget Rule**: Run ONLY minimal integration tests during iterative development. Run full test suite only at acceptance stage.
 
 ### Test Runner
 ```bash
-# During development (no API calls)
+# During development (no LLM calls)
 python tests/test.py --pre-planning
 
 # Minimal integration (specific feature)
-python tests/test.py --iterative --llm-subset=analyzer
+python tests/test.py --iterative --llm-subset=smoke
 
 # Acceptance stage (all tests)
 python tests/test.py --acceptance
@@ -88,25 +85,22 @@ python tests/test.py --acceptance
 
 **LLM Integration** (`llm_integration/`): Individual LLM-powered features
 - Tests specific components that require LLM calls
-- Verifies analyzer, routing, error handling, session management
-- ~40 LLM calls total
+- Verifies routing, error handling, hybrid control, session management
 
-**E2E** (`e2e/`): Complete workflows through Gemini
+**E2E** (`e2e/`): Complete workflows through the LLM
 - Tests full graph execution with LLM
 - Verifies routing, state management, multi-turn conversations
-- ~60 LLM calls total
 
 ## Code Organization
 
-**Feature-based structure** (since v0.3.1):
 ```
 src/uvisbox_assistant/
     core/          # LangGraph orchestration (graph, state, nodes, routing)
-    tools/         # Tool implementations (data, vis, statistics, analyzer)
+    tools/         # Tool implementations (data, vis)
     session/       # User interaction (conversation, hybrid_control, command_parser)
-    llm/           # Gemini configuration
+    llm/           # Ollama model setup
     errors/        # Error tracking and interpretation
-  utils/         # Logging, output control, data loading
+    utils/         # Logging, output control, data loading
 ```
 
 ## Key Conventions
@@ -167,7 +161,6 @@ except Exception as e:
 - **CONTRIBUTING.md**: Dev setup, code standards, naming conventions
 - **API.md**: Complete API reference for all tools
 - **USER_GUIDE.md**: Styling examples, user commands
-- **ANALYSIS_EXAMPLES.md**: Uncertainty analysis workflows
 - **ENVIRONMENT_SETUP.md**: Prerequisites, environment setup
 
 See these docs for user-facing information and API details.

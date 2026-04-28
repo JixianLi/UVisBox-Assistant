@@ -24,12 +24,8 @@ IMPORT_MAPPINGS: Dict[str, str] = {
     # Tools
     "from uvisbox_assistant.data_tools import": "from uvisbox_assistant.tools.data_tools import",
     "from uvisbox_assistant.vis_tools import": "from uvisbox_assistant.tools.vis_tools import",
-    "from uvisbox_assistant.statistics_tools import": "from uvisbox_assistant.tools.statistics_tools import",
-    "from uvisbox_assistant.analyzer_tools import": "from uvisbox_assistant.tools.analyzer_tools import",
     "import uvisbox_assistant.data_tools": "import uvisbox_assistant.tools.data_tools",
     "import uvisbox_assistant.vis_tools": "import uvisbox_assistant.tools.vis_tools",
-    "import uvisbox_assistant.statistics_tools": "import uvisbox_assistant.tools.statistics_tools",
-    "import uvisbox_assistant.analyzer_tools": "import uvisbox_assistant.tools.analyzer_tools",
 
     # Session
     "from uvisbox_assistant.conversation import": "from uvisbox_assistant.session.conversation import",

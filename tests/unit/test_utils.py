@@ -50,14 +50,10 @@ class TestToolTypeDetection:
 
     @patch('uvisbox_assistant.tools.data_tools.DATA_TOOLS', {'load_csv': {}})
     @patch('uvisbox_assistant.tools.vis_tools.VIS_TOOLS', {'plot_boxplot': {}})
-    @patch('uvisbox_assistant.tools.statistics_tools.STATISTICS_TOOLS', {'compute_stats': {}})
-    @patch('uvisbox_assistant.tools.analyzer_tools.ANALYZER_TOOLS', {'generate_report': {}})
     def test_get_tool_type_identifies_all_types(self):
         """Test get_tool_type identifies all tool types."""
         assert get_tool_type('load_csv') == 'data'
         assert get_tool_type('plot_boxplot') == 'vis'
-        assert get_tool_type('compute_stats') == 'statistics'
-        assert get_tool_type('generate_report') == 'analyzer'
         assert get_tool_type('unknown_tool') == 'unknown'
 
 

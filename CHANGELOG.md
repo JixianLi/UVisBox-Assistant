@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-28
+
+### Removed
+- **Uncertainty analysis pipeline**: Removed `statistics_tool` and `analyzer_tool` from the public LangGraph workflow to keep the public branch focused on data + visualization.
+  - Deleted `src/uvisbox_assistant/tools/statistics_tools.py` and `src/uvisbox_assistant/tools/analyzer_tools.py`.
+  - Graph reduced from 5 nodes to 3 (`model`, `data_tool`, `vis_tool`).
+  - Removed `raw_statistics`, `processed_statistics`, `analysis_reports` fields from `GraphState`, plus the `update_state_with_statistics` / `update_state_with_analysis` helpers and `ConversationSession.get_analysis_summary()`.
+  - Dropped report-retrieval quick commands (`show inline summary`, `show quick summary`, `show detailed summary`) and `execute_report_retrieval` in hybrid control.
+  - Deleted analysis-only tests (`test_statistics_tools.py`, `test_analyzer_tools.py`, `test_analyzer.py`, `test_report_switching.py`, `test_analysis_workflows.py`) and `docs/ANALYSIS_EXAMPLES.md`.
+- **Gemini dependency**: Dropped `langchain-google-genai` from `pyproject.toml`. Project is now Ollama-only — `model.py` uses `ChatOllama` exclusively, the commented `ChatGoogleGenerativeAI` block is gone, and `GEMINI_API_KEY` references have been removed from documentation.
+
+### Changed
+- Public API (`uvisbox_assistant.__all__`) no longer exports `compute_functional_boxplot_statistics` or `generate_uncertainty_report` — this is a breaking change for any external consumer.
+- README rewritten: drops "Powered by Google Gemini", drops the v0.3.0 uncertainty-analysis section, lists Ollama setup instead of `GEMINI_API_KEY`.
+- System prompt simplified to only describe data + visualization workflows (Pattern A/B/C; analysis patterns and tool-sequence rules removed).
+- Bumped version to `0.4.0` to flag the breaking removal.
+
 ## [0.3.5] - 2025-11-05
 
 ### Changed

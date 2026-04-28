@@ -7,20 +7,20 @@
 python tests/test.py --pre-planning
 
 # Iterative development: Unit + specific LLM subset
-python tests/test.py --iterative --llm-subset=analyzer
+python tests/test.py --iterative --llm-subset=routing
 
 # Smoke test: Critical path only (~3 LLM calls)
 python tests/test.py --iterative --llm-subset=smoke
 
 # Code review checkpoint: Full interface + LLM subset
-python tests/test.py --code-review --llm-subset=analyzer,routing
+python tests/test.py --code-review --llm-subset=hybrid_control,routing
 
-# Acceptance: All tests (~100 LLM calls)
+# Acceptance: All tests
 python tests/test.py --acceptance
 
 # Direct test selection (pytest-style)
 python tests/test.py tests/unit/test_config.py
-python tests/test.py tests/llm_integration/test_analyzer.py::test_specific
+python tests/test.py tests/llm_integration/test_session.py::test_specific
 
 # With coverage
 python tests/test.py --pre-planning --coverage
@@ -44,21 +44,18 @@ tests/
 │   ├── test_tool_interfaces.py     # Tool → UVisBox interface validation
 │   └── test_csv_loading.py         # CSV loading with real data
 │
-├── llm_integration/            # ~20 tests, ~40 LLM calls
-│   ├── test_analyzer.py            # Analyzer with LLM
+├── llm_integration/            # LLM-powered features
 │   ├── test_error_handling.py      # Error recovery
 │   ├── test_session.py             # Session management
-│   ├── test_hybrid_control.py      # Hybrid control workflows
-│   └── test_report_switching.py    # Report format switching
+│   └── test_hybrid_control.py      # Hybrid control workflows
 │
-├── e2e/                        # ~30 tests, ~60 LLM calls
+├── e2e/                        # End-to-end visualization workflows
 │   ├── test_functional_boxplot.py  # Functional boxplot workflows
 │   ├── test_curve_boxplot.py       # Curve boxplot workflows
 │   ├── test_contour_boxplot.py     # Contour boxplot workflows
 │   ├── test_probabilistic_ms.py    # PMS workflows
 │   ├── test_uncertainty_lobes.py   # Uncertainty lobes workflows
 │   ├── test_squid_glyph.py         # Squid glyph workflows
-│   ├── test_analysis_workflows.py  # Analysis pipelines
 │   └── test_matplotlib_behavior.py # Visualization behavior
 │
 ├── conftest.py
@@ -67,13 +64,12 @@ tests/
 
 ### LLM Call Estimates
 
-| Category | Tests | LLM Calls | Duration |
-|----------|-------|-----------|----------|
-| **Unit** | ~291 | 0 (no UVisBox) | < 5 seconds |
-| **UVisBox Interface** | 23 | 0 | < 30 seconds |
-| **LLM Integration** | ~20 | ~40 | 2-3 minutes |
-| **E2E** | ~30 | ~60 | 3-5 minutes |
-| **Total** | ~350 | ~100 | 8-10 minutes |
+| Category | LLM Calls | Duration |
+|----------|-----------|----------|
+| **Unit** | 0 | < 5 seconds |
+| **UVisBox Interface** | 0 | < 30 seconds |
+| **LLM Integration** | small | 2-3 minutes |
+| **E2E** | larger | 3-5 minutes |
 
 **Note**: LLM call estimates are approximate and may vary by ±20%.
 
@@ -105,14 +101,14 @@ python tests/test.py --pre-planning
 **Purpose**: Fast iteration with minimal LLM budget.
 
 ```bash
-# Working on analyzer
-python tests/test.py --iterative --llm-subset=analyzer
+# Working on routing
+python tests/test.py --iterative --llm-subset=routing
 
 # Working on squid glyph
 python tests/test.py --iterative --llm-subset=squid_glyph
 
 # Multiple subsets
-python tests/test.py --iterative --llm-subset=analyzer,routing
+python tests/test.py --iterative --llm-subset=hybrid_control,routing
 
 # Smoke test only
 python tests/test.py --iterative --llm-subset=smoke
@@ -125,7 +121,7 @@ python tests/test.py --iterative --llm-subset=smoke
 **Purpose**: Verify implementation before requesting review.
 
 ```bash
-python tests/test.py --code-review --llm-subset=analyzer
+python tests/test.py --code-review --llm-subset=hybrid_control
 ```
 
 **Run before:**
@@ -144,46 +140,36 @@ python tests/test.py --acceptance
 - Merging to main
 - Creating release
 
-**Budget**: ~100 LLM calls, 8-10 minutes
-
 ---
 
 ## LLM Subset Reference
 
 ### Component-Based Subsets
 
-| Subset | Marker | Tests | LLM Calls |
-|--------|--------|-------|-----------|
-| `analyzer` | `llm_subset_analyzer` | Analyzer tests | ~5 |
-| `routing` | `llm_subset_routing` | Routing tests | ~5 |
-| `error_handling` | `llm_subset_error_handling` | Error recovery | ~5 |
-| `session` | `llm_subset_session` | Session management | ~3 |
-| `hybrid_control` | `llm_subset_hybrid_control` | Hybrid control | ~3 |
-
-### Workflow-Based Subsets
-
-| Subset | Marker | Tests | LLM Calls |
-|--------|--------|-------|-----------|
-| `analysis` | `llm_subset_analysis` | Analysis workflows | ~10 |
+| Subset | Marker | Tests |
+|--------|--------|-------|
+| `error_handling` | `llm_subset_error_handling` | Error recovery |
+| `session` | `llm_subset_session` | Session management |
+| `hybrid_control` | `llm_subset_hybrid_control` | Hybrid control |
 
 ### Visualization Type Subsets
 
-| Subset | Marker | Tests | LLM Calls |
-|--------|--------|-------|-----------|
-| `functional_boxplot` | `llm_subset_functional_boxplot` | Functional boxplot | ~8 |
-| `curve_boxplot` | `llm_subset_curve_boxplot` | Curve boxplot | ~8 |
-| `contour_boxplot` | `llm_subset_contour_boxplot` | Contour boxplot | ~8 |
-| `probabilistic_ms` | `llm_subset_probabilistic_ms` | PMS | ~8 |
-| `uncertainty_lobes` | `llm_subset_uncertainty_lobes` | Uncertainty lobes | ~8 |
-| `squid_glyph` | `llm_subset_squid_glyph` | Squid glyph | ~8 |
+| Subset | Marker | Tests |
+|--------|--------|-------|
+| `functional_boxplot` | `llm_subset_functional_boxplot` | Functional boxplot |
+| `curve_boxplot` | `llm_subset_curve_boxplot` | Curve boxplot |
+| `contour_boxplot` | `llm_subset_contour_boxplot` | Contour boxplot |
+| `probabilistic_ms` | `llm_subset_probabilistic_ms` | PMS |
+| `uncertainty_lobes` | `llm_subset_uncertainty_lobes` | Uncertainty lobes |
+| `squid_glyph` | `llm_subset_squid_glyph` | Squid glyph |
 
 ### Special Subsets
 
-| Subset | Marker | Tests | LLM Calls |
-|--------|--------|-------|-----------|
-| `smoke` | `smoke` | Critical path only | ~3 |
+| Subset | Marker | Tests |
+|--------|--------|-------|
+| `smoke` | `smoke` | Critical path only |
 
-**Combine subsets**: `--llm-subset=analyzer,routing,smoke`
+**Combine subsets**: `--llm-subset=hybrid_control,routing,smoke`
 
 ---
 
@@ -243,11 +229,10 @@ def test_functional_boxplot_interface():
     assert result['_vis_params']['_tool_name'] == 'plot_functional_boxplot'
 ```
 
-### LLM Integration Tests (~2 LLM Calls per Test)
+### LLM Integration Tests
 **Purpose**: Test specific LLM-powered features in isolation.
 
 **Responsibilities**:
-- Test analyzer report generation
 - Test routing decisions with LLM
 - Test error recovery workflows
 - Test session state management with LLM
@@ -260,60 +245,51 @@ def test_functional_boxplot_interface():
 
 **Example**:
 ```python
-def test_analyzer_basic(session):
-    """Test basic analyzer functionality."""
-    session.send("Generate curves and analyze")
+def test_session_basic(session):
+    """Test basic session functionality."""
+    session.send("Generate 30 curves and plot functional boxplot")
 
-    response = session.get_last_response()
-    assert len(response) > 100  # Substantial report
-    assert "median" in response.lower()
+    stats = session.get_stats()
+    assert stats["current_data"] is True
+    assert stats["current_vis"] is True
 ```
 
-### E2E Tests (~2 LLM Calls per Test)
+### E2E Tests
 **Purpose**: Test complete user scenarios from natural language input to final output.
 
 **Responsibilities**:
-- Complete analysis workflows
 - Full visualization pipelines
 - Multi-turn conversations
-- Real LLM report generation
 - Matplotlib non-blocking behavior
-- Report format validation (inline/quick/detailed)
 
 **When to add E2E tests**:
 - **New visualization type**: Add test for complete workflow
-- **New analysis type**: Add test for new report format
 - **Before release**: Run full E2E suite to verify everything works
 
 **Example**:
 ```python
-def test_full_analyzer_pipeline(session):
-    """Test data → vis → analyze workflow."""
-    session.send("Generate curves, plot boxplot, detailed report")
+def test_full_visualization_pipeline(session):
+    """Test data → vis workflow."""
+    session.send("Generate curves and plot boxplot")
 
-    response = session.get_last_response()
-    assert len(response) > 100  # Substantial report
-    assert "median" in response.lower()
-    assert "outlier" in response.lower()
+    stats = session.get_stats()
+    assert stats["current_vis"] is True
 ```
 
 ---
 
 ## Code Coverage
 
-### Current Coverage (v0.3.4)
+### Coverage Targets
 
 ```
-Overall: ~89%
-
 Key modules:
-- vis_tools.py:        96.69% ✅
-- statistics_tools.py: 92.92% ✅
-- data_tools.py:       92.47% ✅
-- command_parser.py:   94.44% ✅
-- routing.py:         100.00% ✅
-- state.py:           100.00% ✅
-- hybrid_control.py:  100.00% ✅
+- vis_tools.py
+- data_tools.py
+- command_parser.py
+- routing.py
+- state.py
+- hybrid_control.py
 ```
 
 **Run coverage report**:
@@ -350,7 +326,6 @@ tools/vis_tools.py        151      5  96.69%
 - Click files to see line-by-line coverage
 
 **What's NOT covered** (by design):
-- LLM calls in analyzer_tools.py (tested in LLM integration/E2E)
 - Interactive REPL in main.py (manual testing)
 - Entry points __main__.py
 - Debug code marked with `# pragma: no cover`
@@ -428,12 +403,12 @@ Please retry in 17.461429122s
 python tests/test.py --pre-planning
 
 # Iterative: Unit + LLM subset (requires --llm-subset)
-python tests/test.py --iterative --llm-subset=analyzer
+python tests/test.py --iterative --llm-subset=routing
 
 # Code review: Unit + UVisBox interface + LLM subset
-python tests/test.py --code-review --llm-subset=analyzer
+python tests/test.py --code-review --llm-subset=hybrid_control
 
-# Acceptance: All tests (~100 LLM calls)
+# Acceptance: All tests
 python tests/test.py --acceptance
 ```
 
@@ -467,10 +442,10 @@ python tests/test.py --acceptance --coverage
 python tests/test.py --iterative --llm-subset=smoke
 
 # Multiple subsets
-python tests/test.py --iterative --llm-subset=analyzer,routing,smoke
+python tests/test.py --iterative --llm-subset=hybrid_control,routing,smoke
 
 # Component-based
-python tests/test.py --code-review --llm-subset=analyzer,error_handling
+python tests/test.py --code-review --llm-subset=session,error_handling
 
 # Visualization-based
 python tests/test.py --iterative --llm-subset=functional_boxplot,curve_boxplot
@@ -488,7 +463,7 @@ python tests/test.py --iterative --llm-subset=functional_boxplot,curve_boxplot
 
 2. **Run subset tests** for feature being developed:
    ```bash
-   python tests/test.py --iterative --llm-subset=analyzer
+   python tests/test.py --iterative --llm-subset=routing
    ```
 
 3. **Run coverage** to verify new code is tested:
@@ -535,7 +510,7 @@ python tests/test.py --pre-planning
 ```
 
 ### Test Failures
-1. Verify `GEMINI_API_KEY` is set
+1. Verify Ollama is running and the configured model is pulled
 2. Verify conda environment `agent` is active
 3. Verify UVisBox is installed
 4. Run unit tests first to isolate issue
@@ -548,24 +523,11 @@ python tests/test.py --pre-planning
 4. Add tests for those lines
 5. Re-run coverage to verify
 
-### LLM Budget Errors
-If you see "resource exhausted" errors:
+### LLM Budget / Slow Tests
+If LLM-backed tests are slow or unreliable:
 1. Use smaller subsets: `--llm-subset=smoke`
-2. Wait 60s between test runs
-3. Use `--iterative` during development (unit + minimal LLM)
-4. Save `--acceptance` for final validation only
-
----
-
-## Version History
-
-### v0.3.4 (2025-11-05)
-- Complete test redesign with 4-category structure
-- New test.py runner with pipeline modes
-- LLM subset markers for granular budget control
-- Reorganized tests: unit/, uvisbox_interface/, llm_integration/, e2e/
-- Added smoke test markers for critical path
-- Total: ~350 tests (277 unit, 23 interface, ~20 LLM integration, ~30 e2e)
+2. Use `--iterative` during development (unit + minimal LLM)
+3. Save `--acceptance` for final validation only
 
 ### v0.3.1 (2025-11-05)
 - Added comprehensive integration tests for backward compatibility
