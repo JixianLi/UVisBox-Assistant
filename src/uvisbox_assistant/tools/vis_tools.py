@@ -1,6 +1,7 @@
 """Visualization tools wrapping UVisBox functions"""
 import numpy as np
 import matplotlib.pyplot as plt
+import pyvista as pv
 import traceback
 from pathlib import Path
 from typing import Dict, Optional, List
@@ -12,6 +13,7 @@ try:
         functional_boxplot,
         curve_boxplot,
         probabilistic_marching_squares,
+        probabilistic_marching_cubes,
         uncertainty_lobes,
         contour_boxplot,
         squid_glyph_2D
@@ -716,11 +718,97 @@ def plot_contour_boxplot(
         }
 
 
+def plot_probabilistic_marching_cubes(
+    data_path: str,
+    isovalue: float = 0.5,
+    alpha: float = 0.7,
+    colormap: str = "viridis",
+) -> Dict[str, str]:
+    """
+    Create probabilistic marching cubes visualization for 3D scalar field ensembles.
+    
+    This function computes isosurfaces at a given isovalue across all ensemble members,
+    then visualizes the probability of isosurface occurrence at each spatial location.
+    
+    Args:
+        data_path: Path to .npy file with shape (nx, ny, nz, n_ensemble)
+        isovalue: Isovalue for marching cubes (default: 0.5)
+        alpha: Transparency of isosurface mesh (default: 0.7)
+        colormap: Colormap for probability visualization (default: "viridis")
+        show_probability: Whether to color by probability (default: True)
+        probability_threshold: Minimum probability to show surface (default: 0.1)
+    
+    Returns:
+        Dict with status and message
+    """
+    try:
+       
+        # Load data
+        if not Path(data_path).exists():
+            return {"status": "error", "message": f"Data file not found: {data_path}"}
+
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, field, error_msg = load_array(data_path)
+        if not success:
+            return {"status": "error", "message": error_msg}
+
+        # Validate shape (should be 4D: nx, ny, nz, n_ensemble)
+        if field.ndim != 4:
+            return {
+                "status": "error",
+                "message": f"Expected 4D array (nx, ny, nz, n_ensemble), got shape {field.shape}"
+            }
+
+
+        # Create PyVista figure for 3D visualization with Tier-2 defaults
+        plotter = pv.Plotter()
+
+        # call UVisBox probabilistic marching cubes function
+        probabilistic_marching_cubes(
+            ensemble_images=field,
+            isovalue=isovalue,
+            plotter=plotter,
+            colormap=colormap
+        ) 
+        plotter.add_title(f"Probabilistic Marching Cubes (isovalue={isovalue})", font_size=14)
+        plotter.show()
+        return {
+            "status": "success",
+            "message": f"Displayed probabilistic marching cubes for field shape {field.shape}",
+            "_vis_params": {
+                "_tool_name": "plot_probabilistic_marching_cubes",
+                "data_path": data_path,
+                "isovalue": isovalue,
+                "alpha": alpha,
+                "colormap": colormap
+            }
+        }
+        
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+        
+        # Create user-friendly message
+        user_msg = f"Error creating probabilistic marching cubes: {str(e)}"
+        
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
+
 # Tool registry
 VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
+    "plot_probabilistic_marching_cubes": plot_probabilistic_marching_cubes,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
     "plot_squid_glyph_2D": plot_squid_glyph_2D,
     "plot_contour_boxplot": plot_contour_boxplot,
@@ -896,6 +984,35 @@ VIS_TOOL_SCHEMAS = [
                 "colormap": {
                     "type": "string",
                     "description": "Matplotlib colormap name",
+                    "default": "viridis"
+                }
+            },
+            "required": ["data_path"]
+        }
+    },
+    {
+        "name": "plot_probabilistic_marching_cubes",
+        "description": "Create probabilistic marching cubes visualization for 3D scalar field ensembles with isosurface uncertainty",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "data_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing 4D scalar field (nx, ny, nz, n_ensemble)"
+                },
+                "isovalue": {
+                    "type": "number",
+                    "description": "Isovalue for marching cubes surface extraction",
+                    "default": 0.5
+                },
+                "alpha": {
+                    "type": "number",
+                    "description": "Transparency of the isosurface mesh (0-1)",
+                    "default": 0.7
+                },
+                "colormap": {
+                    "type": "string",
+                    "description": "Matplotlib colormap name for probability visualization",
                     "default": "viridis"
                 }
             },

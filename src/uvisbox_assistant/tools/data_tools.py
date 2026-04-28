@@ -293,6 +293,118 @@ def load_npy(filepath: str) -> Dict[str, str]:
         }
 
 
+def generate_3d_scalar_field_ensemble(
+    nx: int = 30,
+    ny: int = 30,
+    nz: int = 30,
+    n_ensemble: int = 30,
+    output_path: Optional[str] = None
+) -> Dict[str, str]:
+    """
+    Generate synthetic 3D scalar field ensemble for volumetric uncertainty visualization.
+
+    Each ensemble member is a 3D Gaussian centered at (nx/2, ny/2, nz/2) with:
+    - Standard deviation proportional to grid size and varying with ensemble index
+    - sigma = grid_size * (0.2 + 0.03 * ensemble_index)
+    - Rescaled to [0, 1]
+    - Uniform noise added from [0, 0.01)
+    - Final rescale to [0, 1]
+
+    Args:
+        nx: Grid size in x
+        ny: Grid size in y 
+        nz: Grid size in z
+        n_ensemble: Number of ensemble members
+        output_path: Output path
+
+    Returns:
+        Dict with status, output_path, message
+    """
+    try:
+        # Convert to int in case LLM passes floats
+        nx = int(nx)
+        ny = int(ny)
+        nz = int(nz)
+        n_ensemble = int(n_ensemble)
+
+        # Create coordinate grids (0 to nx-1, 0 to ny-1, 0 to nz-1)
+        x = np.arange(nx)
+        y = np.arange(ny)
+        z = np.arange(nz)
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+        # Center of the field
+        center_x = nx / 2.0
+        center_y = ny / 2.0
+        center_z = nz / 2.0
+
+        # Generate ensemble of 3D Gaussian fields
+        ensemble = []
+        for ensemble_index in range(n_ensemble):
+            # Standard deviation varies with ensemble index and is proportional to grid size
+            # This creates significant variation between ensemble members
+            spread_factor = 0.2 + 0.03 * ensemble_index
+            sigma_x = nx * spread_factor
+            sigma_y = ny * spread_factor
+            sigma_z = nz * spread_factor
+
+            # Generate 3D Gaussian
+            field = np.exp(-((X - center_x)**2 / (2 * sigma_x**2) +
+                           (Y - center_y)**2 / (2 * sigma_y**2) +
+                           (Z - center_z)**2 / (2 * sigma_z**2)))
+
+            # Rescale to [0, 1]
+            field_min, field_max = field.min(), field.max()
+            if field_max > field_min:
+                field = (field - field_min) / (field_max - field_min)
+            else:
+                field = np.zeros_like(field)
+
+            # Add uniform random noise from [0, 0.01)
+            noise = np.random.uniform(0, 0.01, field.shape)
+            field = field + noise
+
+            # Rescale again to [0, 1]
+            field_min, field_max = field.min(), field.max()
+            if field_max > field_min:
+                field = (field - field_min) / (field_max - field_min)
+            else:
+                field = np.zeros_like(field)
+
+            ensemble.append(field)
+
+        data = np.stack(ensemble, axis=-1)  # Shape: (nx, ny, nz, n_ensemble)
+
+        if output_path is None:
+            output_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}3d_scalar_field.npy"
+
+        np.save(output_path, data)
+
+        return {
+            "status": "success",
+            "output_path": str(output_path),
+            "message": f"Generated 3D scalar field ensemble with shape {data.shape}",
+            "shape": data.shape
+        }
+
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating 3D scalar field: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
+
 def generate_vector_field_ensemble(
     x_res: int = 30,
     y_res: int = 30,
@@ -459,6 +571,7 @@ DATA_TOOLS = {
     "load_csv_to_numpy": load_csv_to_numpy,
     "generate_ensemble_curves": generate_ensemble_curves,
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
+    "generate_3d_scalar_field_ensemble": generate_3d_scalar_field_ensemble,
     "generate_vector_field_ensemble": generate_vector_field_ensemble,
     "load_npy": load_npy,
     "clear_session": clear_session,
@@ -515,6 +628,35 @@ DATA_TOOL_SCHEMAS = [
                     "type": "integer",
                     "description": "Grid size in y direction",
                     "default": 50
+                }
+            }
+        }
+    },
+    {
+        "name": "generate_3d_scalar_field_ensemble",
+        "description": "Generate synthetic 3D scalar field ensemble for volumetric uncertainty visualization",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nx": {
+                    "type": "integer",
+                    "description": "Grid size in x dimension",
+                    "default": 30
+                },
+                "ny": {
+                    "type": "integer",
+                    "description": "Grid size in y dimension",
+                    "default": 30
+                },
+                "nz": {
+                    "type": "integer", 
+                    "description": "Grid size in z dimension",
+                    "default": 30
+                },
+                "n_ensemble": {
+                    "type": "integer",
+                    "description": "Number of ensemble members",
+                    "default": 30
                 }
             }
         }

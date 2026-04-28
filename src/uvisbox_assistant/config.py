@@ -3,10 +3,12 @@ import os
 from pathlib import Path
 
 # API Configuration
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+# OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://blackbox1.sci.utah.edu:11434")
 
 # Model Configuration
-OLLAMA_MODEL_NAME = os.getenv("OLLAMA_MODEL_NAME", "qwen3-vl:8b")  # Local Ollama model name
+# OLLAMA_MODEL_NAME = os.getenv("OLLAMA_MODEL_NAME", "qwen3-vl:8b")  # Local Ollama model name
+OLLAMA_MODEL_NAME = os.getenv("OLLAMA_MODEL_NAME", "qwen3.5:35b")  # Local Ollama model name
 
 # Paths
 # config.py is in src/uvisbox_assistant/, need to go up 3 levels to project root

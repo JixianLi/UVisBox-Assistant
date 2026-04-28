@@ -21,12 +21,13 @@ def get_system_prompt(file_list: list = None) -> str:
 ═══════════════════════════════════════════════════════════════════
 
 **Data Tools**: Load CSV files, generate synthetic data, manage numpy arrays
-**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, contour_boxplot, uncertainty_lobes)
+**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, probabilistic_marching_cubes, contour_boxplot, uncertainty_lobes)
 
 Visualization Types:
 • functional_boxplot: Multiple 1D curves with band depth and percentile bands
 • curve_boxplot: Ensemble curves with depth-based coloring and percentile bands
 • probabilistic_marching_squares: 2D scalar field ensembles with isocontours
+• probabilistic_marching_cubes: 3D scalar field ensembles with isosurfaces
 • contour_boxplot: Contour band depth from scalar field ensembles
 • uncertainty_lobes: Directional uncertainty in vector fields (needs positions_path + vectors_path)
 
