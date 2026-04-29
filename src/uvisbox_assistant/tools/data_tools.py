@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from uvisbox_assistant import config
 from scipy.ndimage import gaussian_filter
+from matplotlib.tri import Triangulation
 
 
 def load_csv_to_numpy(
@@ -247,6 +248,91 @@ def generate_scalar_field_ensemble(
         }
 
 
+def generate_scalar_field_ensemble_tri_mesh(
+    nx: int = 30,
+    ny: int = 30,
+    n_ensemble: int = 30,
+    output_path: Optional[str] = None
+) -> Dict[str, str]:
+    """
+    Generate synthetic 2D scalar field ensemble on a regular grid, with output in triangular mesh format.
+
+    Each ensemble member is a 2D Gaussian centered at (nx/2, ny/2) with:
+    - Standard deviation proportional to grid size and varying with ensemble index
+    - sigma = grid_size * (0.3 + 0.05 * ensemble_index)
+    - Rescaled to [0, 1]
+    - Uniform noise added from [0, 0.01)
+    - Final rescale to [0, 1]
+
+    Args:
+        nx: Grid size in x
+        ny: Grid size in y 
+        n_ensemble: Number of ensemble members
+        output_path: Output path for triangular mesh file
+
+    Returns:
+        Dict with status, output_path, message
+    """
+
+    try:
+        # Generate regular grid points
+        x = np.linspace(0, nx-1, nx)
+        y = np.linspace(0, ny-1, ny)
+        X, Y = np.meshgrid(x, y)
+        points = np.c_[X.ravel(), Y.ravel()]
+
+        # Create triangulation
+        tri = Triangulation(points[:, 0], points[:, 1])
+        triangles = tri.triangles  # Shape: (n_triangles, 3)
+
+        # Generate scalar field ensemble on the grid
+        scalar_field_result = generate_scalar_field_ensemble(nx, ny, n_ensemble)
+        if scalar_field_result["status"] != "success":
+            return scalar_field_result  # Propagate error
+
+        scalar_field_path = scalar_field_result["output_path"]
+        scalar_field_data = np.load(scalar_field_path)  # Shape: (ny, nx, n_ensemble)
+        scalar_field_data = scalar_field_data.reshape(-1, n_ensemble)  # Shape: (nx*ny, n_ensemble)
+
+        # Save triangles and scalar field data for each ensemble member
+        if output_path is None:
+            triangles_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}scalar_field_triangles_cells.npy"
+            points_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}scalar_field_triangles_points.npy"
+            scalar_field_output_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}scalar_field_triangles_data.npy"
+        else:
+            triangles_path = Path(output_path).with_name(f"{Path(output_path).stem}_triangles_cells.npy")
+            points_path = Path(output_path).with_name(f"{Path(output_path).stem}_triangles_points.npy")
+            scalar_field_output_path = Path(output_path).with_name(f"{Path(output_path).stem}_triangles_data.npy")
+        np.save(triangles_path, triangles)
+        np.save(points_path, points)
+        np.save(scalar_field_output_path, scalar_field_data)
+
+        return {
+            "status": "success",
+            "triangles_path": str(triangles_path),
+            "points_path": str(points_path),
+            "scalar_field_output_path": str(scalar_field_output_path),
+            "message": f"Generated triangular mesh with {len(triangles)} triangles and scalar field ensemble with shape {scalar_field_data.shape}"
+        }
+
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating triangular mesh scalar field ensemble: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
+
 def load_npy(filepath: str) -> Dict[str, str]:
     """
     Load and validate a .npy file.
@@ -294,6 +380,7 @@ def load_npy(filepath: str) -> Dict[str, str]:
                 "traceback": tb_str
             }
         }
+
 
 def generate_3d_scalar_field_ensemble_tets_mesh(
     nx: int = 30,
@@ -390,7 +477,6 @@ def generate_3d_scalar_field_ensemble_tets_mesh(
             }
         }
     
-
 
 def generate_3d_scalar_field_ensemble(
     nx: int = 30,
@@ -858,6 +944,7 @@ DATA_TOOLS = {
     "load_csv_to_numpy": load_csv_to_numpy,
     "generate_ensemble_curves": generate_ensemble_curves,
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
+    "generate_scalar_field_ensemble_tri_mesh": generate_scalar_field_ensemble_tri_mesh,
     "generate_3d_scalar_field_ensemble": generate_3d_scalar_field_ensemble,
     "generate_3d_scalar_field_ensemble_tets_mesh": generate_3d_scalar_field_ensemble_tets_mesh,
     "generate_vector_field_ensemble": generate_vector_field_ensemble,
@@ -1052,6 +1139,20 @@ DATA_TOOL_SCHEMAS.append({
             "nx": {"type": "integer", "description": "Grid size in x dimension", "default": 30},
             "ny": {"type": "integer", "description": "Grid size in y dimension", "default": 30},
             "nz": {"type": "integer", "description": "Grid size in z dimension", "default": 30},
+            "n_ensemble": {"type": "integer", "description": "Number of ensemble members", "default": 30}
+        }
+    }
+})
+
+# Add schema for scalar field ensemble with triangular mesh
+DATA_TOOL_SCHEMAS.append({
+    "name": "generate_scalar_field_ensemble_tri_mesh",
+    "description": "Generate synthetic 2D scalar field ensemble on a triangular mesh for testing visualizations that require unstructured meshes",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "nx": {"type": "integer", "description": "Grid size in x direction for base scalar field (will be triangulated)", "default": 30},
+            "ny": {"type": "integer", "description": "Grid size in y direction for base scalar field (will be triangulated)", "default": 30},
             "n_ensemble": {"type": "integer", "description": "Number of ensemble members", "default": 30}
         }
     }

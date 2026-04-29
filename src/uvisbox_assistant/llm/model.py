@@ -21,13 +21,14 @@ def get_system_prompt(file_list: list = None) -> str:
 ═══════════════════════════════════════════════════════════════════
 
 **Data Tools**: Load CSV files, generate synthetic data, manage numpy arrays
-**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, probabilistic_marching_cubes, probabilistic_marching_tetrahedra, contour_boxplot, squid_glyph_2D, squid_glyph_3D, uncertainty_lobes, uncertainty_tubes)
+**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, probabilistic_marching_triangles, probabilistic_marching_cubes, probabilistic_marching_tetrahedra, contour_boxplot, squid_glyph_2D, squid_glyph_3D, uncertainty_lobes, uncertainty_tubes)
 
 Visualization Types:
 • functional_boxplot: Multiple 1D curves with band depth and percentile bands
 • curve_boxplot: Ensemble curves with depth-based coloring and percentile bands
 • uncertainty_tubes: 3D trajectory ensembles with uncertainty tubes
 • probabilistic_marching_squares: 2D scalar field ensembles with isocontours
+• probabilistic_marching_triangles: 2D scalar field ensembles with isocontours on unstructured triangular mesh
 • probabilistic_marching_cubes: 3D scalar field ensembles with isosurfaces
 • probabilistic_marching_tetrahedra: 3D scalar field ensembles with isosurface uncertainty
 • squid_glyph_3D: 3D squid glyphs showing directional uncertainty of vector ensembles (needs positions_path + vectors_path)

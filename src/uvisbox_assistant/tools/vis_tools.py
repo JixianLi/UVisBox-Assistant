@@ -13,6 +13,7 @@ try:
         functional_boxplot,
         curve_boxplot,
         probabilistic_marching_squares,
+        probabilistic_marching_triangles,
         probabilistic_marching_cubes,
         probabilistic_marching_tetrahedra,
         uncertainty_lobes,
@@ -381,6 +382,116 @@ def plot_probabilistic_marching_squares(
         }
 
 
+def plot_probabilistic_marching_triangles(
+    field_path: str,
+    triangles_path: str,
+    points_path: str,
+    isovalue: float = 0.8,
+    colormap: str = "viridis"
+) -> Dict[str, str]:
+    """
+    Create probabilistic marching triangles visualization.
+    
+    Args:
+        field_path: Path to .npy with shape (n_points, n_ensemble) - scalar field values at points
+        triangles_path: Path to .npy with shape (n_triangles, 3) - vertex indices for each triangle
+        points_path: Path to .npy with shape (n_points, 2) - spatial coordinates of points
+        isovalue: Isovalue for contour extraction
+        colormap: Colormap name
+    
+    Returns:
+        Dict with status and message
+    """
+
+    try:
+        if not Path(field_path).exists():
+            return {"status": "error", "message": f"Field file not found: {field_path}"}
+
+        if not Path(triangles_path).exists():
+            return {"status": "error", "message": f"Triangles file not found: {triangles_path}"}
+
+        if not Path(points_path).exists():
+            return {"status": "error", "message": f"Points file not found: {points_path}"}
+
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, field, error_msg = load_array(field_path)
+        if not success:
+            return {"status": "error", "message": f"Field: {error_msg}"}
+
+        success, triangles, error_msg = load_array(triangles_path)
+        if not success:
+            return {"status": "error", "message": f"Triangles: {error_msg}"}
+
+        success, points, error_msg = load_array(points_path)
+        if not success:
+            return {"status": "error", "message": f"Points: {error_msg}"}
+
+        if field.ndim != 2:
+            return {
+                "status": "error",
+                "message": f"Expected field shape (n_points, n_ensemble), got {field.shape}"
+            }
+
+        if triangles.ndim != 2 or triangles.shape[1] != 3:
+            return {
+                "status": "error",
+                "message": f"Expected triangles shape (n_triangles, 3), got {triangles.shape}"
+            }
+
+        if points.ndim != 2 or points.shape[1] != 2:
+            return {
+                "status": "error",
+                "message": f"Expected points shape (n_points, 2), got {points.shape}"
+            }
+
+        fig, ax = plt.subplots(
+            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
+        )
+
+        probabilistic_marching_triangles(
+            ensemble_data=field,
+            triangle_mesh=triangles,
+            points=points,
+            isovalue=isovalue,
+            colormap=colormap,
+            ax=ax
+        )
+
+        ax.set_title(f"Probabilistic Marching Triangles (isovalue={isovalue})")
+        plt.show(block=False)
+        plt.pause(0.1)
+
+        return {
+            "status": "success",
+            "message": f"Displayed probabilistic marching triangles for field shape {field.shape}, triangles shape {triangles.shape}, points shape {points.shape}",
+            "_vis_params": {
+                "_tool_name": "plot_probabilistic_marching_triangles",
+                "field_path": field_path,
+                "triangles_path": triangles_path,
+                "points_path": points_path,
+                "isovalue": isovalue,
+                "colormap": colormap
+            }   
+        }
+    
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating probabilistic marching triangles: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
 
 
 def plot_uncertainty_lobes(
@@ -1083,6 +1194,7 @@ VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
+    "plot_probabilistic_marching_triangles": plot_probabilistic_marching_triangles,
     "plot_probabilistic_marching_cubes": plot_probabilistic_marching_cubes,
     "plot_probabilistic_marching_tetrahedra": plot_probabilistic_marching_tetrahedra,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
@@ -1266,6 +1378,38 @@ VIS_TOOL_SCHEMAS = [
                 }
             },
             "required": ["data_path"]
+        }
+    },
+    {
+        "name": "plot_probabilistic_marching_triangles",
+        "description": "Visualize probabilistic isocontours from 2D scalar field ensemble on unstructured triangular mesh",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "field_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing 2D array of scalar field values at vertices (n_vertices, n_ensemble)"
+                },
+                "points_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing vertex positions (n_vertices, 2)"
+                },
+                "triangles_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing triangular connectivity (n_tris, 3)"
+                },
+                "isovalue": {
+                    "type": "number",
+                    "description": "Isovalue for contour extraction",
+                    "default": 0.8
+                },
+                "colormap": {
+                    "type": "string",
+                    "description": "Matplotlib colormap name",
+                    "default": "viridis"
+                }
+            },
+            "required": ["field_path", "points_path", "triangles_path"]
         }
     },
     {
