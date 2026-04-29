@@ -21,7 +21,7 @@ def get_system_prompt(file_list: list = None) -> str:
 ═══════════════════════════════════════════════════════════════════
 
 **Data Tools**: Load CSV files, generate synthetic data, manage numpy arrays
-**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, probabilistic_marching_cubes, contour_boxplot, uncertainty_lobes, uncertainty_tubes)
+**Visualization Tools**: Create plots (functional_boxplot, curve_boxplot, probabilistic_marching_squares, probabilistic_marching_cubes, contour_boxplot, squid_glyph_2D, squid_glyph_3D, uncertainty_lobes, uncertainty_tubes)
 
 Visualization Types:
 • functional_boxplot: Multiple 1D curves with band depth and percentile bands
@@ -29,6 +29,8 @@ Visualization Types:
 • uncertainty_tubes: 3D trajectory ensembles with uncertainty tubes
 • probabilistic_marching_squares: 2D scalar field ensembles with isocontours
 • probabilistic_marching_cubes: 3D scalar field ensembles with isosurfaces
+• squid_glyph_3D: 3D squid glyphs showing directional uncertainty of vector ensembles (needs positions_path + vectors_path)
+• squid_glyph_2D: 2D squid glyphs showing directional uncertainty of vector ensembles (needs positions_path + vectors_path)
 • contour_boxplot: Contour band depth from scalar field ensembles
 • uncertainty_lobes: Directional uncertainty in vector fields (needs positions_path + vectors_path)
 

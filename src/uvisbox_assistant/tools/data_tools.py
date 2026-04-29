@@ -516,6 +516,90 @@ def generate_vector_field_ensemble(
         }
 
 
+def generate_3d_vector_field_ensemble(
+    x_res: int = 8,
+    y_res: int = 8,
+    z_res: int = 8,
+    n_instances: int = 30,
+    noise_scale: float = 0.5,
+    output_path: Optional[str] = None,
+) -> Dict[str, str]:
+    """
+    Generate a synthetic 3D vector field ensemble on a regular grid.
+
+    Positions are created on a regular (x_res, y_res, z_res) grid and flattened
+    to shape (n_positions, 3). The vector ensemble has shape
+    (n_positions, n_instances, 3) where each instance perturbs a smooth base
+    vector field.
+
+    Defaults use x_res = y_res = z_res = 8 as requested.
+
+    Returns paths to saved positions and vectors .npy files and shapes.
+    """
+    try:
+        x_res = int(x_res)
+        y_res = int(y_res)
+        z_res = int(z_res)
+        n_instances = int(n_instances)
+
+        # Create regular grid positions
+        x = np.arange(x_res)
+        y = np.arange(y_res)
+        z = np.arange(z_res)
+        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+
+        # Flatten to (n_positions, 3)
+        positions = np.stack([X.flatten(), Y.flatten(), Z.flatten()], axis=1)
+        n_positions = positions.shape[0]
+
+        vectors = np.zeros((n_positions, n_instances, 3))
+        #
+        for inst in range(n_instances):
+
+            # [vx, vy, vz] = [x, y, z] + noise
+            # This creates a smooth base field that points outward from the origin
+            base_vectors = positions.astype(float)  # Shape: (n_positions, 3)   
+            # Add noise to create ensemble variation
+            noise = np.random.normal(0, noise_scale, size=base_vectors.shape)
+            inst_vectors = base_vectors + noise
+
+            vectors[:, inst, :] = inst_vectors
+
+        # Generate output paths
+        if output_path is None:
+            positions_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}vector3d_positions.npy"
+            vectors_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}vector3d_ensemble.npy"
+        else:
+            base_path = Path(output_path)
+            positions_path = base_path.parent / f"{base_path.stem}_positions3d.npy"
+            vectors_path = base_path.parent / f"{base_path.stem}_vectors3d.npy"
+
+        np.save(positions_path, positions)
+        np.save(vectors_path, vectors)
+
+        return {
+            "status": "success",
+            "positions_path": str(positions_path),
+            "vectors_path": str(vectors_path),
+            "message": f"Generated 3D vector field ensemble: {x_res}x{y_res}x{z_res} grid, {n_instances} instances",
+            "positions_shape": positions.shape,
+            "vectors_shape": vectors.shape
+        }
+
+    except Exception as e:
+        tb_str = traceback.format_exc()
+        user_msg = f"Error generating 3D vector field ensemble: {str(e)}"
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
+
 def generate_3d_trajectory_ensemble(
     n_steps: int = 50,
     n_starting_locations: int = 5,
@@ -679,6 +763,7 @@ DATA_TOOLS = {
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
     "generate_3d_scalar_field_ensemble": generate_3d_scalar_field_ensemble,
     "generate_vector_field_ensemble": generate_vector_field_ensemble,
+    "generate_3d_vector_field_ensemble": generate_3d_vector_field_ensemble,
     "generate_3d_trajectory_ensemble": generate_3d_trajectory_ensemble,
     "load_npy": load_npy,
     "clear_session": clear_session,
@@ -839,6 +924,22 @@ DATA_TOOL_SCHEMAS.append({
             "n_ensemble_members": {"type": "integer", "description": "Number of ensemble members per starting location", "default": 30},
             "noise_scale": {"type": "number", "description": "Per-step noise stddev", "default": 0.0001},
             "rng_seed": {"type": "integer", "description": "Optional RNG seed for reproducibility"}
+        }
+    }
+})
+
+# Add schema for 3D vector field generator
+DATA_TOOL_SCHEMAS.append({
+    "name": "generate_3d_vector_field_ensemble",
+    "description": "Generate synthetic 3D vector field ensemble on a regular grid for testing volumetric vector visualizations",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "x_res": {"type": "integer", "description": "Grid resolution in x direction", "default": 8},
+            "y_res": {"type": "integer", "description": "Grid resolution in y direction", "default": 8},
+            "z_res": {"type": "integer", "description": "Grid resolution in z direction", "default": 8},
+            "n_instances": {"type": "integer", "description": "Number of ensemble members", "default": 30},
+            "noise_scale": {"type": "number", "description": "Standard deviation of random noise added to vector directions", "default": 0.5}
         }
     }
 })

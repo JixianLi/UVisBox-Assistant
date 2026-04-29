@@ -17,6 +17,7 @@ try:
         uncertainty_lobes,
         contour_boxplot,
         squid_glyph_2D,
+        squid_glyph_3D,
         uncertainty_tubes,
     )
     from uvisbox.Core.CommonInterface import BoxplotStyleConfig
@@ -585,6 +586,93 @@ def plot_squid_glyph_2D(
         }
 
 
+def plot_squid_glyph_3D(
+    vectors_path: str,
+    positions_path: str,
+    percentile: float = 95,
+    scale: float = 0.2,
+    workers: Optional[int] = None
+) -> Dict[str, str]:
+    """
+    Create 3D squid glyphs showing vector ensemble uncertainty using PyVista.
+
+    Args:
+        vectors_path: Path to .npy with shape (n, m, 3) - ensemble vectors
+        positions_path: Path to .npy with shape (n, 3) - glyph positions
+        percentile: Percentile of ensemble members to include (0-100, default: 95)
+        scale: Scale factor for glyphs (default: 0.2)
+        workers: Number of parallel workers for computation (default: None)
+
+    Returns:
+        Dict with status and message
+    """
+    try:
+        if not Path(vectors_path).exists():
+            return {"status": "error", "message": f"Vectors file not found: {vectors_path}"}
+
+        if not Path(positions_path).exists():
+            return {"status": "error", "message": f"Positions file not found: {positions_path}"}
+
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, vectors, error_msg = load_array(vectors_path)
+        if not success:
+            return {"status": "error", "message": f"Vectors: {error_msg}"}
+
+        success, positions, error_msg = load_array(positions_path)
+        if not success:
+            return {"status": "error", "message": f"Positions: {error_msg}"}
+
+        # Validate shapes
+        if positions.ndim != 2 or positions.shape[1] != 3:
+            return {"status": "error", "message": f"Positions must have shape (n, 3), got {positions.shape}"}
+
+        if vectors.ndim != 3 or vectors.shape[2] != 3:
+            return {"status": "error", "message": f"Vectors must have shape (n, m, 3), got {vectors.shape}"}
+
+        # Create PyVista plotter
+        plotter = pv.Plotter()
+
+        # Call UVisBox 3D squid glyph function
+        squid_glyph_3D(
+            positions=positions,
+            ensemble_vectors=vectors,
+            percentile=percentile,
+            scale=scale,
+            ax=plotter,
+        )
+
+        plotter.add_title(f"3D Squid Glyphs (percentile={percentile})", font_size=14)
+        plotter.show()
+
+        n_positions = positions.shape[0]
+
+        return {
+            "status": "success",
+            "message": f"Displayed 3D squid glyphs for {n_positions} positions (percentile={percentile})",
+            "_vis_params": {
+                "_tool_name": "plot_squid_glyph_3D",
+                "positions_path": positions_path,
+                "vectors_path": vectors_path,
+                "percentile": percentile,
+                "scale": scale,
+            }
+        }
+
+    except Exception as e:
+        tb_str = traceback.format_exc()
+        user_msg = f"Error creating 3D squid glyphs: {str(e)}"
+
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+
+
 def plot_contour_boxplot(
     data_path: str,
     isovalue: float,
@@ -897,6 +985,7 @@ VIS_TOOLS = {
     "plot_probabilistic_marching_cubes": plot_probabilistic_marching_cubes,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
     "plot_squid_glyph_2D": plot_squid_glyph_2D,
+    "plot_squid_glyph_3D": plot_squid_glyph_3D,
     "plot_contour_boxplot": plot_contour_boxplot,
     "plot_uncertainty_tubes": plot_uncertainty_tubes
 }
@@ -1171,6 +1260,20 @@ VIS_TOOL_SCHEMAS = [
                     "type": "integer",
                     "description": "Number of parallel workers for computation (default: None)"
                 }
+            },
+            "required": ["vectors_path", "positions_path"]
+        }
+    },
+    {
+        "name": "plot_squid_glyph_3D",
+        "description": "Create 3D squid glyphs showing directional uncertainty of vector ensembles using PyVista",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "vectors_path": {"type": "string", "description": "Path to .npy file with ensemble vectors (n, m, 3)"},
+                "positions_path": {"type": "string", "description": "Path to .npy file with glyph positions (n, 3)"},
+                "percentile": {"type": "number", "description": "Percentile of ensemble members to include (0-100)", "default": 95},
+                "scale": {"type": "number", "description": "Scale factor for glyph size", "default": 0.2},
             },
             "required": ["vectors_path", "positions_path"]
         }
