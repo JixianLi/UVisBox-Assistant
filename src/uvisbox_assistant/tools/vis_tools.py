@@ -14,6 +14,7 @@ try:
         curve_boxplot,
         probabilistic_marching_squares,
         probabilistic_marching_cubes,
+        probabilistic_marching_tetrahedra,
         uncertainty_lobes,
         contour_boxplot,
         squid_glyph_2D,
@@ -378,6 +379,8 @@ def plot_probabilistic_marching_squares(
                 "traceback": tb_str
             }
         }
+
+
 
 
 def plot_uncertainty_lobes(
@@ -892,6 +895,104 @@ def plot_probabilistic_marching_cubes(
         }
 
 
+def plot_probabilistic_marching_tetrahedra(
+    field_path: str,
+    positions_path: str,
+    tetrahedra_path: str,
+    isovalue: float = 0.0,
+) -> Dict[str, str]:
+    """
+    Create probabilistic marching tetrahedra visualization for 3D scalar field ensembles.
+
+    Args:
+        field_path: Path to .npy file with shape (n_vertices, n_ensemble)
+        positions_path: Path to .npy file with shape (n_vertices, 3) - vertex positions
+        tetrahedra_path: Path to .npy file with shape (n_tets, 4) - tetrahedral connectivity
+        isovalue: Isovalue for marching tetrahedra (default: 0.0)
+
+    Returns:
+        Dict with status and message
+    """
+
+    try:
+        # Load data
+        if not Path(field_path).exists():
+            return {"status": "error", "message": f"Field file not found: {field_path}"}
+
+        if not Path(positions_path).exists():
+            return {"status": "error", "message": f"Positions file not found: {positions_path}"}
+
+        if not Path(tetrahedra_path).exists():
+            return {"status": "error", "message": f"Tetrahedra file not found: {tetrahedra_path}"}
+
+        from uvisbox_assistant.utils.data_loading import load_array
+
+        success, field, error_msg = load_array(field_path)
+        if not success:
+            return {"status": "error", "message": f"Field: {error_msg}"}
+
+        success, positions, error_msg = load_array(positions_path)
+        if not success:
+            return {"status": "error", "message": f"Positions: {error_msg}"}
+
+        success, tetrahedra, error_msg = load_array(tetrahedra_path)
+        if not success:
+            return {"status": "error", "message": f"Tetrahedra: {error_msg}"}
+
+        # Validate shapes
+        if field.ndim != 2:
+            return {"status": "error", "message": f"Field must have shape (n_vertices, n_ensemble), got {field.shape}"}
+
+        if positions.ndim != 2 or positions.shape[1] != 3:
+            return {"status": "error", "message": f"Positions must have shape (n_vertices, 3), got {positions.shape}"}
+
+        if tetrahedra.ndim != 2 or tetrahedra.shape[1] != 4:
+            return {"status": "error", "message": f"Tetrahedra must have shape (n_tets, 4), got {tetrahedra.shape}"}
+
+        # Create PyVista figure for 3D visualization with Tier-2 defaults
+        plotter = pv.Plotter()
+
+        # Call UVisBox probabilistic marching tetrahedra function
+        probabilistic_marching_tetrahedra(
+            ensemble_data=field,
+            tetrahedral_mesh=tetrahedra,  # Ensure only 4 vertices per tetrahedron
+            points=positions,
+            isovalue=isovalue,
+            plotter=plotter
+        )
+
+        plotter.add_title(f"Probabilistic Marching Tetrahedra (isovalue={isovalue})", font_size=14)
+        plotter.show()
+        return {
+            "status": "success",
+            "message": f"Displayed probabilistic marching tetrahedra for field shape {field.shape}",
+            "_vis_params": {
+                "_tool_name": "plot_probabilistic_marching_tetrahedra",
+                "field_path": field_path,
+                "positions_path": positions_path,
+                "tetrahedra_path": tetrahedra_path,
+                "isovalue": isovalue
+            }
+        }
+    
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error creating probabilistic marching tetrahedra: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+    
+
 def plot_uncertainty_tubes(
     data_path: str,
     colormap: str = "viridis",
@@ -983,6 +1084,7 @@ VIS_TOOLS = {
     "plot_curve_boxplot": plot_curve_boxplot,
     "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
     "plot_probabilistic_marching_cubes": plot_probabilistic_marching_cubes,
+    "plot_probabilistic_marching_tetrahedra": plot_probabilistic_marching_tetrahedra,
     "plot_uncertainty_lobes": plot_uncertainty_lobes,
     "plot_squid_glyph_2D": plot_squid_glyph_2D,
     "plot_squid_glyph_3D": plot_squid_glyph_3D,
@@ -1193,6 +1295,33 @@ VIS_TOOL_SCHEMAS = [
                 }
             },
             "required": ["data_path"]
+        }
+    },
+    {
+        "name": "plot_probabilistic_marching_tetrahedra",
+        "description": "Create probabilistic marching tetrahedra visualization for 3D scalar field ensembles with isosurface uncertainty",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "field_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing 2D array of scalar field values at vertices (n_vertices, n_ensemble)"
+                },
+                "positions_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing vertex positions (n_vertices, 3)"
+                },
+                "tetrahedra_path": {
+                    "type": "string",
+                    "description": "Path to .npy file containing tetrahedral connectivity (n_tets, 4)"
+                },
+                "isovalue": {
+                    "type": "number",
+                    "description": "Isovalue for marching tetrahedra surface extraction",
+                    "default": 0.0
+                }
+            },
+            "required": ["field_path", "positions_path", "tetrahedra_path"]
         }
     },
     {

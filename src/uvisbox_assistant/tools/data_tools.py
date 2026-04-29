@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import traceback
+import pyvista as pv
 from pathlib import Path
 from typing import Dict, Optional
 from uvisbox_assistant import config
@@ -293,6 +294,102 @@ def load_npy(filepath: str) -> Dict[str, str]:
                 "traceback": tb_str
             }
         }
+
+def generate_3d_scalar_field_ensemble_tets_mesh(
+    nx: int = 30,
+    ny: int = 30,
+    nz: int = 30,
+    n_ensemble: int = 30,
+    output_path: Optional[str] = None
+) -> Dict[str, str]:
+
+    """
+    Generate synthetic 3D scalar field ensemble on a regular grid, with output in TETs mesh format.
+
+    Each ensemble member is a 3D Gaussian centered at (nx/2, ny/2, nz/2) with:
+    - Standard deviation proportional to grid size and varying with ensemble index
+    - sigma = grid_size * (0.2 + 0.03 * ensemble_index)
+    - Rescaled to [0, 1]
+    - Uniform noise added from [0, 0.01)
+    - Final rescale to [0, 1]
+
+    Args:
+        nx: Grid size in x
+        ny: Grid size in y 
+        nz: Grid size in z
+        n_ensemble: Number of ensemble members
+        output_path: Output path for TETs mesh file
+    Returns:
+        Dict with status, output_path, message
+    """
+    # tear drop function
+    def tear_drop(x, y, z):
+        return 0.5*x**5 + 0.5*x**4 - y**2 - z**2
+    try:
+        # Convert to int in case LLM passes floats
+        nx = int(nx)
+        ny = int(ny)
+        nz = int(nz)
+        n_ensemble = int(n_ensemble)
+
+        x = np.linspace(-1.0, 1.0, nx)
+        y = np.linspace(-1.0, 1.0, ny)
+        z = np.linspace(-1.0, 1.0, nz)
+        X, Y, Z = np.meshgrid(x, y, z)
+        F = np.zeros((nx, ny, nz, n_ensemble))
+        noise_less_F = tear_drop(X, Y, Z)
+        # Create an ensemble of scalar fields with some noise
+        for e in range(n_ensemble):
+            noise = np.random.normal(0, 0.01, (nx, ny, nz))
+            F[:, :, :, e] = noise_less_F + noise
+        points = np.c_[X.ravel(), Y.ravel(), Z.ravel()]
+
+        # create teterahedral mesh
+        pv_points= pv.PolyData(points)
+        grid = pv_points.delaunay_3d(offset=0.1)
+        tetrahedra = grid.cells.reshape(-1, 5)[:, 1:]   
+        F = F.reshape(-1, n_ensemble)   
+        print(f"tetrahedra shape: {tetrahedra.shape}, points shape: {points.shape}, F shape: {F.shape}")
+
+
+        if output_path is None:
+            F_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}3d_scalar_field_tets.npy"
+            tetrahedra_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}3d_scalar_field_tets_cells.npy"
+            points_path = config.TEMP_DIR / f"{config.TEMP_FILE_PREFIX}3d_scalar_field_tets_points.npy"
+        else:
+            F_path = Path(output_path).with_suffix('.npy')
+            tetrahedra_path = Path(output_path).with_name(f"{Path(output_path).stem}_cells.npy")
+            points_path = Path(output_path).with_name(f"{Path(output_path).stem}_points.npy")
+
+        np.save(F_path, F)
+        np.save(tetrahedra_path, tetrahedra)
+        np.save(points_path, points)
+
+        return {
+            "status": "success",
+            "F_path": str(F_path),
+            "tetrahedra_path": str(tetrahedra_path),
+            "points_path": str(points_path),
+            "message": "3D scalar field ensemble with TETs mesh generated successfully."
+        }
+
+    except Exception as e:
+        # Capture full traceback
+        tb_str = traceback.format_exc()
+
+        # Create user-friendly message
+        user_msg = f"Error generating 3D scalar field with TETs mesh: {str(e)}"
+
+        # Return error info (will be recorded by conversation.py)
+        return {
+            "status": "error",
+            "message": user_msg,
+            "_error_details": {
+                "exception": e,
+                "traceback": tb_str
+            }
+        }
+    
 
 
 def generate_3d_scalar_field_ensemble(
@@ -762,6 +859,7 @@ DATA_TOOLS = {
     "generate_ensemble_curves": generate_ensemble_curves,
     "generate_scalar_field_ensemble": generate_scalar_field_ensemble,
     "generate_3d_scalar_field_ensemble": generate_3d_scalar_field_ensemble,
+    "generate_3d_scalar_field_ensemble_tets_mesh": generate_3d_scalar_field_ensemble_tets_mesh,
     "generate_vector_field_ensemble": generate_vector_field_ensemble,
     "generate_3d_vector_field_ensemble": generate_3d_vector_field_ensemble,
     "generate_3d_trajectory_ensemble": generate_3d_trajectory_ensemble,
@@ -940,6 +1038,21 @@ DATA_TOOL_SCHEMAS.append({
             "z_res": {"type": "integer", "description": "Grid resolution in z direction", "default": 8},
             "n_instances": {"type": "integer", "description": "Number of ensemble members", "default": 30},
             "noise_scale": {"type": "number", "description": "Standard deviation of random noise added to vector directions", "default": 0.5}
+        }
+    }
+})
+
+## Add schema for 3D scalar field with TETs mesh generator
+DATA_TOOL_SCHEMAS.append({
+    "name": "generate_3d_scalar_field_ensemble_tets_mesh",
+    "description": "Generate synthetic 3D scalar field ensemble on a regular grid with TETs mesh for testing volumetric uncertainty visualizations",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "nx": {"type": "integer", "description": "Grid size in x dimension", "default": 30},
+            "ny": {"type": "integer", "description": "Grid size in y dimension", "default": 30},
+            "nz": {"type": "integer", "description": "Grid size in z dimension", "default": 30},
+            "n_ensemble": {"type": "integer", "description": "Number of ensemble members", "default": 30}
         }
     }
 })
