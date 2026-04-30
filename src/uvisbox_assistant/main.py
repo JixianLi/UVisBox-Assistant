@@ -33,7 +33,7 @@ def print_welcome():
     print("  /verbose on - Show internal state messages")
     print("  /errors     - List recent errors")
     print("  /clear      - Clear session and temp files")
-    print("  /close-fig  - Close all open matplotlib figures")
+    print("  /close-fig  - Close all open figures (matplotlib + PyVista)")
     print("  /reset      - Reset conversation (keep files)")
     print("  /quit       - Exit")
     print("="*70 + "\n")
@@ -83,7 +83,7 @@ def print_help():
     print("  • /context      - Show current conversation context")
     print("  • /stats        - Show session statistics")
     print("  • /clear        - Clear session and temp files")
-    print("  • /close-fig    - Close all open matplotlib figures")
+    print("  • /close-fig    - Close all open figures (matplotlib + PyVista)")
     print("  • /reset        - Reset conversation (keep files)")
     print("  • /quit         - Exit UVisBox-Assistant")
 
@@ -146,6 +146,11 @@ def main():
 
                 elif command == "/close-fig":
                     plt.close('all')
+                    try:
+                        import pyvista as pv
+                        pv.close_all()
+                    except ImportError:
+                        pass
                     print("🖼️  Closed all open figures")
                     continue
 
