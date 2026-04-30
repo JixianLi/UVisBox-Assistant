@@ -1,3 +1,5 @@
+# ABOUTME: Miscellaneous utilities: tool-type lookup, temp-file cleanup, available-files listing.
+# ABOUTME: get_tool_type is the single source of truth for routing; uses lazy imports to avoid cycles with the tools package.
 """Utility functions for the UVisBox-Assistant pipeline"""
 from typing import Dict, Optional
 from pathlib import Path

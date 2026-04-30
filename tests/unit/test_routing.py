@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the LangGraph routing predicates in core/routing.py.
+# ABOUTME: 0 LLM calls; covers tool-type dispatch and the error-count circuit breaker.
 """Test routing logic"""
 import sys
 from pathlib import Path

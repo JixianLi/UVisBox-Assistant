@@ -1,3 +1,5 @@
+# ABOUTME: Conditional-edge predicates for the LangGraph workflow.
+# ABOUTME: route_after_model selects the next tool node by tool type; route_after_tool enforces the 3-error circuit breaker.
 """Routing logic for the LangGraph workflow"""
 from typing import Literal
 from uvisbox_assistant.core.state import GraphState

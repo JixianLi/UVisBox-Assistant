@@ -1,3 +1,5 @@
+# ABOUTME: Hybrid control fast path that re-executes the last vis tool with updated parameters, bypassing the LLM.
+# ABOUTME: execute_simple_command parses input via command_parser, applies the param patch, and invokes the vis function directly.
 """Hybrid control system for fast parameter updates."""
 
 from typing import Optional, Tuple

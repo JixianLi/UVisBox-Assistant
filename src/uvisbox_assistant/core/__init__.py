@@ -1,3 +1,5 @@
+# ABOUTME: Core-package exports for the LangGraph workflow.
+# ABOUTME: Re-exports graph_app, node functions, routing predicates, and GraphState helpers.
 """Core LangGraph workflow orchestration."""
 
 from uvisbox_assistant.core.graph import graph_app, create_graph

@@ -1,3 +1,5 @@
+# ABOUTME: Regex-based parser for quick parameter commands like "median color blue" or "vmin 0.0".
+# ABOUTME: Returns SimpleCommand objects consumed by hybrid_control; unknown input falls through to the full LLM graph.
 """Parse simple direct commands for hybrid control."""
 
 import re

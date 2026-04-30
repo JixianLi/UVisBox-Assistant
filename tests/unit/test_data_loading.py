@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for utils/data_loading.py path resolution and array loading.
+# ABOUTME: 0 LLM calls; covers absolute / relative / bare-filename resolution and load_array tuple semantics.
 """Unit tests for data loading utilities."""
 
 import numpy as np

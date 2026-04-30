@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests verifying that data and vis tool nodes record errors into ConversationSession.error_history.
+# ABOUTME: 0 LLM calls; uses corrupted-file fixtures to trigger error paths.
 """Unit tests for error recording in tool nodes."""
 
 import pytest

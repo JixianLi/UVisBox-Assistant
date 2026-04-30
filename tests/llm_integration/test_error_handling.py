@@ -1,3 +1,5 @@
+# ABOUTME: LLM-integration tests for error recovery flows, including the auto-fix and circuit-breaker paths.
+# ABOUTME: Requires Ollama; intentionally triggers tool errors to verify the agent recovers.
 """Test error handling and recovery."""
 import sys
 from pathlib import Path

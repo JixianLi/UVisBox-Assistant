@@ -1,3 +1,5 @@
+# ABOUTME: GraphState TypedDict and state-update helpers used across all graph nodes.
+# ABOUTME: create_initial_state seeds a turn; update_state_with_data / update_state_with_vis return per-node patches; increment_error_count drives the circuit breaker.
 """State definition for the LangGraph workflow"""
 from typing import TypedDict, List, Optional, Annotated, Dict
 from langchain_core.messages import BaseMessage

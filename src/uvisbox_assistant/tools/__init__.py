@@ -1,3 +1,5 @@
+# ABOUTME: Tool-package exports for data and visualization tools.
+# ABOUTME: Re-exports the public tool functions plus DATA_TOOL_SCHEMAS / VIS_TOOL_SCHEMAS used to bind the LLM.
 """Data generation and visualization tools."""
 
 from uvisbox_assistant.tools.data_tools import (

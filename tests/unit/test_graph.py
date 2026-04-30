@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the LangGraph compilation in core/graph.py.
+# ABOUTME: 0 LLM calls; mocks the model and verifies graph wiring and run_graph / stream_graph plumbing.
 """Unit tests for graph.py (0 API calls with mocking)."""
 
 import pytest

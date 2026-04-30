@@ -1,3 +1,5 @@
+# ABOUTME: ErrorRecord dataclass capturing tool errors with timestamp, exception type, and full traceback.
+# ABOUTME: Stored in ConversationSession.error_history; surfaced via the /errors and /trace REPL commands.
 """Error tracking functionality for debugging and troubleshooting."""
 
 from dataclasses import dataclass

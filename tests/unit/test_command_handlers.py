@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the slash-command dispatch in main.py.
+# ABOUTME: 0 LLM calls; verifies /help, /context, /clear, /reset, /debug, etc., behave correctly.
 """Unit tests for command handlers.
 
 These tests verify the command handling logic in main.py.

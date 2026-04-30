@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the ErrorRecord dataclass in errors/error_tracking.py.
+# ABOUTME: 0 LLM calls; verifies field population, serialization, and detailed() formatting.
 """Unit tests for error tracking functionality."""
 
 import sys

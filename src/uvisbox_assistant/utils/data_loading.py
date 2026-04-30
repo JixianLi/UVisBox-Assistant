@@ -1,3 +1,5 @@
+# ABOUTME: Path resolution and array loading helpers shared by data and vis tools.
+# ABOUTME: resolve_data_path handles absolute/relative/bare-filename lookup; load_array returns (success, data, error_msg) tuples.
 """Unified data loading utilities for multiple file formats."""
 
 import numpy as np

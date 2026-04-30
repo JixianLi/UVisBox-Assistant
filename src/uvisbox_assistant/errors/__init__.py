@@ -1,3 +1,5 @@
+# ABOUTME: Errors-package exports.
+# ABOUTME: Re-exports ErrorRecord, interpret_uvisbox_error, and format_error_with_hint.
 """Error handling infrastructure."""
 
 from uvisbox_assistant.errors.error_tracking import ErrorRecord

@@ -1,3 +1,5 @@
+# ABOUTME: Session-package exports.
+# ABOUTME: Re-exports ConversationSession, execute_simple_command, and parse_simple_command.
 """User interaction and session management."""
 
 from uvisbox_assistant.session.conversation import ConversationSession

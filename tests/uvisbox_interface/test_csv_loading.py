@@ -1,3 +1,5 @@
+# ABOUTME: UVisBox-interface tests for the CSV-loading data tools, exercising real file I/O.
+# ABOUTME: 0 LLM calls; verifies pandas → numpy round-trip and error paths.
 """Integration tests for CSV file loading."""
 
 import pytest

@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for vprint and the global session reference in utils/output_control.py.
+# ABOUTME: 0 LLM calls; verifies verbose-mode gating and session injection.
 """Unit tests for verbose mode output control."""
 
 import sys

@@ -1,3 +1,5 @@
+# ABOUTME: Visualization tool wrappers around UVisBox plotting functions (matplotlib + PyVista).
+# ABOUTME: Each plot_* function returns a status dict with _vis_params used for hybrid-control parameter updates.
 """Visualization tools wrapping UVisBox functions"""
 import numpy as np
 import matplotlib.pyplot as plt

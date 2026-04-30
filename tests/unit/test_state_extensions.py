@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for GraphState fields and the state-update helpers in core/state.py.
+# ABOUTME: 0 LLM calls; pure logic tests against create_initial_state and update_state_with_*.
 """Unit tests for GraphState helpers (0 API calls)."""
 
 import pytest

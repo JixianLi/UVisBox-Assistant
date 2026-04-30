@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for data_tools and vis_tools wrapper logic with UVisBox / file I/O mocked.
+# ABOUTME: 0 LLM calls; covers parameter defaults, validation paths, and error returns.
 """Unit tests for data_tools and vis_tools."""
 
 import sys

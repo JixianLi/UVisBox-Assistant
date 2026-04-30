@@ -1,3 +1,5 @@
+# ABOUTME: UVisBox-specific error interpretation that turns raw exceptions into user-friendly messages with debug hints.
+# ABOUTME: interpret_uvisbox_error matches known patterns (colormap, shape, file-not-found); format_error_with_hint composes the final message.
 """Interpret and enhance error messages with context-aware hints."""
 
 import re

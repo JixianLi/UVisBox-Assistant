@@ -1,3 +1,5 @@
+# ABOUTME: Top-level package exports for the public uvisbox_assistant API.
+# ABOUTME: Re-exports graph_app, ConversationSession, data/vis tools, ErrorRecord, and config.
 """
 UVisBox-Assistant - Natural language interface for UVisBox uncertainty visualization.
 

@@ -1,3 +1,5 @@
+# ABOUTME: Interactive REPL entry point for UVisBox-Assistant.
+# ABOUTME: Handles slash commands (/help, /clear, /close-fig, /quit, etc.) and dispatches free text to ConversationSession.
 """
 UVisBox-Assistant - Main interactive REPL
 

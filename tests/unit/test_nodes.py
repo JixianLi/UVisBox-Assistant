@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the LangGraph node implementations in core/nodes.py.
+# ABOUTME: 0 LLM calls; mocks MODEL and tool registries to verify state-update behavior.
 """Unit tests for nodes.py using mocks (0 API calls)."""
 
 import pytest

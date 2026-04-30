@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the error-pattern matchers in errors/error_interpretation.py.
+# ABOUTME: 0 LLM calls; checks colormap, shape, and file-not-found message rewrites.
 """Unit tests for error interpretation."""
 
 import sys

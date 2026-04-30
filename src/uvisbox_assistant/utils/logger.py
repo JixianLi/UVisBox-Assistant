@@ -1,3 +1,5 @@
+# ABOUTME: File-based logging setup writing to logs/uvisbox_assistant.log.
+# ABOUTME: Provides log_tool_call / log_tool_result / log_error helpers; console output is handled separately by vprint.
 """Logging utilities for debugging."""
 import logging
 from uvisbox_assistant import config

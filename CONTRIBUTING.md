@@ -23,9 +23,9 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 ### Prerequisites
 
-- Python 3.10-3.13
+- Python 3.11–3.13
 - Conda environment (recommended)
-- Google Gemini API key (for testing)
+- A running [Ollama](https://ollama.com/) instance with a tool-capable model pulled
 
 ### Installation
 
@@ -55,8 +55,8 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 5. **Run tests**:
    ```bash
-   # Unit tests (0 API calls, fast)
-   python tests/utils/run_all_tests.py --unit
+   # Pre-planning: unit + uvisbox_interface (0 LLM calls)
+   python tests/test.py --pre-planning
    ```
 
 ## Code Standards
@@ -70,20 +70,36 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 ### File Organization
 
+Feature-based layout:
+
 ```
 src/uvisbox_assistant/
-├── graph.py          # LangGraph workflow
-├── state.py          # State definitions
-├── nodes.py          # Graph nodes
-├── routing.py        # Routing logic
-├── model.py          # LLM setup
-├── data_tools.py     # Data generation/loading
-├── vis_tools.py      # Visualization wrappers
-├── hybrid_control.py # Fast parameter updates
-├── command_parser.py # Command parsing
-├── conversation.py   # Session management
-├── config.py         # Configuration
-└── utils.py          # Utilities
+├── __init__.py             # Public API exports
+├── __main__.py             # `python -m uvisbox_assistant` entry point
+├── config.py               # Configuration (paths, Ollama settings)
+├── main.py                 # Interactive REPL
+├── core/                   # LangGraph workflow orchestration
+│   ├── graph.py            # StateGraph (model, data_tool, vis_tool)
+│   ├── nodes.py            # Graph node implementations
+│   ├── routing.py          # Conditional routing with circuit breaker
+│   └── state.py            # GraphState + state-update helpers
+├── tools/
+│   ├── data_tools.py       # Data loading / synthetic generation
+│   └── vis_tools.py        # Visualization wrappers (matplotlib + PyVista)
+├── session/
+│   ├── conversation.py     # ConversationSession + error tracking
+│   ├── hybrid_control.py   # Fast parameter updates without LLM
+│   └── command_parser.py   # Quick-command pattern parsing
+├── llm/
+│   └── model.py            # Ollama model setup + system prompt
+├── errors/
+│   ├── error_tracking.py   # ErrorRecord
+│   └── error_interpretation.py  # Context-aware error hints
+└── utils/
+    ├── data_loading.py     # Path resolution + safe array loading
+    ├── logger.py           # File-based tool/error logging
+    ├── output_control.py   # Verbose mode + session injection
+    └── utils.py            # Tool-type lookup, temp file cleanup
 ```
 
 ### Naming Conventions
@@ -95,7 +111,28 @@ src/uvisbox_assistant/
 
 ### Documentation
 
-- Use docstrings with parameter descriptions:
+#### Mandatory file headers (`ABOUTME:`)
+
+Every `.py` file in `src/` and `tests/` (including `__init__.py`) MUST start with two `ABOUTME:` comment lines, **before** the module docstring or any imports. The prefix makes the headers trivially greppable (`grep -rl ABOUTME src/`).
+
+Format:
+
+```python
+# ABOUTME: One-line description of file purpose.
+# ABOUTME: Second line with key details — main classes/functions, when to use it.
+"""Existing module docstring (kept)."""
+import ...
+```
+
+Rules:
+- Exactly two lines. The first names the file's role; the second adds the most useful concrete detail.
+- Neither line should narrate history (no "refactored from", "new", "legacy").
+- The lines describe the file as it is, not as it once was.
+- Empty `__init__.py` files still get the two lines (e.g., "Test package marker."), so the rule applies uniformly.
+
+#### Function and class docstrings
+
+- Use Google-style docstrings with `Args:` / `Returns:` sections:
   ```python
   def my_function(param1: str, param2: int) -> Dict[str, Any]:
       """
@@ -206,12 +243,6 @@ python tests/test.py --pre-planning --coverage
 ```
 
 See [TESTING.md](TESTING.md) for comprehensive testing guide.
-
-### Rate Limit Considerations
-
-- Gemini free tier: 30 requests per minute
-- Tests include automatic delays
-- See [RATE_LIMIT_FRIENDLY_TESTING.md](RATE_LIMIT_FRIENDLY_TESTING.md) for details
 
 ## Pull Request Process
 

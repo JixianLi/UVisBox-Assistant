@@ -1,3 +1,5 @@
+# ABOUTME: LLM-integration tests for the hybrid-control fast path that bypasses the LLM.
+# ABOUTME: Requires Ollama for the initial vis call; subsequent quick commands re-execute without LLM.
 """Test hybrid control functionality."""
 
 import sys

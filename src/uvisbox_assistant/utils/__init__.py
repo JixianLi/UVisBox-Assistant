@@ -1,3 +1,5 @@
+# ABOUTME: Utils-package exports for logging, output control, and tool-type lookup.
+# ABOUTME: Re-exports vprint, set_session, log_*, get_tool_type, cleanup_temp_files, and similar shared helpers.
 """Utilities and logging."""
 
 from uvisbox_assistant.utils.logger import log_tool_call, log_tool_result, log_error, log_state_update

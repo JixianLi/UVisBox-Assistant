@@ -1,3 +1,5 @@
+# ABOUTME: E2E sanity test that vis tool calls do not block the REPL on matplotlib.show().
+# ABOUTME: 0 LLM calls; calls plot_* functions directly and checks for non-blocking behavior.
 """Test matplotlib window behavior to ensure non-blocking.
 
 This test makes NO API calls - safe to run anytime.

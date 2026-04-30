@@ -1,3 +1,5 @@
+# ABOUTME: ConversationSession manages multi-turn graph execution, error history, and debug/verbose modes.
+# ABOUTME: send() first tries hybrid control then falls back to the full graph; tracks auto-fix patterns across turns.
 """Conversation management for multi-turn interactions."""
 
 from typing import Optional, Dict, List

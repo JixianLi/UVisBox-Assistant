@@ -1,3 +1,5 @@
+# ABOUTME: Module entry point so `python -m uvisbox_assistant` runs the REPL.
+# ABOUTME: Wraps main.main() with a setup-error message that points users at docs/ENVIRONMENT_SETUP.md.
 """
 Entry point for running UVisBox-Assistant as a module.
 

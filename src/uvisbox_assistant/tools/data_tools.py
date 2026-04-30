@@ -1,3 +1,5 @@
+# ABOUTME: Data tool wrappers for loading CSV/.npy files and generating synthetic ensembles.
+# ABOUTME: Each load_* / generate_* function returns a status dict with output_path consumed by downstream vis tools.
 """Data loading and transformation tools"""
 import numpy as np
 import pandas as pd

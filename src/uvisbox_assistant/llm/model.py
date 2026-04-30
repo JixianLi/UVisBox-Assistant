@@ -1,3 +1,5 @@
+# ABOUTME: Ollama model setup and system prompt construction for the LangGraph agent.
+# ABOUTME: create_model_with_tools binds tool schemas onto a ChatOllama instance; get_system_prompt builds the prompt with available test_data files.
 """Language model setup for UVisBox-Assistant"""
 from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage

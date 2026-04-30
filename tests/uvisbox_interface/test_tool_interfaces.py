@@ -1,3 +1,5 @@
+# ABOUTME: UVisBox-interface integration tests that call vis tool wrappers against the real UVisBox library.
+# ABOUTME: Catches structure changes in UVisBox APIs; 0 LLM calls.
 """Integration tests for tool interfaces with UVisBox.
 
 These tests directly call tool functions to verify the interface between

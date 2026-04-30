@@ -1,3 +1,5 @@
+# ABOUTME: Pytest fixtures and configuration shared across the UVisBox-Assistant test suite.
+# ABOUTME: Hosts reusable fixtures (sessions, sample arrays) and global test setup.
 """Pytest fixtures and configuration for UVisBox-Assistant tests."""
 
 import pytest

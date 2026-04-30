@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for the regex patterns in session/command_parser.py.
+# ABOUTME: 0 LLM calls; covers each quick-command pattern (median color, vmin/vmax, show/hide, etc.).
 """Unit tests for hybrid control command parser."""
 
 import sys

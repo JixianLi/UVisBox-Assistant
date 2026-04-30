@@ -1,3 +1,5 @@
+# ABOUTME: Verbose-mode print routing keyed off the active ConversationSession.
+# ABOUTME: vprint is silent unless the session's verbose_mode is on; set_session / get_current_session manage the global session reference.
 """Control verbose output based on session settings."""
 
 from typing import Optional, TYPE_CHECKING

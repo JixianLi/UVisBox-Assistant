@@ -1,3 +1,5 @@
+# ABOUTME: LangGraph StateGraph definition (nodes, edges, conditional routing).
+# ABOUTME: 3-node graph (model, data_tool, vis_tool); exposes the compiled graph_app plus run_graph / stream_graph helpers.
 """LangGraph workflow definition for UVisBox-Assistant"""
 from langgraph.graph import StateGraph, END
 from uvisbox_assistant.core.state import GraphState

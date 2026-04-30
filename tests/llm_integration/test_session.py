@@ -1,3 +1,5 @@
+# ABOUTME: LLM-integration tests for ConversationSession multi-turn behavior and reset/clear semantics.
+# ABOUTME: Requires a running Ollama server; covers send(), get_stats(), and session lifecycle.
 """Test session management features."""
 
 from uvisbox_assistant.session.conversation import ConversationSession

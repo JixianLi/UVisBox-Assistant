@@ -1,3 +1,5 @@
+# ABOUTME: LangGraph node implementations for model invocation and tool execution.
+# ABOUTME: call_model runs the LLM; call_data_tool / call_vis_tool execute tools, record errors, and emit state updates.
 """Node implementations for the LangGraph workflow"""
 from typing import Dict
 from langchain_core.messages import AIMessage, ToolMessage, HumanMessage

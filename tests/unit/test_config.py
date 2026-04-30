@@ -1,3 +1,5 @@
+# ABOUTME: Unit tests for config.py constants and Ollama configuration.
+# ABOUTME: 0 LLM calls; verifies path setup, defaults, and that vis-specific params are NOT in DEFAULT_VIS_PARAMS.
 """Unit tests for configuration."""
 
 import sys

@@ -1,3 +1,5 @@
+# ABOUTME: Configuration constants for paths, file naming, and Ollama connection settings.
+# ABOUTME: Imported as `from uvisbox_assistant import config`; OLLAMA_API_URL / OLLAMA_MODEL_NAME env vars override defaults.
 """Configuration for UVisBox-Assistant"""
 import os
 from pathlib import Path
