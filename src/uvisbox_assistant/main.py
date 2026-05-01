@@ -134,6 +134,11 @@ def main():
                 if command == "/quit" or command == "/exit":
                     print("\n👋 Goodbye!")
                     plt.close('all')
+                    try:
+                        import pyvista as pv
+                        pv.close_all()
+                    except ImportError:
+                        pass
                     break
 
                 elif command == "/reset":
@@ -298,4 +303,9 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n💥 Fatal error: {e}")
         plt.close('all')
+        try:
+            import pyvista as pv
+            pv.close_all()
+        except ImportError:
+            pass
         sys.exit(1)

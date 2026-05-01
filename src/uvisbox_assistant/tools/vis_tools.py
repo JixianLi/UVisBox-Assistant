@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pyvista as pv
+from pyvistaqt import BackgroundPlotter
 import traceback
 from pathlib import Path
 from typing import Dict, Optional, List
@@ -746,8 +747,8 @@ def plot_squid_glyph_3D(
         if vectors.ndim != 3 or vectors.shape[2] != 3:
             return {"status": "error", "message": f"Vectors must have shape (n, m, 3), got {vectors.shape}"}
 
-        # Create PyVista plotter
-        plotter = pv.Plotter()
+        # Create non-blocking PyVista plotter (window appears on construction)
+        plotter = BackgroundPlotter()
 
         # Call UVisBox 3D squid glyph function
         squid_glyph_3D(
@@ -758,8 +759,10 @@ def plot_squid_glyph_3D(
             ax=plotter,
         )
 
-        plotter.add_title(f"3D Squid Glyphs (percentile={percentile})", font_size=14)
-        plotter.show()
+        plotter.add_text(
+            f"3D Squid Glyphs (percentile={percentile})",
+            position='upper_edge', font_size=14, name='title'
+        )
 
         n_positions = positions.shape[0]
 
@@ -966,8 +969,8 @@ def plot_probabilistic_marching_cubes(
             }
 
 
-        # Create PyVista figure for 3D visualization with Tier-2 defaults
-        plotter = pv.Plotter()
+        # Create non-blocking PyVista plotter (window appears on construction)
+        plotter = BackgroundPlotter()
 
         # call UVisBox probabilistic marching cubes function
         probabilistic_marching_cubes(
@@ -975,9 +978,11 @@ def plot_probabilistic_marching_cubes(
             isovalue=isovalue,
             plotter=plotter,
             colormap=colormap
-        ) 
-        plotter.add_title(f"Probabilistic Marching Cubes (isovalue={isovalue})", font_size=14)
-        plotter.show()
+        )
+        plotter.add_text(
+            f"Probabilistic Marching Cubes (isovalue={isovalue})",
+            position='upper_edge', font_size=14, name='title'
+        )
         return {
             "status": "success",
             "message": f"Displayed probabilistic marching cubes for field shape {field.shape}",
@@ -1062,8 +1067,8 @@ def plot_probabilistic_marching_tetrahedra(
         if tetrahedra.ndim != 2 or tetrahedra.shape[1] != 4:
             return {"status": "error", "message": f"Tetrahedra must have shape (n_tets, 4), got {tetrahedra.shape}"}
 
-        # Create PyVista figure for 3D visualization with Tier-2 defaults
-        plotter = pv.Plotter()
+        # Create non-blocking PyVista plotter (window appears on construction)
+        plotter = BackgroundPlotter()
 
         # Call UVisBox probabilistic marching tetrahedra function
         probabilistic_marching_tetrahedra(
@@ -1074,8 +1079,10 @@ def plot_probabilistic_marching_tetrahedra(
             plotter=plotter
         )
 
-        plotter.add_title(f"Probabilistic Marching Tetrahedra (isovalue={isovalue})", font_size=14)
-        plotter.show()
+        plotter.add_text(
+            f"Probabilistic Marching Tetrahedra (isovalue={isovalue})",
+            position='upper_edge', font_size=14, name='title'
+        )
         return {
             "status": "success",
             "message": f"Displayed probabilistic marching tetrahedra for field shape {field.shape}",
@@ -1145,8 +1152,8 @@ def plot_uncertainty_tubes(
                 "message": f"Expected 4D array with last dimension 3 (n_steps, n_starting_locations, n_ensemble_members, 3), got shape {trajectories.shape}"
             }
 
-        # Create PyVista figure for 3D visualization with Tier-2 defaults
-        plotter = pv.Plotter()
+        # Create non-blocking PyVista plotter (window appears on construction)
+        plotter = BackgroundPlotter()
 
         # Call UVisBox uncertainty tubes function
         uncertainty_tubes(
@@ -1158,8 +1165,10 @@ def plot_uncertainty_tubes(
             n_jobs=workers
         )
 
-        plotter.add_title("Uncertainty Tubes", font_size=14)
-        plotter.show()
+        plotter.add_text(
+            "Uncertainty Tubes",
+            position='upper_edge', font_size=14, name='title'
+        )
 
         return {
             "status": "success",
