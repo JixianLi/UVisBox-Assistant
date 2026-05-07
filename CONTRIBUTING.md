@@ -29,10 +29,15 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 ### Installation
 
-1. **Clone the repository**:
+1. **Clone the repository** (with submodules):
    ```bash
-   git clone https://github.com/yourusername/uvisbox_assistant.git
+   git clone --recurse-submodules https://github.com/yourusername/uvisbox_assistant.git
    cd uvisbox_assistant
+   ```
+
+   If you already cloned without `--recurse-submodules`:
+   ```bash
+   git submodule update --init --recursive
    ```
 
 2. **Set up environment**:
