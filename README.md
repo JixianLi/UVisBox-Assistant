@@ -211,6 +211,38 @@ python tests/test.py --acceptance
 
 See [TESTING.md](TESTING.md) for details.
 
+## Web Interface (preview)
+
+A browser-based interface backed by [webuvisbox](webuvisbox/) is available
+alongside the CLI REPL. Chat panel displays plots as static PNGs; trace
+panel shows the agent's execution as a live swim-lane diagram.
+
+**Development workflow** (HMR for the frontend):
+
+```bash
+# Terminal 1: Python server (FastAPI + WebSocket on 127.0.0.1:8000)
+python -m uvisbox_assistant.web
+
+# Terminal 2: Vite dev server with proxy to FastAPI
+cd web && npm install && npm run dev
+# Open http://localhost:5173
+```
+
+**Production workflow** (single-origin, no Vite dev server):
+
+```bash
+cd web && npm install && npm run build
+cd ..
+python -m uvisbox_assistant.web
+# Open http://127.0.0.1:8000
+```
+
+The CLI REPL (`python -m uvisbox_assistant`) is unaffected by web mode
+and remains the primary interface. Reload the browser to start a fresh
+session — there is no persistence in this preview. See
+[`docs/plans/web-interface/design.md`](docs/plans/web-interface/design.md)
+for the architecture overview.
+
 ## Documentation
 
 - **User Guide**: `docs/USER_GUIDE.md` - Detailed styling control examples

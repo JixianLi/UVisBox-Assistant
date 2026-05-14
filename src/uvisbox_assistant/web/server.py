@@ -1,13 +1,20 @@
 # ABOUTME: FastAPI app exposing a WebSocket /ws endpoint and a /figures/<id>.png static endpoint.
-# ABOUTME: Dispatches each connection to a per-WS SessionRunner that drives the agent over the wire.
+# ABOUTME: Dispatches each connection to a per-WS SessionRunner; also serves web/dist when present.
 
 """FastAPI server for the web interface (transport + per-connection SessionRunner dispatch)."""
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .figures import FIGURES_DIR, clear_figures_dir, validate_figure_filename
 from .session_runner import SessionRunner
+
+# web/dist lives at <project-root>/web/dist. server.py is at
+# src/uvisbox_assistant/web/server.py, so go up 4 levels to reach the project root.
+WEB_DIST = Path(__file__).resolve().parents[3] / "web" / "dist"
 
 app = FastAPI()
 
@@ -55,3 +62,10 @@ async def ws_endpoint(ws: WebSocket) -> None:
                 })
     except WebSocketDisconnect:
         return
+
+
+# Production: mount the React build at root after all API routes are
+# registered so /ws and /figures take precedence. Dev mode (vite proxy)
+# ignores this path because web/dist won't exist until `npm run build`.
+if WEB_DIST.exists():
+    app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="web")
