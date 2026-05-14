@@ -29,6 +29,15 @@ export default defineConfig({
     },
     server: {
         port: 5173,
+        // Vite's default fs.allow is the project root (web/); webuvisbox is
+        // a sibling, and pulling its source via the "@" alias means assets
+        // (fonts, CSS) under ../webuvisbox/ also need to be readable.
+        fs: {
+            allow: [
+                path.resolve(__dirname),
+                path.resolve(__dirname, "../webuvisbox"),
+            ],
+        },
         proxy: {
             "/ws":      { target: "ws://127.0.0.1:8000",   ws: true },
             "/figures": { target: "http://127.0.0.1:8000", changeOrigin: false },
