@@ -8,16 +8,16 @@
     "panel_layouts": {
         "default_layouts": {
             "xl": [
-                {"i": "Trace", "x": 0,  "y": 0, "w": 11, "h": 16, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false},
-                {"i": "Chat",  "x": 11, "y": 0, "w": 11, "h": 16, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
+                {"i": "Trace", "x": 0,  "y": 0, "w": 6, "h": 16, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false},
+                {"i": "Chat",  "x": 6, "y": 0, "w": 16, "h": 16, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
             ],
             "lg": [
-                {"i": "Trace", "x": 0, "y": 0, "w": 6, "h": 12, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false},
-                {"i": "Chat",  "x": 6, "y": 0, "w": 6, "h": 12, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
+                {"i": "Trace", "x": 0, "y": 0, "w": 4, "h": 12, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false},
+                {"i": "Chat",  "x": 4, "y": 0, "w": 8, "h": 12, "minW": 3, "minH": 3, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
             ],
             "sm": [
                 {"i": "Trace", "x": 0, "y": 0, "w": 6, "h": 8, "minW": 2, "minH": 2, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false},
-                {"i": "Chat",  "x": 0, "y": 8, "w": 6, "h": 8, "minW": 2, "minH": 2, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
+                {"i": "Chat",  "x": 0, "y": 4, "w": 6, "h": 8, "minW": 2, "minH": 2, "resizeHandles": ["sw", "se"], "visible": true, "moved": false, "static": false}
             ]
         },
         "breakpoints": {"xl": 1440, "lg": 800, "sm": 400},
