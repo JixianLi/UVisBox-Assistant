@@ -1061,6 +1061,7 @@ def plot_probabilistic_marching_tetrahedra(
     positions_path: str,
     tetrahedra_path: str,
     isovalue: float = 0.0,
+    colormap: str = "viridis"
 ) -> Dict[str, str]:
     """
     Create probabilistic marching tetrahedra visualization for 3D scalar field ensembles.
@@ -1070,6 +1071,7 @@ def plot_probabilistic_marching_tetrahedra(
         positions_path: Path to .npy file with shape (n_vertices, 3) - vertex positions
         tetrahedra_path: Path to .npy file with shape (n_tets, 4) - tetrahedral connectivity
         isovalue: Isovalue for marching tetrahedra (default: 0.0)
+        colormap: Matplotlib colormap name for probability visualization (default: "viridis")
 
     Returns:
         Dict with status and message
@@ -1127,7 +1129,8 @@ def plot_probabilistic_marching_tetrahedra(
                 tetrahedral_mesh=tetrahedra_vtk,
                 points=positions,
                 isovalue=isovalue,
-                plotter=plotter
+                plotter=plotter,
+                colormap=colormap,
             )
             plotter.add_text(
                 f"Probabilistic Marching Tetrahedra (isovalue={isovalue})",
@@ -1145,7 +1148,8 @@ def plot_probabilistic_marching_tetrahedra(
                 "field_path": field_path,
                 "positions_path": positions_path,
                 "tetrahedra_path": tetrahedra_path,
-                "isovalue": isovalue
+                "isovalue": isovalue,
+                "colormap": colormap
             }
         }
         if fig_path is not None:
@@ -1538,6 +1542,11 @@ VIS_TOOL_SCHEMAS = [
                     "type": "number",
                     "description": "Isovalue for marching tetrahedra surface extraction",
                     "default": 0.0
+                }, 
+                "colormap": {
+                    "type": "string",
+                    "description": "Matplotlib colormap name for probability visualization",
+                    "default": "viridis"
                 }
             },
             "required": ["field_path", "positions_path", "tetrahedra_path"]
