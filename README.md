@@ -144,6 +144,16 @@ python main.py
 # Or: python -m uvisbox_assistant
 ```
 
+6. **(Optional) Web interface** — fetch the `webuvisbox` submodule. Skip this if you only use the CLI REPL.
+```bash
+# First-time clone: pull the submodule alongside the repo
+git submodule update --init webuvisbox
+
+# Later, to update to the latest webuvisbox commit
+git submodule update --remote webuvisbox
+```
+See the [Web Interface (preview)](#web-interface-preview) section below for the dev and production run workflows.
+
 ## Project Structure
 
 ```
