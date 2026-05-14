@@ -7,8 +7,9 @@ import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 import traceback
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Callable, Dict, Optional, List
 from uvisbox_assistant import config
+from uvisbox_assistant.utils.renderer import current_renderer
 
 # Import UVisBox modules
 try:
@@ -125,11 +126,10 @@ def plot_functional_boxplot(
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
 
-        # Show non-blocking
-        plt.show(block=False)
-        plt.pause(0.1)
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
 
-        return {
+        result = {
             "status": "success",
             "message": f"Displayed functional boxplot for {curves.shape[0]} curves with percentiles {percentiles} using method '{method}'",
             "_vis_params": {
@@ -150,6 +150,9 @@ def plot_functional_boxplot(
                 "vmax": vmax
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -267,10 +270,11 @@ def plot_curve_boxplot(
         )
 
         ax.set_title("Curve Boxplot")
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed curve boxplot for {curves.shape[0]} curves with percentiles {percentiles}",
             "_vis_params": {
@@ -289,6 +293,9 @@ def plot_curve_boxplot(
                 "workers": workers
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -353,10 +360,11 @@ def plot_probabilistic_marching_squares(
         )
 
         ax.set_title(f"Probabilistic Marching Squares (isovalue={isovalue})")
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed probabilistic marching squares for field shape {field.shape}",
             "_vis_params": {
@@ -366,6 +374,9 @@ def plot_probabilistic_marching_squares(
                 "colormap": colormap
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -463,10 +474,11 @@ def plot_probabilistic_marching_triangles(
         )
 
         ax.set_title(f"Probabilistic Marching Triangles (isovalue={isovalue})")
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed probabilistic marching triangles for field shape {field.shape}, triangles shape {triangles.shape}, points shape {points.shape}",
             "_vis_params": {
@@ -476,8 +488,11 @@ def plot_probabilistic_marching_triangles(
                 "points_path": points_path,
                 "isovalue": isovalue,
                 "colormap": colormap
-            }   
+            }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
     
     except Exception as e:
         # Capture full traceback
@@ -567,10 +582,11 @@ def plot_uncertainty_lobes(
 
         ax.set_title("Uncertainty Lobes")
         ax.set_aspect('equal')
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed uncertainty lobes for {n_positions} positions",
             "_vis_params": {
@@ -583,6 +599,9 @@ def plot_uncertainty_lobes(
                 "workers": workers
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -669,10 +688,11 @@ def plot_squid_glyph_2D(
 
         ax.set_title("2D Squid Glyphs")
         ax.set_aspect('equal')
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed 2D squid glyphs for {n_positions} positions (percentile={percentile})",
             "_vis_params": {
@@ -684,6 +704,9 @@ def plot_squid_glyph_2D(
                 "workers": workers
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -747,26 +770,30 @@ def plot_squid_glyph_3D(
         if vectors.ndim != 3 or vectors.shape[2] != 3:
             return {"status": "error", "message": f"Vectors must have shape (n, m, 3), got {vectors.shape}"}
 
-        # Create non-blocking PyVista plotter (window appears on construction)
-        plotter = BackgroundPlotter()
+        def plotter_factory(**kwargs):
+            if kwargs.get("off_screen"):
+                return pv.Plotter(off_screen=True)
+            return BackgroundPlotter()
 
-        # Call UVisBox 3D squid glyph function
-        squid_glyph_3D(
-            positions=positions,
-            ensemble_vectors=vectors,
-            percentile=percentile,
-            scale=scale,
-            ax=plotter,
-        )
+        def build_scene(plotter):
+            squid_glyph_3D(
+                positions=positions,
+                ensemble_vectors=vectors,
+                percentile=percentile,
+                scale=scale,
+                ax=plotter,
+            )
+            plotter.add_text(
+                f"3D Squid Glyphs (percentile={percentile})",
+                position='upper_edge', font_size=14, name='title'
+            )
 
-        plotter.add_text(
-            f"3D Squid Glyphs (percentile={percentile})",
-            position='upper_edge', font_size=14, name='title'
-        )
+        renderer = current_renderer.get()
+        fig_path = renderer.show_pyvista(plotter_factory, build_scene)
 
         n_positions = positions.shape[0]
 
-        return {
+        result = {
             "status": "success",
             "message": f"Displayed 3D squid glyphs for {n_positions} positions (percentile={percentile})",
             "_vis_params": {
@@ -777,6 +804,9 @@ def plot_squid_glyph_3D(
                 "scale": scale,
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         tb_str = traceback.format_exc()
@@ -884,10 +914,11 @@ def plot_contour_boxplot(
         )
 
         ax.set_title(f"Contour Boxplot (isovalue={isovalue})")
-        plt.show(block=False)
-        plt.pause(0.1)
 
-        return {
+        renderer = current_renderer.get()
+        fig_path = renderer.show_matplotlib(fig)
+
+        result = {
             "status": "success",
             "message": f"Displayed contour boxplot for ensemble with {ensemble_images.shape[0]} members",
             "_vis_params": {
@@ -907,6 +938,9 @@ def plot_contour_boxplot(
                 "workers": workers
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -969,21 +1003,27 @@ def plot_probabilistic_marching_cubes(
             }
 
 
-        # Create non-blocking PyVista plotter (window appears on construction)
-        plotter = BackgroundPlotter()
+        def plotter_factory(**kwargs):
+            if kwargs.get("off_screen"):
+                return pv.Plotter(off_screen=True)
+            return BackgroundPlotter()
 
-        # call UVisBox probabilistic marching cubes function
-        probabilistic_marching_cubes(
-            ensemble_images=field,
-            isovalue=isovalue,
-            plotter=plotter,
-            colormap=colormap
-        )
-        plotter.add_text(
-            f"Probabilistic Marching Cubes (isovalue={isovalue})",
-            position='upper_edge', font_size=14, name='title'
-        )
-        return {
+        def build_scene(plotter):
+            probabilistic_marching_cubes(
+                ensemble_images=field,
+                isovalue=isovalue,
+                plotter=plotter,
+                colormap=colormap
+            )
+            plotter.add_text(
+                f"Probabilistic Marching Cubes (isovalue={isovalue})",
+                position='upper_edge', font_size=14, name='title'
+            )
+
+        renderer = current_renderer.get()
+        fig_path = renderer.show_pyvista(plotter_factory, build_scene)
+
+        result = {
             "status": "success",
             "message": f"Displayed probabilistic marching cubes for field shape {field.shape}",
             "_vis_params": {
@@ -994,6 +1034,9 @@ def plot_probabilistic_marching_cubes(
                 "colormap": colormap
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
         
     except Exception as e:
         # Capture full traceback
@@ -1067,23 +1110,34 @@ def plot_probabilistic_marching_tetrahedra(
         if tetrahedra.ndim != 2 or tetrahedra.shape[1] != 4:
             return {"status": "error", "message": f"Tetrahedra must have shape (n_tets, 4), got {tetrahedra.shape}"}
 
-        # Create non-blocking PyVista plotter (window appears on construction)
-        plotter = BackgroundPlotter()
-
-        # Call UVisBox probabilistic marching tetrahedra function
-        probabilistic_marching_tetrahedra(
-            ensemble_data=field,
-            tetrahedral_mesh=tetrahedra,  # Ensure only 4 vertices per tetrahedron
-            points=positions,
-            isovalue=isovalue,
-            plotter=plotter
+        # UVisBox passes tetrahedra to pyvista.UnstructuredGrid, which expects the
+        # VTK-flat connectivity format with a leading vertex count per cell.
+        tetrahedra_vtk = np.hstack(
+            (np.full((tetrahedra.shape[0], 1), 4, dtype=tetrahedra.dtype), tetrahedra)
         )
 
-        plotter.add_text(
-            f"Probabilistic Marching Tetrahedra (isovalue={isovalue})",
-            position='upper_edge', font_size=14, name='title'
-        )
-        return {
+        def plotter_factory(**kwargs):
+            if kwargs.get("off_screen"):
+                return pv.Plotter(off_screen=True)
+            return BackgroundPlotter()
+
+        def build_scene(plotter):
+            probabilistic_marching_tetrahedra(
+                ensemble_data=field,
+                tetrahedral_mesh=tetrahedra_vtk,
+                points=positions,
+                isovalue=isovalue,
+                plotter=plotter
+            )
+            plotter.add_text(
+                f"Probabilistic Marching Tetrahedra (isovalue={isovalue})",
+                position='upper_edge', font_size=14, name='title'
+            )
+
+        renderer = current_renderer.get()
+        fig_path = renderer.show_pyvista(plotter_factory, build_scene)
+
+        result = {
             "status": "success",
             "message": f"Displayed probabilistic marching tetrahedra for field shape {field.shape}",
             "_vis_params": {
@@ -1094,6 +1148,9 @@ def plot_probabilistic_marching_tetrahedra(
                 "isovalue": isovalue
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
     
     except Exception as e:
         # Capture full traceback
@@ -1152,25 +1209,29 @@ def plot_uncertainty_tubes(
                 "message": f"Expected 4D array with last dimension 3 (n_steps, n_starting_locations, n_ensemble_members, 3), got shape {trajectories.shape}"
             }
 
-        # Create non-blocking PyVista plotter (window appears on construction)
-        plotter = BackgroundPlotter()
+        def plotter_factory(**kwargs):
+            if kwargs.get("off_screen"):
+                return pv.Plotter(off_screen=True)
+            return BackgroundPlotter()
 
-        # Call UVisBox uncertainty tubes function
-        uncertainty_tubes(
-            trajectories=trajectories,
-            colormap=colormap,
-            resolution=resolution,
-            e_proj=e_proj,
-            plotter=plotter,
-            n_jobs=workers
-        )
+        def build_scene(plotter):
+            uncertainty_tubes(
+                trajectories=trajectories,
+                colormap=colormap,
+                resolution=resolution,
+                e_proj=e_proj,
+                plotter=plotter,
+                n_jobs=workers
+            )
+            plotter.add_text(
+                "Uncertainty Tubes",
+                position='upper_edge', font_size=14, name='title'
+            )
 
-        plotter.add_text(
-            "Uncertainty Tubes",
-            position='upper_edge', font_size=14, name='title'
-        )
+        renderer = current_renderer.get()
+        fig_path = renderer.show_pyvista(plotter_factory, build_scene)
 
-        return {
+        result = {
             "status": "success",
             "message": f"Displayed uncertainty tubes for trajectory ensemble with shape {trajectories.shape}",
             "_vis_params": {
@@ -1182,6 +1243,9 @@ def plot_uncertainty_tubes(
                 "workers": workers
             }
         }
+        if fig_path is not None:
+            result["_figure_path"] = fig_path
+        return result
 
     except Exception as e:
         # Capture full traceback
@@ -1671,3 +1735,18 @@ VIS_TOOL_SCHEMAS = [
         }
     }
 ]
+
+
+TOOL_REGISTRY: Dict[str, Callable[..., Dict]] = {
+    "plot_functional_boxplot": plot_functional_boxplot,
+    "plot_curve_boxplot": plot_curve_boxplot,
+    "plot_probabilistic_marching_squares": plot_probabilistic_marching_squares,
+    "plot_probabilistic_marching_triangles": plot_probabilistic_marching_triangles,
+    "plot_uncertainty_lobes": plot_uncertainty_lobes,
+    "plot_squid_glyph_2D": plot_squid_glyph_2D,
+    "plot_squid_glyph_3D": plot_squid_glyph_3D,
+    "plot_contour_boxplot": plot_contour_boxplot,
+    "plot_probabilistic_marching_cubes": plot_probabilistic_marching_cubes,
+    "plot_probabilistic_marching_tetrahedra": plot_probabilistic_marching_tetrahedra,
+    "plot_uncertainty_tubes": plot_uncertainty_tubes,
+}
