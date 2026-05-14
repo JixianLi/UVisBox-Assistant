@@ -46,17 +46,6 @@ def test_ws_unknown_type_returns_error(client):
     assert "nonsense" in msg["message"]
 
 
-def test_ws_prompt_currently_nacks(client):
-    # Phase 03 replaces the NACK with real prompt handling; update this test then.
-    with client.websocket_connect("/ws") as ws:
-        ws.send_json({"type": "prompt", "text": "hi"})
-        msg = ws.receive_json()
-
-    assert msg["type"] == "error"
-    assert isinstance(msg["message"], str)
-    assert msg["message"] != ""
-
-
 def test_figures_endpoint_404_on_missing(client):
     # Vanishingly unlikely to collide with any real file.
     resp = client.get("/figures/00000000000000000000000000000000.png")

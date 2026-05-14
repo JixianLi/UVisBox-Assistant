@@ -1,7 +1,15 @@
 # ABOUTME: Web entry point - `python -m uvisbox_assistant.web` launches uvicorn at 127.0.0.1:8000.
-# ABOUTME: Activates FileRenderer before importing the FastAPI app so plot tools save PNGs to disk.
+# ABOUTME: Forces matplotlib Agg backend (thread-safe) and activates FileRenderer before importing the app.
 
 """Launch the FastAPI web server with the FileRenderer active."""
+
+# Force Agg before any other matplotlib import. Plot tools run on a worker
+# thread in web mode; GUI backends (MacOSX, TkAgg, Qt) cannot create figures
+# off the main thread. Agg is non-interactive and thread-safe, which matches
+# our use case: render and savefig, never display a window.
+import matplotlib
+
+matplotlib.use("Agg", force=True)
 
 from uvisbox_assistant.utils.renderer import FileRenderer, set_renderer
 
@@ -13,9 +21,6 @@ def main() -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     set_renderer(FileRenderer(FIGURES_DIR))
 
-    # Import uvicorn + app AFTER the renderer is set so any module-level
-    # tool wiring picks up FileRenderer behavior (defensive - today nothing
-    # at import time runs a tool, but this keeps the order explicit).
     import uvicorn
     from .server import app
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")

@@ -1,12 +1,13 @@
 # ABOUTME: FastAPI app exposing a WebSocket /ws endpoint and a /figures/<id>.png static endpoint.
-# ABOUTME: Handles hello/reset handshake only; real prompt handling is wired up in Phase 03.
+# ABOUTME: Dispatches each connection to a per-WS SessionRunner that drives the agent over the wire.
 
-"""FastAPI server skeleton for the web interface (transport only)."""
+"""FastAPI server for the web interface (transport + per-connection SessionRunner dispatch)."""
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 
 from .figures import FIGURES_DIR, clear_figures_dir, validate_figure_filename
+from .session_runner import SessionRunner
 
 app = FastAPI()
 
@@ -31,9 +32,10 @@ async def get_figure(name: str):
 
 @app.websocket("/ws")
 async def ws_endpoint(ws: WebSocket) -> None:
-    """Handle hello/reset handshake; NACK prompts pending Phase 03 wiring."""
+    """Handle hello/reset/prompt over a single WebSocket via a per-connection SessionRunner."""
     await ws.accept()
     clear_figures_dir()
+    runner = SessionRunner(ws)
     try:
         while True:
             msg = await ws.receive_json()
@@ -41,13 +43,11 @@ async def ws_endpoint(ws: WebSocket) -> None:
             if t == "hello":
                 await ws.send_json({"type": "session_ready", "actors": ACTORS})
             elif t == "reset":
+                await runner.reset()
                 clear_figures_dir()
                 await ws.send_json({"type": "session_ready", "actors": ACTORS})
             elif t == "prompt":
-                await ws.send_json({
-                    "type": "error",
-                    "message": "prompt handling not yet implemented",
-                })
+                await runner.handle_prompt(msg.get("text", ""))
             else:
                 await ws.send_json({
                     "type": "error",
