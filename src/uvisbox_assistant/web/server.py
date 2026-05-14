@@ -3,11 +3,15 @@
 
 """FastAPI server for the web interface (transport + per-connection SessionRunner dispatch)."""
 
+import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+from uvisbox_assistant.utils.main_thread import register_main_loop
 
 from .figures import FIGURES_DIR, clear_figures_dir, validate_figure_filename
 from .session_runner import SessionRunner
@@ -16,7 +20,16 @@ from .session_runner import SessionRunner
 # src/uvisbox_assistant/web/server.py, so go up 4 levels to reach the project root.
 WEB_DIST = Path(__file__).resolve().parents[3] / "web" / "dist"
 
-app = FastAPI()
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    # Lifespan runs on the asyncio loop's main thread. Recording the loop
+    # here lets FileRenderer.show_pyvista marshal back to this thread from
+    # the agent worker thread (needed on macOS for VTK/Cocoa).
+    register_main_loop(asyncio.get_running_loop())
+    yield
+
+
+app = FastAPI(lifespan=_lifespan)
 
 ACTORS = [
     {"id": "user",      "label": "User",      "kind": "user"},

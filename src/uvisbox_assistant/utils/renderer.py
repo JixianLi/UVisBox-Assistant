@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional, Protocol, runtime_checkable
 from uuid import uuid4
 
+from uvisbox_assistant.utils.main_thread import run_on_main_thread
+
 if TYPE_CHECKING:
     import pyvista
 
@@ -66,6 +68,17 @@ class FileRenderer:
         plotter_factory: Callable[..., "pyvista.Plotter"],
         build_scene: Callable[["pyvista.Plotter"], None],
     ) -> Optional[str]:
+        # VTK/Cocoa on macOS requires NSWindow init on the main thread, even
+        # for off_screen plotters. The agent runs in a worker thread in web
+        # mode, so we marshal the render to the main thread. In CLI mode
+        # (no loop registered) this is a no-op.
+        return run_on_main_thread(lambda: self._render_pyvista(plotter_factory, build_scene))
+
+    def _render_pyvista(
+        self,
+        plotter_factory: Callable[..., "pyvista.Plotter"],
+        build_scene: Callable[["pyvista.Plotter"], None],
+    ) -> str:
         path = self.out_dir / f"{uuid4().hex}.png"
         plotter = plotter_factory(off_screen=True)
         build_scene(plotter)

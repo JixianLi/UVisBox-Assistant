@@ -1112,12 +1112,6 @@ def plot_probabilistic_marching_tetrahedra(
         if tetrahedra.ndim != 2 or tetrahedra.shape[1] != 4:
             return {"status": "error", "message": f"Tetrahedra must have shape (n_tets, 4), got {tetrahedra.shape}"}
 
-        # UVisBox passes tetrahedra to pyvista.UnstructuredGrid, which expects the
-        # VTK-flat connectivity format with a leading vertex count per cell.
-        tetrahedra_vtk = np.hstack(
-            (np.full((tetrahedra.shape[0], 1), 4, dtype=tetrahedra.dtype), tetrahedra)
-        )
-
         def plotter_factory(**kwargs):
             if kwargs.get("off_screen"):
                 return pv.Plotter(off_screen=True)
@@ -1126,7 +1120,7 @@ def plot_probabilistic_marching_tetrahedra(
         def build_scene(plotter):
             probabilistic_marching_tetrahedra(
                 ensemble_data=field,
-                tetrahedral_mesh=tetrahedra_vtk,
+                tetrahedral_mesh=tetrahedra,
                 points=positions,
                 isovalue=isovalue,
                 plotter=plotter,
