@@ -144,13 +144,20 @@ python main.py
 # Or: python -m uvisbox_assistant
 ```
 
-6. **(Optional) Web interface** — fetch the `webuvisbox` submodule. Skip this if you only use the CLI REPL.
+6. **(Optional) Web interface** — fetch the `webuvisbox` submodule and install its dependencies. Skip this if you only use the CLI REPL.
 ```bash
 # First-time clone: pull the submodule alongside the repo
 git submodule update --init webuvisbox
 
+# Install webuvisbox's npm dependencies. Required even though we don't run
+# webuvisbox directly: the web app consumes its source via a path alias, and
+# both runtime assets (e.g. @fontsource/roboto) and IDE type resolution need
+# webuvisbox/node_modules populated.
+cd webuvisbox && npm install && cd ..
+
 # Later, to update to the latest webuvisbox commit
 git submodule update --remote webuvisbox
+cd webuvisbox && npm install && cd ..   # re-install if dependencies changed
 ```
 See the [Web Interface (preview)](#web-interface-preview) section below for the dev and production run workflows.
 
