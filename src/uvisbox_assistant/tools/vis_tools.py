@@ -1018,6 +1018,7 @@ def plot_probabilistic_marching_tetrahedra(
     positions_path: str,
     tetrahedra_path: str,
     isovalue: float = 0.0,
+    colormap: str = "viridis"
 ) -> Dict[str, str]:
     """
     Create probabilistic marching tetrahedra visualization for 3D scalar field ensembles.
@@ -1076,7 +1077,8 @@ def plot_probabilistic_marching_tetrahedra(
             tetrahedral_mesh=tetrahedra,  # Ensure only 4 vertices per tetrahedron
             points=positions,
             isovalue=isovalue,
-            plotter=plotter
+            plotter=plotter,
+            colormap=colormap
         )
 
         plotter.add_text(
@@ -1091,7 +1093,8 @@ def plot_probabilistic_marching_tetrahedra(
                 "field_path": field_path,
                 "positions_path": positions_path,
                 "tetrahedra_path": tetrahedra_path,
-                "isovalue": isovalue
+                "isovalue": isovalue,
+                "colormap": colormap
             }
         }
     
@@ -1474,6 +1477,11 @@ VIS_TOOL_SCHEMAS = [
                     "type": "number",
                     "description": "Isovalue for marching tetrahedra surface extraction",
                     "default": 0.0
+                }, 
+                "colormap": {
+                    "type": "string",
+                    "description": "Matplotlib colormap name for probability visualization",
+                    "default": "viridis"
                 }
             },
             "required": ["field_path", "positions_path", "tetrahedra_path"]
