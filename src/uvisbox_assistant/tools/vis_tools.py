@@ -7,7 +7,7 @@ import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 import traceback
 from pathlib import Path
-from typing import Callable, Dict, Optional, List
+from typing import Callable, Dict, Optional, List, Tuple
 from uvisbox_assistant import config
 from uvisbox_assistant.utils.renderer import current_renderer
 
@@ -518,7 +518,7 @@ def plot_uncertainty_lobes(
     percentile1: float = 90,
     percentile2: float = 50,
     scale: float = 0.2,
-    workers: Optional[int] = None
+    workers: Optional[int] = None,
 ) -> Dict[str, str]:
     """
     Create uncertainty lobe glyphs.
@@ -1173,7 +1173,8 @@ def plot_uncertainty_tubes(
     colormap: str = "viridis",
     resolution: int = 20,
     e_proj: float = 2.0,
-    workers: Optional[int] = 1
+    workers: Optional[int] = 1,
+    clim: Optional[List[float]] = None
 )-> Dict[str, str]:
     """
     Create uncertainty tube visualization for 3D trajectory ensembles.
@@ -1186,6 +1187,7 @@ def plot_uncertainty_tubes(
         resolution: Number of points along the tube circumference (default: 20)
         e_proj: Projection exponent for tube radius superellipse (default: 2.0)
         workers: Number of parallel workers for band depth computation (default: None)
+        clim: Color limits for colormap as [vmin, vmax] (default: None, auto-determined from data)
 
     Returns:
         Dict with status and message
@@ -1219,7 +1221,8 @@ def plot_uncertainty_tubes(
                 resolution=resolution,
                 e_proj=e_proj,
                 plotter=plotter,
-                n_jobs=workers
+                n_jobs=workers,
+                clim=clim
             )
             plotter.add_text(
                 "Uncertainty Tubes",
@@ -1238,7 +1241,8 @@ def plot_uncertainty_tubes(
                 "colormap": colormap,
                 "resolution": resolution,
                 "e_proj": e_proj,
-                "workers": workers
+                "workers": workers,
+                "clim": clim
             }
         }
         if fig_path is not None:
@@ -1658,6 +1662,12 @@ VIS_TOOL_SCHEMAS = [
                     "type": "integer",
                     "description": "Number of parallel workers for band depth computation (default: None)",
                     "default": 1
+                }, 
+                "clim": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "Color limits for colormap as [vmin, vmax] (default: None, auto-determined from data)",
+                    "default": None
                 }
             },
             "required": ["data_path"]
