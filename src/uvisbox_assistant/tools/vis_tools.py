@@ -27,6 +27,7 @@ try:
         uncertainty_tubes,
     )
     from uvisbox.Core.CommonInterface import BoxplotStyleConfig
+    from uvisbox.Core.MapSetup import map_setup
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
     print("Make sure UVisBox is installed in the 'agent' conda environment")
@@ -184,7 +185,8 @@ def plot_curve_boxplot(
     outliers_color: str = "gray",
     outliers_width: float = 1.0,
     outliers_alpha: float = 0.5,
-    workers: int = 12
+    workers: int = 12, 
+    map_setup_flag: bool = False
 ) -> Dict[str, str]:
     """
     Create a curve boxplot from curve ensemble data with multiple percentile bands.
@@ -206,6 +208,7 @@ def plot_curve_boxplot(
         outliers_width: Width of outlier curves (default: 1.0)
         outliers_alpha: Alpha of outlier curves (default: 0.5)
         workers: Number of parallel workers for band depth computation (default: 12)
+        map_setup_flag: Whether to call map_setup for spatial curve visualization (default: False)
 
     Returns:
         Dict with status and message
@@ -257,10 +260,17 @@ def plot_curve_boxplot(
             outliers_alpha=outliers_alpha
         )
 
-        fig, ax = plt.subplots(
-            figsize=config.DEFAULT_VIS_PARAMS["figsize"],
-            dpi=config.DEFAULT_VIS_PARAMS["dpi"]
-        )
+        
+        if curves.ndim == 3 and map_setup_flag is True:
+            fig, ax = map_setup(curves)
+            # update vis size and dpi for map setup
+            # fig.set_size_inches(config.DEFAULT_VIS_PARAMS["figsize"])
+            # fig.set_dpi(config.DEFAULT_VIS_PARAMS["dpi"])
+        else:
+            fig, ax = plt.subplots(
+                figsize=config.DEFAULT_VIS_PARAMS["figsize"],
+                dpi=config.DEFAULT_VIS_PARAMS["dpi"]
+            )
 
         curve_boxplot(
             curves=curves,
@@ -290,7 +300,8 @@ def plot_curve_boxplot(
                 "outliers_color": outliers_color,
                 "outliers_width": outliers_width,
                 "outliers_alpha": outliers_alpha,
-                "workers": workers
+                "workers": workers,
+                "map_setup_flag": map_setup_flag
             }
         }
         if fig_path is not None:
@@ -1266,6 +1277,7 @@ def plot_uncertainty_tubes(
             }
         }
 
+
 # Tool registry
 VIS_TOOLS = {
     "plot_functional_boxplot": plot_functional_boxplot,
@@ -1278,7 +1290,7 @@ VIS_TOOLS = {
     "plot_squid_glyph_2D": plot_squid_glyph_2D,
     "plot_squid_glyph_3D": plot_squid_glyph_3D,
     "plot_contour_boxplot": plot_contour_boxplot,
-    "plot_uncertainty_tubes": plot_uncertainty_tubes
+    "plot_uncertainty_tubes": plot_uncertainty_tubes,
 }
 
 
@@ -1428,6 +1440,11 @@ VIS_TOOL_SCHEMAS = [
                     "type": "integer",
                     "description": "Number of parallel workers for band depth computation (default: 12)",
                     "default": 12
+                },
+                "map_setup_flag": {
+                    "type": "boolean",
+                    "description": "Whether to call map_setup for spatial curve visualization (default: False)",
+                    "default": False
                 }
             },
             "required": ["data_path"]
@@ -1746,9 +1763,8 @@ VIS_TOOL_SCHEMAS = [
             },
             "required": ["data_path", "isovalue"]
         }
-    }
+    },
 ]
-
 
 TOOL_REGISTRY: Dict[str, Callable[..., Dict]] = {
     "plot_functional_boxplot": plot_functional_boxplot,
@@ -1763,3 +1779,4 @@ TOOL_REGISTRY: Dict[str, Callable[..., Dict]] = {
     "plot_probabilistic_marching_tetrahedra": plot_probabilistic_marching_tetrahedra,
     "plot_uncertainty_tubes": plot_uncertainty_tubes,
 }
+
