@@ -1,5 +1,8 @@
 # Testing Guide
 
+> Commands below assume the uv environment — prefix each with `uv run` (e.g.
+> `uv run python tests/test.py --pre-planning`) or activate `.venv` first.
+
 ## Quick Start
 
 ```bash
@@ -511,8 +514,8 @@ python tests/test.py --pre-planning
 
 ### Test Failures
 1. Verify Ollama is running and the configured model is pulled
-2. Verify conda environment `agent` is active
-3. Verify UVisBox is installed
+2. Verify the environment is synced (`uv sync`)
+3. Verify UVisBox is installed (submodule checked out: `ls external/UVisBox/uvisbox`)
 4. Run unit tests first to isolate issue
 5. Check if UVisBox interface changed (run `--pre-planning`)
 

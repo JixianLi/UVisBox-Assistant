@@ -4,9 +4,10 @@ This document explains how to configure the local LLM and set up your developmen
 
 ## Prerequisites
 
-- Python 3.11–3.13
-- Conda (recommended) or venv
+- [uv](https://docs.astral.sh/uv/) (manages the Python interpreter and the virtual environment)
 - A running [Ollama](https://ollama.com/) instance with a tool-capable model pulled
+
+uv reads the pinned interpreter from `.python-version` (3.13) and installs it automatically if it is missing — you do not need a separate Python install or Conda.
 
 ## LLM Configuration
 
@@ -54,32 +55,25 @@ ollama list | grep "$OLLAMA_MODEL_NAME"
 
 ## Python Environment Setup
 
-### Using Conda (Recommended)
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). UVisBox is consumed
+from the `external/UVisBox` git submodule as an editable path dependency (see
+`[tool.uv.sources]` in `pyproject.toml`), so make sure the submodules are checked out
+before syncing.
 
 ```bash
-# Create environment
-conda create -n uvisbox_assistant python=3.13
-conda activate uvisbox_assistant
+# Fetch submodules (UVisBox + webuvisbox) if you haven't already
+git submodule update --init --recursive
 
-# Install dependencies
-poetry install
-pip install uvisbox
+# Create the virtual environment and install everything (incl. editable UVisBox)
+uv sync
 
 # Verify installation
-python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
+uv run python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
 ```
 
-### Using venv
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-poetry install
-pip install uvisbox
-
-python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
-```
+`uv sync` creates `.venv/` and installs the locked dependency set from `uv.lock`.
+Run project commands with `uv run <cmd>` (no manual activation needed), or activate the
+environment once with `source .venv/bin/activate` if you prefer bare `python`.
 
 ## Troubleshooting
 
@@ -100,19 +94,17 @@ python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
 ### Problem: UVisBox import fails
 
 **Solution**:
-1. Verify the Python environment is activated
-2. Install UVisBox: `pip install uvisbox`
-3. Check installation: `python -c "import uvisbox; print(uvisbox.__version__)"`
+1. Confirm the submodule is checked out: `ls external/UVisBox/uvisbox`
+   (if empty, run `git submodule update --init --recursive`)
+2. Re-sync the environment: `uv sync`
+3. Check installation: `uv run python -c "import uvisbox; print(uvisbox.__version__)"`
 
 ### Problem: Python version incompatible
 
 **Solution**:
-1. Check your Python version: `python --version`
-2. UVisBox-Assistant requires Python 3.11–3.13
-3. Create a new environment with the correct version:
-   ```bash
-   conda create -n uvisbox_assistant python=3.13
-   ```
+1. The interpreter is pinned to 3.13 in `.python-version`; uv installs it on `uv sync`
+2. Check the environment's Python: `uv run python --version`
+3. If it is wrong, recreate the environment: `rm -rf .venv && uv sync`
 
 ## Complete Setup Example
 
@@ -120,19 +112,17 @@ python -c "import uvisbox_assistant; print('UVisBox-Assistant ready!')"
 # 1. Pull a tool-capable Ollama model
 ollama pull qwen3-vl:8b
 
-# 2. Create and activate the Python environment
-conda create -n uvisbox_assistant python=3.13
-conda activate uvisbox_assistant
+# 2. Fetch submodules
+git submodule update --init --recursive
 
-# 3. Install dependencies
-poetry install
-pip install uvisbox
+# 3. Create the environment and install dependencies
+uv sync
 
 # 4. Verify installation
-python -c "import uvisbox_assistant; print('Ready!')"
+uv run python -c "import uvisbox_assistant; print('Ready!')"
 
 # 5. Run UVisBox-Assistant
-python main.py
+uv run python main.py
 ```
 
 ## Next Steps
@@ -141,8 +131,8 @@ After completing the environment setup:
 
 1. **Read the User Guide**: `docs/USER_GUIDE.md` for usage examples
 2. **Check the API Reference**: `docs/API.md` for complete documentation
-3. **Run tests**: `python tests/test.py --pre-planning` for quick validation
-4. **Start the REPL**: `python main.py` to begin using UVisBox-Assistant
+3. **Run tests**: `uv run python tests/test.py --pre-planning` for quick validation
+4. **Start the REPL**: `uv run python main.py` to begin using UVisBox-Assistant
 
 ## Additional Resources
 

@@ -109,8 +109,7 @@ For fast parameter updates without full reprocessing:
 ## Installation
 
 ### Prerequisites
-- Python 3.11-3.13
-- Conda environment (recommended for UVisBox)
+- [uv](https://docs.astral.sh/uv/) (manages Python 3.13 and the virtual environment)
 - A running [Ollama](https://ollama.com/) instance with a tool-capable model pulled (default: `qwen3-vl:8b`)
 
 ### Setup
@@ -126,22 +125,20 @@ export OLLAMA_API_URL="http://localhost:11434"
 export OLLAMA_MODEL_NAME="qwen3-vl:8b"
 ```
 
-3. **Create and activate environment**:
+3. **Fetch submodules** (UVisBox is consumed from `external/UVisBox`):
 ```bash
-conda create -n agent python=3.13
-conda activate agent
+git submodule update --init --recursive
 ```
 
-4. **Install dependencies**:
+4. **Install dependencies** (creates `.venv`, installs the locked set incl. editable UVisBox):
 ```bash
-poetry install
-pip install uvisbox
+uv sync
 ```
 
 5. **Run the application**:
 ```bash
-python main.py
-# Or: python -m uvisbox_assistant
+uv run python main.py
+# Or: uv run python -m uvisbox_assistant
 ```
 
 6. **(Optional) Web interface** — fetch the `webuvisbox` submodule and install its dependencies. Skip this if you only use the CLI REPL.
@@ -194,21 +191,21 @@ uvisbox-assistant/
 ├── temp/                       # Temporary files (auto-generated)
 ├── tests/                      # Test suites
 ├── scripts/                    # Helper scripts
-└── pyproject.toml              # Poetry configuration
+└── pyproject.toml              # Project metadata and dependencies (PEP 621 + uv)
 ```
 
 ## Requirements
 
-Managed via Poetry (see `pyproject.toml`):
+Managed via [uv](https://docs.astral.sh/uv/) (see `pyproject.toml` and `uv.lock`):
 
 - `langchain>=1.2.15`
 - `langchain-ollama>=1.1.0`
 - `langgraph>=1.1.10`
-- `uvisbox` (installed separately)
+- `uvisbox` (editable, from the `external/UVisBox` submodule)
 - `numpy>=2.0`
 - `pandas>=3.0.2`
 - `matplotlib>=3.10.7`
-- `scikit-learn>=1.7.2`, `scikit-image>=0.26.0`, `scipy>=1.16.3`
+- `scikit-learn>=1.7.2`, `scikit-image>=0.25.2`, `scipy>=1.16.3`
 - `langsmith>=0.7.37`
 
 ## Development
@@ -217,13 +214,13 @@ Managed via Poetry (see `pyproject.toml`):
 
 ```bash
 # Quick validation (0 LLM calls, < 30 seconds)
-python tests/test.py --pre-planning
+uv run python tests/test.py --pre-planning
 
 # Smoke test (minimal LLM usage, ~3 calls)
-python tests/test.py --iterative --llm-subset=smoke
+uv run python tests/test.py --iterative --llm-subset=smoke
 
 # Full test suite
-python tests/test.py --acceptance
+uv run python tests/test.py --acceptance
 ```
 
 See [TESTING.md](TESTING.md) for details.
@@ -238,7 +235,7 @@ panel shows the agent's execution as a live swim-lane diagram.
 
 ```bash
 # Terminal 1: Python server (FastAPI + WebSocket on 127.0.0.1:8000)
-python -m uvisbox_assistant.web
+uv run python -m uvisbox_assistant.web
 
 # Terminal 2: Vite dev server with proxy to FastAPI
 cd web && npm install && npm run dev
@@ -250,15 +247,13 @@ cd web && npm install && npm run dev
 ```bash
 cd web && npm install && npm run build
 cd ..
-python -m uvisbox_assistant.web
+uv run python -m uvisbox_assistant.web
 # Open http://127.0.0.1:8000
 ```
 
-The CLI REPL (`python -m uvisbox_assistant`) is unaffected by web mode
+The CLI REPL (`uv run python -m uvisbox_assistant`) is unaffected by web mode
 and remains the primary interface. Reload the browser to start a fresh
-session — there is no persistence in this preview. See
-[`docs/plans/web-interface/design.md`](docs/plans/web-interface/design.md)
-for the architecture overview.
+session — there is no persistence in this preview.
 
 ## Documentation
 

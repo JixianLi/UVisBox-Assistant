@@ -23,8 +23,7 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
 
 ### Prerequisites
 
-- Python 3.11–3.13
-- Conda environment (recommended)
+- [uv](https://docs.astral.sh/uv/) (manages Python 3.13 and the virtual environment)
 - A running [Ollama](https://ollama.com/) instance with a tool-capable model pulled
 
 ### Installation
@@ -40,28 +39,21 @@ UVisBox-Assistant is a natural language interface for the UVisBox uncertainty vi
    git submodule update --init --recursive
    ```
 
-2. **Set up environment**:
+2. **Install dependencies** (creates `.venv` with Python 3.13, installs editable UVisBox):
    ```bash
-   conda create -n uvisbox_assistant python=3.13
-   conda activate uvisbox_assistant
+   uv sync
    ```
 
-3. **Install dependencies**:
-   ```bash
-   poetry install
-   pip install uvisbox
-   ```
-
-4. **Configure Ollama** (defaults shown — only override if needed):
+3. **Configure Ollama** (defaults shown — only override if needed):
    ```bash
    export OLLAMA_API_URL="http://localhost:11434"
    export OLLAMA_MODEL_NAME="qwen3-vl:8b"
    ```
 
-5. **Run tests**:
+4. **Run tests**:
    ```bash
    # Pre-planning: unit + uvisbox_interface (0 LLM calls)
-   python tests/test.py --pre-planning
+   uv run python tests/test.py --pre-planning
    ```
 
 ## Code Standards
@@ -219,6 +211,9 @@ def test_session_runs_visualization():
 ```
 
 ### Running Tests
+
+The commands below assume the uv environment — prefix each with `uv run` (e.g.
+`uv run python tests/test.py --pre-planning`) or activate `.venv` first.
 
 ```bash
 # Before feature planning - verify UVisBox interface

@@ -67,13 +67,13 @@ Feature development follows this pipeline:
 ### Test Runner
 ```bash
 # During development (no LLM calls)
-python tests/test.py --pre-planning
+uv run python tests/test.py --pre-planning
 
 # Minimal integration (specific feature)
-python tests/test.py --iterative --llm-subset=smoke
+uv run python tests/test.py --iterative --llm-subset=smoke
 
 # Acceptance stage (all tests)
-python tests/test.py --acceptance
+uv run python tests/test.py --acceptance
 ```
 
 ### Integration Test Layers
@@ -126,13 +126,13 @@ except Exception as e:
 
 ## External Dependencies
 
-**UVisBox**: Source dependency project (see `.claude-local.md` for local path)
-- Interface may change; always run `python tests/test.py --pre-planning` after UVisBox updates
+**UVisBox**: Git submodule at `external/UVisBox`, installed as an editable path dependency via `[tool.uv.sources]` in `pyproject.toml`
+- Interface may change; always run `uv run python tests/test.py --pre-planning` after UVisBox updates (and `uv sync` if its deps changed)
 - 6 visualization functions wrapped: functional_boxplot, curve_boxplot, probabilistic_marching_squares, uncertainty_lobes, contour_boxplot, squid_glyph_2D
 
-**Python**: Conda environment `agent` (see `.claude-local.md` for local path)
+**Python**: Pinned to 3.13 via `.python-version`; uv manages the `.venv` (run commands with `uv run` or activate `.venv`)
 
-**Package Management**: Poetry (all dev packages in `[tool.poetry.group.dev.dependencies]`)
+**Package Management**: uv (dependencies in `[project]`, dev tools in `[dependency-groups]`)
 
 ## Common Development Tasks
 

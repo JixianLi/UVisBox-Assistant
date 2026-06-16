@@ -30,7 +30,7 @@ try:
     from uvisbox.Core.MapSetup import map_setup
 except ImportError as e:
     print(f"Warning: UVisBox import failed: {e}")
-    print("Make sure UVisBox is installed in the 'agent' conda environment")
+    print("Make sure the submodule is checked out and run 'uv sync'")
 
 
 def plot_functional_boxplot(
