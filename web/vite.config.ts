@@ -10,7 +10,7 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "../webuvisbox/src"),
+            "@": path.resolve(__dirname, "../external/webuvisbox/src"),
         },
         // webuvisbox/node_modules and web/node_modules both contain copies of
         // these packages; dedupe forces a single instance to be bundled so
@@ -29,13 +29,13 @@ export default defineConfig({
     },
     server: {
         port: 5173,
-        // Vite's default fs.allow is the project root (web/); webuvisbox is
-        // a sibling, and pulling its source via the "@" alias means assets
-        // (fonts, CSS) under ../webuvisbox/ also need to be readable.
+        // Vite's default fs.allow is the project root (web/); webuvisbox lives
+        // under ../external/, and pulling its source via the "@" alias means
+        // assets (fonts, CSS) under ../external/webuvisbox/ also need to be readable.
         fs: {
             allow: [
                 path.resolve(__dirname),
-                path.resolve(__dirname, "../webuvisbox"),
+                path.resolve(__dirname, "../external/webuvisbox"),
             ],
         },
         proxy: {

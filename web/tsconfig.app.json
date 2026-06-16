@@ -24,7 +24,7 @@
         "noUncheckedSideEffectImports": true,
 
         "paths": {
-            "@/*": ["../webuvisbox/src/*"]
+            "@/*": ["../external/webuvisbox/src/*"]
         }
     },
     "include": ["src"]

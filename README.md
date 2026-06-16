@@ -147,17 +147,17 @@ python main.py
 6. **(Optional) Web interface** — fetch the `webuvisbox` submodule and install its dependencies. Skip this if you only use the CLI REPL.
 ```bash
 # First-time clone: pull the submodule alongside the repo
-git submodule update --init webuvisbox
+git submodule update --init external/webuvisbox
 
 # Install webuvisbox's npm dependencies. Required even though we don't run
 # webuvisbox directly: the web app consumes its source via a path alias, and
 # both runtime assets (e.g. @fontsource/roboto) and IDE type resolution need
-# webuvisbox/node_modules populated.
-cd webuvisbox && npm install && cd ..
+# external/webuvisbox/node_modules populated.
+cd external/webuvisbox && npm install && cd ../..
 
 # Later, to update to the latest webuvisbox commit
-git submodule update --remote webuvisbox
-cd webuvisbox && npm install && cd ..   # re-install if dependencies changed
+git submodule update --remote external/webuvisbox
+cd external/webuvisbox && npm install && cd ../..   # re-install if dependencies changed
 ```
 See the [Web Interface (preview)](#web-interface-preview) section below for the dev and production run workflows.
 
@@ -230,7 +230,7 @@ See [TESTING.md](TESTING.md) for details.
 
 ## Web Interface (preview)
 
-A browser-based interface backed by [webuvisbox](webuvisbox/) is available
+A browser-based interface backed by [webuvisbox](external/webuvisbox/) is available
 alongside the CLI REPL. Chat panel displays plots as static PNGs; trace
 panel shows the agent's execution as a live swim-lane diagram.
 

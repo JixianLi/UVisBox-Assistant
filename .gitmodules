@@ -1,3 +1,6 @@
 [submodule "webuvisbox"]
-	path = webuvisbox
+	path = external/webuvisbox
 	url = git@github.com:JixianLi/webuvisbox.git
+[submodule "external/UVisBox"]
+	path = external/UVisBox
+	url = https://github.com/ouermijudicael/UVisBox.git
