@@ -8,6 +8,10 @@ import path from "path";
 
 export default defineConfig({
     plugins: [react()],
+    // Covers the production build (rollup); the optimizeDeps.esbuildOptions
+    // define below covers the dev pre-bundler. Both are needed so
+    // react-grid-layout's process.env.DRAGGABLE_DEBUG never reaches the browser.
+    define: { "process.env.DRAGGABLE_DEBUG": "false" },
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "../external/webuvisbox/src"),
@@ -33,7 +37,14 @@ export default defineConfig({
     // this, @mui's responsivePropType.mjs imports raw CJS prop-types and the
     // browser throws "does not provide an export named 'default'".
     optimizeDeps: {
-        include: ["prop-types", "react-is"],
+        include: ["prop-types", "react-is", "react-grid-layout/legacy"],
+        esbuildOptions: {
+            // react-grid-layout (via react-draggable) gates a debug log on
+            // process.env.DRAGGABLE_DEBUG, which throws "process is not defined"
+            // in the browser. Replace it at pre-bundle time so `process` is
+            // never dereferenced.
+            define: { "process.env.DRAGGABLE_DEBUG": "false" },
+        },
     },
     server: {
         port: 5173,
