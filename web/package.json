@@ -8,32 +8,33 @@
         "build": "tsc -b && vite build",
         "preview": "vite preview",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "postinstall": "npm install --prefix ../external/webuvisbox"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
-        "@fontsource/roboto": "^5.2.6",
-        "@mui/icons-material": "^7.3.1",
-        "@mui/material": "^7.3.1",
-        "mobx": "^6.13.7",
+        "@fontsource/roboto": "^5.2.10",
+        "@mui/icons-material": "^9.1.1",
+        "@mui/material": "^9.1.1",
+        "mobx": "^6.16.1",
         "mobx-react-lite": "^4.1.1",
-        "react": "^19.1.1",
-        "react-dom": "^19.1.1",
-        "react-grid-layout": "^1.5.2",
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "react-grid-layout": "^2.2.3",
         "react-promise-tracker": "^2.1.1",
         "react-spinners": "^0.17.0"
     },
     "devDependencies": {
-        "@testing-library/dom": "^10.4.0",
-        "@testing-library/react": "^16.1.0",
-        "@types/node": "^24.3.1",
-        "@types/react": "^19.1.10",
-        "@types/react-dom": "^19.1.7",
-        "@vitejs/plugin-react": "^5.0.0",
-        "jsdom": "^25.0.1",
-        "typescript": "~5.8.3",
-        "vite": "^7.1.2",
-        "vitest": "^3.2.4"
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
+        "@types/node": "^25.9.3",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^6.0.2",
+        "jsdom": "^29.1.1",
+        "typescript": "~6.0.3",
+        "vite": "^8.0.16",
+        "vitest": "^4.1.9"
     }
 }

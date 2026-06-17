@@ -27,6 +27,14 @@ export default defineConfig({
             "mobx-react-lite",
         ],
     },
+    // webuvisbox source is consumed via the "@" alias, so Vite's dep scanner
+    // does not crawl into it to discover these CJS deps. Pre-bundle them
+    // explicitly so they get ESM-interop wrappers (a `default` export); without
+    // this, @mui's responsivePropType.mjs imports raw CJS prop-types and the
+    // browser throws "does not provide an export named 'default'".
+    optimizeDeps: {
+        include: ["prop-types", "react-is"],
+    },
     server: {
         port: 5173,
         // Vite's default fs.allow is the project root (web/); webuvisbox lives
