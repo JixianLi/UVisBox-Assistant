@@ -23,5 +23,8 @@
         "breakpoints": {"xl": 1440, "lg": 800, "sm": 400},
         "cols": {"xl": 22, "lg": 12, "sm": 6}
     },
-    "global_data": {}
+    "global_data": {
+        "chat_font_size": 14,
+        "trace_font_size": 13
+    }
 }

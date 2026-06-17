@@ -15,6 +15,8 @@ export class UVisBoxAssistantGlobalContext implements GlobalContext {
     selectedTraceId: string | null;
     busy: boolean;
     connectionState: ConnectionState;
+    chatFontSize: number;
+    traceFontSize: number;
 
     private ws: WebSocket | null;
 
@@ -25,6 +27,8 @@ export class UVisBoxAssistantGlobalContext implements GlobalContext {
         this.selectedTraceId = null;
         this.busy = false;
         this.connectionState = "disconnected";
+        this.chatFontSize = 14;
+        this.traceFontSize = 13;
         this.ws = null;
 
         makeAutoObservable<this, "ws">(this, { ws: false });
@@ -34,6 +38,16 @@ export class UVisBoxAssistantGlobalContext implements GlobalContext {
         this.selectTrace = this.selectTrace.bind(this);
         this.submitUserPrompt = this.submitUserPrompt.bind(this);
         this.reset = this.reset.bind(this);
+        this.setChatFontSize = this.setChatFontSize.bind(this);
+        this.setTraceFontSize = this.setTraceFontSize.bind(this);
+    }
+
+    setChatFontSize(px: number) {
+        this.chatFontSize = px;
+    }
+
+    setTraceFontSize(px: number) {
+        this.traceFontSize = px;
     }
 
     appendTrace(msg: TraceMessage) {
@@ -58,7 +72,14 @@ export class UVisBoxAssistantGlobalContext implements GlobalContext {
         this.ws.send(JSON.stringify({ type: "reset" }));
     }
 
-    initialize(_globalData: any): void {}
+    initialize(globalData: any): void {
+        if (typeof globalData?.chat_font_size === "number") {
+            this.chatFontSize = globalData.chat_font_size;
+        }
+        if (typeof globalData?.trace_font_size === "number") {
+            this.traceFontSize = globalData.trace_font_size;
+        }
+    }
 
     async asyncInitialize(): Promise<void> {
         this.connect();
