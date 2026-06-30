@@ -38,12 +38,14 @@ export default defineConfig({
     // browser throws "does not provide an export named 'default'".
     optimizeDeps: {
         include: ["prop-types", "react-is", "react-grid-layout/legacy"],
-        esbuildOptions: {
-            // react-grid-layout (via react-draggable) gates a debug log on
-            // process.env.DRAGGABLE_DEBUG, which throws "process is not defined"
-            // in the browser. Replace it at pre-bundle time so `process` is
-            // never dereferenced.
-            define: { "process.env.DRAGGABLE_DEBUG": "false" },
+        rolldownOptions: {
+            transform: {
+                // react-grid-layout (via react-draggable) gates a debug log on
+                // process.env.DRAGGABLE_DEBUG, which throws "process is not defined"
+                // in the browser. Replace it at pre-bundle time so `process` is
+                // never dereferenced.
+                define: { "process.env.DRAGGABLE_DEBUG": "false" },
+            },
         },
     },
     server: {
